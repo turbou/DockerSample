@@ -1,0 +1,17 @@
+api: 
+  url: https://xxx.contrastsecurity.com/Contrast
+  api_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  service_key: XXXXXXXXXXXXXXXX
+  user_name: agent_XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX@Org
+
+agent:
+  service:
+    port: 30556
+
+application:
+  name: DjangoSimple
+  tags: Docker, CentOS7, Python:3.6.3, Django:2.0.13, Port:8080
+
+server:
+  name: Docker_CentOS7
+
