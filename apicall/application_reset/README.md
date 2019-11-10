@@ -4,6 +4,9 @@
 - Reset application
 - Clear attack event
 
+### Requirements
+- [jq](https://stedolan.github.io/jq/) for JSON parse.
+
 ### Steps
 1. Configuration  
     ```sh
@@ -16,5 +19,6 @@
     ```
 1. Run  
     ```
+    chmod 755 application_reset.sh
     ./application_reset.sh
     ```
