@@ -1,5 +1,9 @@
 ## Application Reset Sample
 
+### Function
+- Reset application
+- Clear attack event
+
 ### Steps
 1. Configuration  
     ```sh
