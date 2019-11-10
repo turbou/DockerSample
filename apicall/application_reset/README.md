@@ -6,6 +6,16 @@
 
 ### Requirements
 - [jq](https://stedolan.github.io/jq/) for JSON parse.
+    ```sh
+    # Mac
+    brew install jq
+    # CentOS
+    yum -y install epel-release
+    yum -y install jq
+    # Ubuntu
+    apt -y update
+    apt -y install jq
+    ```
 
 ### Steps
 1. Configuration  
@@ -18,7 +28,7 @@
     APP_ID="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
     ```
 1. Run  
-    ```
+    ```sh
     chmod 755 application_reset.sh
     ./application_reset.sh
     ```
