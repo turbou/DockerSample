@@ -1,4 +1,4 @@
-## DjangoSimple
+## EasyBuggy4Django
 
 ### Steps
 1. Download PythonAgent  
