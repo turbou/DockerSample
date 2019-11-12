@@ -1,4 +1,4 @@
-api:
+api: 
   url: https://xxx.contrastsecurity.com/Contrast
   api_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   service_key: XXXXXXXXXXXXXXXX
