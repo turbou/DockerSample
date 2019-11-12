@@ -26,7 +26,6 @@ _If the agent cannot communicate with the service due to an agent bug, add the f
 
 1. Access  
     `http://localhost:8080`  
-    `http://localhost:8080/admin` (admin/adminadmin)
 
 1. Check TeamServer  
 make sure the Server and Application are onboarded.
