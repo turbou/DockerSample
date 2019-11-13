@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  django:
+    build:
+      context: .
+    container_name: djangoat
+    restart: always
+    command: python /project/DjanGoat/manage.py runserver 0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true
+
