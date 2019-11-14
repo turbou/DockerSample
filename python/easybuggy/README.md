@@ -29,3 +29,11 @@ _If the agent cannot communicate with the service due to an agent bug, add the f
 
 1. Check TeamServer  
 make sure the Server and Application are onboarded.
+
+1. Other
+    ```sh
+    docker ps
+    docker exec -it easybuggy bash
+    docker-compose down
+    ```
+
