@@ -10,7 +10,7 @@ agent:
 
 application:
   name: EasyBuggy4Django
-  tags: Docker, CentOS7, Python:3.6.3, Django:2.0.13, Port:8080
+  tags: Docker, CentOS7, Python:3.6.3, Django:2.0.3, Port:8080
 
 server:
   name: Docker_CentOS7
