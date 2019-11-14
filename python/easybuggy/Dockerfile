@@ -13,5 +13,4 @@ RUN cp -p easybuggy/config/settings.py easybuggy/config/settings_org.py && \
 COPY contrast-python-agent-2.3.1.tar.gz /project
 RUN pip --disable-pip-version-check install -r /project/easybuggy/requirements.txt
 RUN pip --disable-pip-version-check install /project/contrast-python-agent-2.3.1.tar.gz
-COPY contrast_security.yaml /project
 

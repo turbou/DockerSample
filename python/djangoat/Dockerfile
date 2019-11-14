@@ -23,5 +23,4 @@ RUN cp -p DjanGoat/pygoat/settings.py DjanGoat/pygoat/settings_org.py && \
 RUN pip --disable-pip-version-check install -r /project/DjanGoat/requirements.txt
 RUN pip --disable-pip-version-check install /project/contrast-python-agent-2.3.1.tar.gz
 RUN python /project/DjanGoat/manage.py migrate
-COPY contrast_security.yaml /project/
 
