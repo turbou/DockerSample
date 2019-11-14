@@ -11,4 +11,6 @@ services:
       - "8080:8080"
     tty: true
     stdin_open: true
+    volumes:
+      - ./contrast_security.yaml:/project/contrast_security.yaml
 
