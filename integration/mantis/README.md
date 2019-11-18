@@ -23,5 +23,7 @@
 
     click "Install/Upgrade Database" button.
 
-4. Login
+4. Login  
+    ```
     administrator/root
+    ```
