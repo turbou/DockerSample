@@ -56,7 +56,10 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $t_app->add(function($req, $res, $next) {
             $path = $req->getUri()->getPath();
             error_log('path: ' . $path);
-            preg_match('/^plugins\/ContrastSecurity\/(\w+)/', $path, $match);
+            $is_exist_key = preg_match('/^plugins\/ContrastSecurity\/(\w+)/', $path, $match);
+            if(!$is_exist_key) {
+                return $next($req, $res);
+            }
             error_log('key: ' . $match[1]);
             $token = $match[1];
             $t_user_id = api_token_get_user($token);
@@ -112,15 +115,17 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $t_issue = $p_request->getParsedBody();
 
         $t_data = array('payload' => array('issue' => $t_issue));
-        error_log(var_dump($t_data));
-#        $t_command = new IssueAddCommand( $t_data );
-#        $t_result = $t_command->execute();
-#        $t_issue_id = (int)$t_result['issue_id'];
-#
-#        $t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
-#
-#        return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
-#           withJson( array( 'issue' => $t_created_issue ) );
+        #error_log(var_dump($t_data));
+        $t_command = new IssueAddCommand($t_data);
+        #error_log(var_dump($t_command));
+        $t_result = $t_command->execute();
+        #error_log(var_dump($t_result));
+        $t_issue_id = (int)$t_result['issue_id'];
+
+        $t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
+
+        return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
+           withJson( array( 'issue' => $t_created_issue ) );
     }
 }
 
