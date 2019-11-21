@@ -5,6 +5,8 @@ services:
     build:
       context: .
     container_name: mantisbt
+    volumes:
+      - ./html:/var/www/html
     ports:
       - "8989:80"
     restart: always
