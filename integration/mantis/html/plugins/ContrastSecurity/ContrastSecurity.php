@@ -1,7 +1,8 @@
 <?php
 
-require_api( 'authentication_api.php' );
-require_api( 'user_api.php' );
+require_api('authentication_api.php');
+require_api('user_api.php');
+require_api('api_token_api.php');
 
 $t_restlocal_dir = __DIR__ . '/core/';
 require_once( $t_restlocal_dir . 'MyAuthMiddleware.php' );
@@ -56,7 +57,21 @@ class ContrastSecurityPlugin extends MantisPlugin {
     public function routes($p_event_name, $p_event_args) {
         $t_app = $p_event_args['app'];
         $t_app->add(function($req, $res, $next) {
-            $res->getBody()->write("middleware #2\n");
+            $t_user_id = api_token_get_user('poqQoA_5w_iOKo21LrP3VCPWwd-z4Lzm');
+            if( $t_user_id !== false ) {
+                $t_api_token = 'poqQoA_5w_iOKo21LrP3VCPWwd-z4Lzm';
+            }
+            if( $t_user_id === false ) { 
+                return $res->withStatus(HTTP_STATUS_FORBIDDEN, 'API token not found');
+            } 
+            # use api token
+            $t_login_method = LOGIN_METHOD_API_TOKEN;
+            $t_password = $t_api_token;
+            $t_username = user_get_username($t_user_id);
+            if( mci_check_login($t_username, $t_password) === false) {
+                return $res->withStatus(HTTP_STATUS_FORBIDDEN, 'Access denied');
+            }
+            $res->getBody()->write($t_username . " middleware #2\n");
             return $next($req, $res);
         });
         $t_plugin = $this;
