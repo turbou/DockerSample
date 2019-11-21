@@ -112,6 +112,8 @@ class ContrastSecurityPlugin extends MantisPlugin {
      * @return \Slim\Http\Response The augmented response.
      */
     function rest_issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
+        $contentType = $p_request->getContentType();
+        #error_log($contentType);
         #$t_issue = $p_request->getParsedBody();
         $json_data = $p_request->getBody();
         $t_issue = json_decode($json_data, true);
