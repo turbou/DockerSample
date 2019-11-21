@@ -57,9 +57,14 @@ class ContrastSecurityPlugin extends MantisPlugin {
     public function routes($p_event_name, $p_event_args) {
         $t_app = $p_event_args['app'];
         $t_app->add(function($req, $res, $next) {
-            $t_user_id = api_token_get_user('poqQoA_5w_iOKo21LrP3VCPWwd-z4Lzm');
+            $path = $req->getUri()->getPath();
+            error_log('path: ' . $path);
+            preg_match('/^plugins\/ContrastSecurity\/(\w+)/', $path, $match);
+            error_log('key: ' . $match[1]);
+            $token = $match[1];
+            $t_user_id = api_token_get_user($token);
             if( $t_user_id !== false ) {
-                $t_api_token = 'poqQoA_5w_iOKo21LrP3VCPWwd-z4Lzm';
+                $t_api_token = $token;
             }
             if( $t_user_id === false ) { 
                 return $res->withStatus(HTTP_STATUS_FORBIDDEN, 'API token not found');
@@ -94,7 +99,9 @@ class ContrastSecurityPlugin extends MantisPlugin {
      */
     #function rest_issue_get( \Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args ) {
     function rest_auth_test($p_request, $p_response, array $p_args) {
+        error_log('rest_auth_test');
     	$t_key = isset($p_args['key']) ? $p_args['key'] : $p_request->getParam('key');
+        error_log($t_key);
         return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
 
 #    	if( !is_blank( $t_issue_id ) ) {
