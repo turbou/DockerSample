@@ -25,3 +25,5 @@ RUN set -xe \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && echo 'date.timezone = "Asia/Tokyo"' > /usr/local/etc/php/php.ini
 
+ADD .vimrc /root/
+
