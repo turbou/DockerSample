@@ -170,7 +170,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
         # /Contrast/api/ng/[ORG_ID]/orgtraces/mark
         # {traces: ["6J22-DQ96-VN03-LFTD"], status: "Confirmed", note: "test."}
         $url = sprintf('%s/api/ng/%s/orgtraces/mark', $teamserver_url, $org_id);
-        $t_data = array('traces' => array($vul_id), 'status' => 'Confirmed', 'note' => 'from mantisbt.');
+        $t_data = array('traces' => array($vul_id), 'status' => 'Confirmed', 'note' => 'by MantisBT.');
         $put_result = callAPI('PUT', $url, json_encode($t_data));
         $result = json_decode($put_result, true);
         plugin_pop_current('ContrastSecurity');
