@@ -42,6 +42,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
     public function hooks() {
         return parent::hooks() + array(
             'EVENT_REST_API_ROUTES' => 'routes',
+            'EVENT_UPDATE_BUG' => 'bug_update',
         );
     }
     
@@ -75,14 +76,13 @@ class ContrastSecurityPlugin extends MantisPlugin {
         });
         $t_plugin = $this;
         $t_app->group(plugin_route_group(), function() use ($t_app, $t_plugin) {
-                $t_app->get('/hello/{name}', function ($request, $response, $args) {
-                    echo "Hello, " . $args['name'] . "!!\r\n";
-                }); 
-                $t_app->get( '/{key}/test', [$t_plugin, 'rest_auth_test']);
-                $t_app->post( '/{key}/test', [$t_plugin, 'rest_auth_test']);
-                $t_app->post( '/{key}/issues', [$t_plugin, 'rest_issue_add']);
-            }
-        );
+            $t_app->get('/hello/{name}', function ($request, $response, $args) {
+                echo "Hello, " . $args['name'] . "!!\r\n";
+            }); 
+            $t_app->get( '/{key}/test', [$t_plugin, 'rest_auth_test']);
+            $t_app->post( '/{key}/test', [$t_plugin, 'rest_auth_test']);
+            $t_app->post( '/{key}/issues', [$t_plugin, 'rest_issue_add']);
+        });
     }
     /**
      * A method that does the work to handle getting an issue via REST API.
@@ -111,43 +111,66 @@ class ContrastSecurityPlugin extends MantisPlugin {
      * @return \Slim\Http\Response The augmented response.
      */
     function rest_issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
-        plugin_push_current('ContrastSecurity');
         $contentType = $p_request->getContentType();
         #error_log($contentType);
         #$t_issue = $p_request->getParsedBody();
         $json_data = $p_request->getBody();
-        #error_log($json_data);
+        error_log('json_data: ' . $json_data);
         $t_issue = json_decode($json_data, true);
+        error_log('t_issue: ' . var_dump($t_issue));
         if ($t_issue["applicationName"] == "ContrastTestApplication") {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
         }
+        #error_log(var_dump($t_issue));
         #error_log($t_issue['description']);
         $is_exist = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $match);
         if ($is_exist) {
+            plugin_push_current('ContrastSecurity');
             $teamserver_url = plugin_config_get('teamserver_url');
             $org_id = $match[1];
             $app_id = $match[2];
             $vul_id = $match[3];
-            $get_data = callAPI(
-                'GET',
-                $teamserver_url . '/api/ng/' . $org_id . '/applications/',
-                false
-            );
-            error_log(var_dump(json_decode($get_data, true)));
+            # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
+            $url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', $teamserver_url, $org_id, $app_id, $vul_id);
+            #error_log($url);
+            $get_data = callAPI('GET', $url, false);
+            $vuln_json = json_decode($get_data, true);
+            $summary = $vuln_json["trace"]["title"];
+            $description = $t_issue['description'];
+            $t_issue['summary'] = $summary;
+            $t_issue['custom_fields'] = array('{"field": {"id": 1, "name": "org_id"}, "value":' . $org_id . '}');
+            #error_log('custom_fields add: ' . json_encode($t_issue));
+            plugin_pop_current('ContrastSecurity');
         } else {
             error_log('nonmatch');
         }
 
-        $t_data = array('payload' => array('issue' => $t_issue));
-        #$t_command = new IssueAddCommand($t_data);
-        #$t_result = $t_command->execute();
+        $t_data = array('payload'=>array('issue' => $t_issue));
+        $t_command = new IssueAddCommand($t_data);
+        $t_result = $t_command->execute();
+        error_log(var_dump($t_result));
         #$t_issue_id = (int)$t_result['issue_id'];
-
         #$t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
-
+        #return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->withJson( array( 'issue' => $t_created_issue ) );
         return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
-        #return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
-        #   withJson( array( 'issue' => $t_created_issue ) );
+    }
+
+    public function bug_update($p_event_name, $t_existing_bug, $t_updated_bug) {
+        error_log('event_name: ' . $p_event_name);
+        error_log('status: ' . $t_existing_bug->status . ' -> ' . $t_updated_bug->status);
+        plugin_push_current('ContrastSecurity');
+        $teamserver_url = plugin_config_get('teamserver_url');
+        $org_id = 'dd0c161a-e5b3-40fd-b837-2d3a362d3975';
+        # /Contrast/api/ng/[ORG_ID]/orgtraces/mark
+        # {traces: ["6J22-DQ96-VN03-LFTD"], status: "Confirmed", note: "test."}
+        $url = sprintf('%s/api/ng/%s/orgtraces/mark', $teamserver_url, $org_id);
+        $t_data = array('traces' => array('28RR-84L2-D69W-K9JL'), 'status' => 'Reported', 'note' => 'mantisbt.');
+        #error_log($url);
+        #error_log(json_encode($t_data));
+        $put_result = callAPI('PUT', $url, json_encode($t_data));
+        error_log($put_result);
+        $result = json_decode($put_result, true);
+        plugin_pop_current('ContrastSecurity');
     }
 }
 
@@ -178,6 +201,7 @@ function callAPI($method, $url, $data){
       'Authorization: ' . $auth_header,
       'API-Key: ' . $api_key,
       'Accept: application/json',
+      'Content-Type: application/json',
    ));
    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
