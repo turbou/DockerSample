@@ -2,7 +2,7 @@
 
 $s_plugin_ContrastSecurity_ = '';
 $s_plugin_ContrastSecurity_title = 'ContrastSecurity';
-$s_plugin_ContrastSecurity_description = 'ContrastSecurity Integration';
+$s_plugin_ContrastSecurity_description = 'ContrastSecurity インテグレーション';
 
 /* Configuration page */
 $s_plugin_ContrastSecurity_teamserver_url = 'Contrast URL';
