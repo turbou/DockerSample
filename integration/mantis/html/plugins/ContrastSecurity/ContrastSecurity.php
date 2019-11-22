@@ -85,6 +85,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
                     echo "Hello, " . $args['name'] . "!!\r\n";
                 }); 
                 $t_app->get( '/{key}/test', [$t_plugin, 'rest_auth_test']);
+                $t_app->post( '/{key}/test', [$t_plugin, 'rest_auth_test']);
                 $t_app->post( '/{key}/issues', [$t_plugin, 'rest_issue_add']);
             }
         );
@@ -113,10 +114,15 @@ class ContrastSecurityPlugin extends MantisPlugin {
      */
     function rest_issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
         $contentType = $p_request->getContentType();
-        #error_log($contentType);
+        error_log($contentType);
         #$t_issue = $p_request->getParsedBody();
         $json_data = $p_request->getBody();
+        error_log($json_data);
         $t_issue = json_decode($json_data, true);
+        if ($t_issue["applicationName"] == "ContrastTestApplication") {
+            return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
+        }
+        #error_log(var_dump($t_issue));
 
         $t_data = array('payload' => array('issue' => $t_issue));
         #error_log(var_dump($t_data));
@@ -128,8 +134,9 @@ class ContrastSecurityPlugin extends MantisPlugin {
 
         $t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
 
-        return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
-           withJson( array( 'issue' => $t_created_issue ) );
+        return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
+        #return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
+        #   withJson( array( 'issue' => $t_created_issue ) );
     }
 }
 
