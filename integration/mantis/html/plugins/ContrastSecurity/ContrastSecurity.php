@@ -142,8 +142,18 @@ class ContrastSecurityPlugin extends MantisPlugin {
             $get_data = callAPI('GET', $url, false);
             $vuln_json = json_decode($get_data, true);
             $summary = $vuln_json["trace"]["title"];
-            $description = $t_issue['description'];
+            $story_url = "";
+            foreach ($vuln_json["trace"]["links"] as $c_link) {
+                if ($c_link["rel"] == "story") {
+                    $story_url = $c_link["href"];
+                    break;
+                }
+            }
             $t_issue['summary'] = $summary;
+            $get_story_data = callAPI('GET', $story_url, false);
+            $story_json = json_decode($get_story_data, true);
+            $story = $story_json["story"]["risk"]["text"];
+            $t_issue['description'] = $story;
         } elseif ($is_lib) {
             if (plugin_config_get('lib_issues') != ON) {
                 return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Lib Skip");
