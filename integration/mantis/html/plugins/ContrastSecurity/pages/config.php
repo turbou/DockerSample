@@ -36,7 +36,7 @@ print_manage_menu('manage_plugin_page.php');
                 </tr>
                 <tr <?php echo helper_alternate_class() ?>>
                   <td class="category" width="150"><?php echo plugin_lang_get('auth_header'); ?></td>
-                  <td><input name="auth_header" size="50" value="<?php echo plugin_config_get('auth_header', '') ?>" /></td>
+                  <td><input name="auth_header" size="100" value="<?php echo plugin_config_get('auth_header', '') ?>" /></td>
                 </tr>
               </table>
             </div>

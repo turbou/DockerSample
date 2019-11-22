@@ -124,12 +124,13 @@ class ContrastSecurityPlugin extends MantisPlugin {
         #error_log($t_issue['description']);
         $is_exist = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $match);
         if ($is_exist) {
-            error_log('org_id: ' . $match[1]);
-            error_log('app_id: ' . $match[2]);
-            error_log('vul_id: ' . $match[3]);
+            $teamserver_url = plugin_config_get('teamserver_url');
+            $org_id = $match[1];
+            $app_id = $match[2];
+            $vul_id = $match[3];
             $get_data = callAPI(
                 'GET',
-                'http://192.168.80.1:8080/Contrast/api/ng/dd0c161a-e5b3-40fd-b837-2d3a362d3975/applications/',
+                $teamserver_url . '/api/ng/' . $org_id . '/applications/',
                 false
             );
             error_log(var_dump(json_decode($get_data, true)));
@@ -170,10 +171,12 @@ function callAPI($method, $url, $data){
    }
 
    // OPTIONS:
+   $api_key = plugin_config_get('api_key');
+   $auth_header = plugin_config_get('auth_header');
    curl_setopt($curl, CURLOPT_URL, $url);
    curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-      'Authorization: dGFrYS5zaGlvemFraUBjb250cmFzdHNlY3VyaXR5LmNvbTp0ODQ3MGt2YmQ2MDNudjJzZ282c2pvaTcycw==',
-      'API-Key: AKTORm4SxV1OX1br',
+      'Authorization: ' . $auth_header,
+      'API-Key: ' . $api_key,
       'Accept: application/json',
    ));
    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
