@@ -82,8 +82,8 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $t_app->add(function($req, $res, $next) {
             $path = $req->getUri()->getPath();
             #error_log('path: ' . $path);
-            $is_exist_key = preg_match('/^plugins\/ContrastSecurity\/(\w+)/', $path, $match);
-            if(!$is_exist_key) {
+            $is_exist_token = preg_match('/^plugins\/ContrastSecurity\/services\/(\w+)/', $path, $match);
+            if(!$is_exist_token) {
                 return $next($req, $res);
             }
             #error_log('key: ' . $match[1]);
@@ -99,40 +99,18 @@ class ContrastSecurityPlugin extends MantisPlugin {
             $t_login_method = LOGIN_METHOD_API_TOKEN;
             $t_password = $t_api_token;
             $t_username = user_get_username($t_user_id);
-            if( mci_check_login($t_username, $t_password) === false) {
+            if(mci_check_login($t_username, $t_password) === false) {
                 return $res->withStatus(HTTP_STATUS_FORBIDDEN, 'Access denied');
             }
-            $res->getBody()->write($t_username . " middleware #2\n");
+            #$res->getBody()->write($t_username . " middleware #2\n");
             return $next($req, $res);
         });
         $t_plugin = $this;
         $t_app->group(plugin_route_group(), function() use ($t_app, $t_plugin) {
-            $t_app->get('/hello/{name}', function ($request, $response, $args) {
-                echo "Hello, " . $args['name'] . "!!\r\n";
-            }); 
-            $t_app->get( '/{key}/test', [$t_plugin, 'rest_auth_test']);
-            $t_app->post( '/{key}/test', [$t_plugin, 'rest_auth_test']);
-            $t_app->post( '/{key}/issues', [$t_plugin, 'rest_issue_add']);
+            $t_app->post('/services/{key}', [$t_plugin, 'issue_add']);
         });
     }
-    /**
-     * A method that does the work to handle getting an issue via REST API.
-     *
-     * @param \Slim\Http\Request $p_request   The request.
-     * @param \Slim\Http\Response $p_response The response.
-     * @param array $p_args Arguments
-     * @return \Slim\Http\Response The augmented response.
-     */
-    function rest_auth_test(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
-        plugin_push_current('ContrastSecurity');
-        #error_log('rest_auth_test');
-        $t_key = isset($p_args['key']) ? $p_args['key'] : $p_request->getParam('key');
-        #error_log(plugin_config_get('teamserver_url', ''));
-        #error_log(plugin_config_get('api_key', ''));
-        #error_log(plugin_config_get('auth_header', ''));
-        return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
-    }
-    
+
     /**
      * Create an issue from a POST to the issues url.
      *
@@ -141,7 +119,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
      * @param array $p_args Arguments
      * @return \Slim\Http\Response The augmented response.
      */
-    function rest_issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
+    function issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
         $contentType = $p_request->getContentType();
         #error_log($contentType);
         #$t_issue = $p_request->getParsedBody();
@@ -195,7 +173,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
         return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
     }
 
-    public function bug_update($p_event_name, $t_existing_bug, $t_updated_bug) {
+    function bug_update($p_event_name, $t_existing_bug, $t_updated_bug) {
         error_log('event_name: ' . $p_event_name);
         error_log('status: ' . $t_existing_bug->status . ' -> ' . $t_updated_bug->status);
         plugin_push_current('ContrastSecurity');
@@ -220,7 +198,6 @@ class ContrastSecurityPlugin extends MantisPlugin {
 
 function callAPI($method, $url, $data){
    $curl = curl_init();
-
    switch ($method){
       case "POST":
          curl_setopt($curl, CURLOPT_POST, 1);
