@@ -42,10 +42,11 @@ print_manage_menu('manage_plugin_page.php');
             </div>
           </div>
           <div class="widget-toolbox padding-8 clearfix">
-            <input type="submit" class="btn btn-primary btn-white btn-round" value="<?php echo lang_get( 'change_configuration' )?>" />
+            <input type="submit" class="btn btn-primary btn-white btn-round" value="<?php echo lang_get('change_configuration')?>" />
           </div>
         </div>
       </div>
+      <?php echo plugin_lang_get('settings_guide') ?>
     </form>
   </div>
 </div>
