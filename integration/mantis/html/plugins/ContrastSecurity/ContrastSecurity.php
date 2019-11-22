@@ -147,6 +147,12 @@ class ContrastSecurityPlugin extends MantisPlugin {
             array_push($custom_fields, array('field' => array('id' => $vul_id_id, 'name' => VUL), 'value' => $vul_id));
             $t_issue['custom_fields'] = $custom_fields;
             plugin_pop_current('ContrastSecurity');
+        } elseif (strpos($t_issue['description'], 'A new CVE') !== false) {
+            $is_foundin = preg_match('/.+ was found in ([^(]+) \(.+/', $t_issue['description'], $match);
+            if ($is_foundin) {
+                $lib_name = $match[1];
+                $t_issue['summary'] = $lib_name;
+            }
         } else {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Test URL Success");
         }
