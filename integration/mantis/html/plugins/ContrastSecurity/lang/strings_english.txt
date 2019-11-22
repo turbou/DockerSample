@@ -21,9 +21,12 @@ $s_plugin_ContrastSecurity_invalid_issues_count_badge_url = 'Invalid issues coun
 
 /* Configuration page */
 
-$s_plugin_ContrastSecurity_config_section_general = 'General';
+$s_plugin_ContrastSecurity_config_section_general = 'Contrast Settings';
 $s_plugin_ContrastSecurity_config_section_issues = 'Issues Endpoints';
 $s_plugin_ContrastSecurity_config_section_version = 'Version Endpoints';
+$s_plugin_ContrastSecurity_teamserver_url = 'Contrast URL';
+$s_plugin_ContrastSecurity_api_key = 'API Key';
+$s_plugin_ContrastSecurity_auth_header = 'Authorization Header';
 $s_plugin_ContrastSecurity_api_user = 'API User';
 $s_plugin_ContrastSecurity_api_token = 'API Token';
 $s_plugin_ContrastSecurity_config_page_title = '%%project%% ContrastSecurity Configuration';
