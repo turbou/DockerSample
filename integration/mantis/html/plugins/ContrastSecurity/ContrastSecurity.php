@@ -1,10 +1,41 @@
 <?php
 
+require_api('custom_field_api.php');
 require_api('authentication_api.php');
 require_api('user_api.php');
 require_api('api_token_api.php');
 
+define('ORG', 'contrast_org_id');
+define('APP', 'contrast_app_id');
+define('VUL', 'contrast_vul_id');
+
 class ContrastSecurityPlugin extends MantisPlugin {
+
+    const CUSTOM_FIELDS = [ORG, APP, VUL];
+
+    function install() {
+        foreach (self::CUSTOM_FIELDS as $c_field) {
+            $c_id = custom_field_get_id_from_name($c_field);
+            if (empty($c_id)) {
+                $result_id = custom_field_create($c_field);
+                $t_values['name'] = $c_field;
+                $t_values['type'] = 0;
+                $t_values['display_update'] = FALSE;
+                custom_field_update($result_id, $t_values);
+            }
+        }
+        return TRUE;
+    }
+
+    function uninstall() {
+        foreach (self::CUSTOM_FIELDS as $c_field) {
+            $c_id = custom_field_get_id_from_name($c_field);
+            if (!empty($c_id)) {
+                custom_field_destroy($c_id);
+            }
+        }
+    }
+
     public function register() {
         $this->name = plugin_lang_get("title");
         $this->description = plugin_lang_get("description");
@@ -94,11 +125,11 @@ class ContrastSecurityPlugin extends MantisPlugin {
      */
     function rest_auth_test(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
         plugin_push_current('ContrastSecurity');
-        error_log('rest_auth_test');
+        #error_log('rest_auth_test');
         $t_key = isset($p_args['key']) ? $p_args['key'] : $p_request->getParam('key');
-        error_log(plugin_config_get('teamserver_url', ''));
-        error_log(plugin_config_get('api_key', ''));
-        error_log(plugin_config_get('auth_header', ''));
+        #error_log(plugin_config_get('teamserver_url', ''));
+        #error_log(plugin_config_get('api_key', ''));
+        #error_log(plugin_config_get('auth_header', ''));
         return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
     }
     
@@ -115,9 +146,9 @@ class ContrastSecurityPlugin extends MantisPlugin {
         #error_log($contentType);
         #$t_issue = $p_request->getParsedBody();
         $json_data = $p_request->getBody();
-        error_log('json_data: ' . $json_data);
+        #error_log('json_data: ' . $json_data);
         $t_issue = json_decode($json_data, true);
-        error_log('t_issue: ' . var_dump($t_issue));
+        #error_log('t_issue: ' . var_dump($t_issue));
         if ($t_issue["applicationName"] == "ContrastTestApplication") {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
         }
@@ -138,17 +169,26 @@ class ContrastSecurityPlugin extends MantisPlugin {
             $summary = $vuln_json["trace"]["title"];
             $description = $t_issue['description'];
             $t_issue['summary'] = $summary;
-            $t_issue['custom_fields'] = array('{"field": {"id": 1, "name": "org_id"}, "value":' . $org_id . '}');
-            #error_log('custom_fields add: ' . json_encode($t_issue));
+            # CUSTOM FIELD SETUP
+            $custom_fields = array();
+            $org_id_id = custom_field_get_id_from_name(ORG);
+            array_push($custom_fields, array('field' => array('id' => $org_id_id, 'name' => ORG), 'value' => $org_id));
+            $app_id_id = custom_field_get_id_from_name(APP);
+            array_push($custom_fields, array('field' => array('id' => $app_id_id, 'name' => APP), 'value' => $app_id));
+            $app_id_id = custom_field_get_id_from_name(VUL);
+            array_push($custom_fields, array('field' => array('id' => $vul_id_id, 'name' => VUL), 'value' => $vul_id));
+            $t_issue['custom_fields'] = $custom_fields;
+
+            #error_log('custom_fields add: ' . var_dump($t_issue));
             plugin_pop_current('ContrastSecurity');
         } else {
             error_log('nonmatch');
         }
 
-        $t_data = array('payload'=>array('issue' => $t_issue));
+        $t_data = array('payload' => array('issue' => $t_issue));
         $t_command = new IssueAddCommand($t_data);
         $t_result = $t_command->execute();
-        error_log(var_dump($t_result));
+        #error_log(var_dump($t_result));
         #$t_issue_id = (int)$t_result['issue_id'];
         #$t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
         #return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->withJson( array( 'issue' => $t_created_issue ) );
@@ -160,13 +200,17 @@ class ContrastSecurityPlugin extends MantisPlugin {
         error_log('status: ' . $t_existing_bug->status . ' -> ' . $t_updated_bug->status);
         plugin_push_current('ContrastSecurity');
         $teamserver_url = plugin_config_get('teamserver_url');
-        $org_id = 'dd0c161a-e5b3-40fd-b837-2d3a362d3975';
+
+        $org_id_id = custom_field_get_id_from_name(ORG);
+        $org_id = custom_field_get_value($org_id_id, $t_updated_bug->id);
+
+        $vul_id_id = custom_field_get_id_from_name(VUL);
+        $vul_id = custom_field_get_value($vul_id_id, $t_updated_bug->id);
+
         # /Contrast/api/ng/[ORG_ID]/orgtraces/mark
         # {traces: ["6J22-DQ96-VN03-LFTD"], status: "Confirmed", note: "test."}
         $url = sprintf('%s/api/ng/%s/orgtraces/mark', $teamserver_url, $org_id);
-        $t_data = array('traces' => array('28RR-84L2-D69W-K9JL'), 'status' => 'Reported', 'note' => 'mantisbt.');
-        #error_log($url);
-        #error_log(json_encode($t_data));
+        $t_data = array('traces' => array($vul_id), 'status' => 'Confirmed', 'note' => 'from mantisbt.');
         $put_result = callAPI('PUT', $url, json_encode($t_data));
         error_log($put_result);
         $result = json_decode($put_result, true);
