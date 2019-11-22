@@ -1,8 +1,5 @@
 <?php
 
-auth_reauthenticate();
-access_ensure_global_level(config_get('manage_plugin_threshold'));
-
 $t_project_id = helper_get_current_project();
 $t_title = str_replace( '%%project%%', project_get_name( $t_project_id ), plugin_lang_get( 'config_page_title' ) );
 layout_page_header($t_title);
