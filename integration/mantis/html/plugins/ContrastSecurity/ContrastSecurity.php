@@ -33,15 +33,9 @@ class ContrastSecurityPlugin extends MantisPlugin {
 
     function config() {
         return array(
-            'issues'  => ON,
-            'auth_issues'  => ON,
-            'issues_count'  => ON,
-            'issues_countbadge'  => ON,
-            'version'  => ON,
-            'versionbadge'  => ON,
-            'next_version_type' => 1,
-            'api_user' => '',
-            'api_token' => ''
+            'teamserver_url' => '',
+            'api_key' => '',
+            'auth_header' => ''
         );
     }
 
@@ -55,12 +49,12 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $t_app = $p_event_args['app'];
         $t_app->add(function($req, $res, $next) {
             $path = $req->getUri()->getPath();
-            error_log('path: ' . $path);
+            #error_log('path: ' . $path);
             $is_exist_key = preg_match('/^plugins\/ContrastSecurity\/(\w+)/', $path, $match);
             if(!$is_exist_key) {
                 return $next($req, $res);
             }
-            error_log('key: ' . $match[1]);
+            #error_log('key: ' . $match[1]);
             $token = $match[1];
             $t_user_id = api_token_get_user($token);
             if( $t_user_id !== false ) {
@@ -99,8 +93,12 @@ class ContrastSecurityPlugin extends MantisPlugin {
      * @return \Slim\Http\Response The augmented response.
      */
     function rest_auth_test(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
+        plugin_push_current('ContrastSecurity');
         error_log('rest_auth_test');
         $t_key = isset($p_args['key']) ? $p_args['key'] : $p_request->getParam('key');
+        error_log(plugin_config_get('teamserver_url', ''));
+        error_log(plugin_config_get('api_key', ''));
+        error_log(plugin_config_get('auth_header', ''));
         return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
     }
     
@@ -113,26 +111,32 @@ class ContrastSecurityPlugin extends MantisPlugin {
      * @return \Slim\Http\Response The augmented response.
      */
     function rest_issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
+        plugin_push_current('ContrastSecurity');
         $contentType = $p_request->getContentType();
-        error_log($contentType);
+        #error_log($contentType);
         #$t_issue = $p_request->getParsedBody();
         $json_data = $p_request->getBody();
-        error_log($json_data);
+        #error_log($json_data);
         $t_issue = json_decode($json_data, true);
         if ($t_issue["applicationName"] == "ContrastTestApplication") {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
         }
-        #error_log(var_dump($t_issue));
+        #error_log($t_issue['description']);
+        $is_exist = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $match);
+        if ($is_exist) {
+            error_log('org_id: ' . $match[1]);
+            error_log('app_id: ' . $match[2]);
+            error_log('vul_id: ' . $match[3]);
+        } else {
+            error_log('nonmatch');
+        }
 
         $t_data = array('payload' => array('issue' => $t_issue));
-        #error_log(var_dump($t_data));
-        $t_command = new IssueAddCommand($t_data);
-        #error_log(var_dump($t_command));
-        $t_result = $t_command->execute();
-        #error_log(var_dump($t_result));
-        $t_issue_id = (int)$t_result['issue_id'];
+        #$t_command = new IssueAddCommand($t_data);
+        #$t_result = $t_command->execute();
+        #$t_issue_id = (int)$t_result['issue_id'];
 
-        $t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
+        #$t_created_issue = mc_issue_get( /* username */ '', /* password */ '', $t_issue_id );
 
         return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
         #return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
