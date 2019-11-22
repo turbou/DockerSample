@@ -127,6 +127,12 @@ class ContrastSecurityPlugin extends MantisPlugin {
             error_log('org_id: ' . $match[1]);
             error_log('app_id: ' . $match[2]);
             error_log('vul_id: ' . $match[3]);
+            $get_data = callAPI(
+                'GET',
+                'http://192.168.80.1:8080/Contrast/api/ng/dd0c161a-e5b3-40fd-b837-2d3a362d3975/applications/',
+                false
+            );
+            error_log(var_dump(json_decode($get_data, true)));
         } else {
             error_log('nonmatch');
         }
@@ -142,5 +148,41 @@ class ContrastSecurityPlugin extends MantisPlugin {
         #return $p_response->withStatus( HTTP_STATUS_CREATED, "Issue Created with id $t_issue_id" )->
         #   withJson( array( 'issue' => $t_created_issue ) );
     }
+}
+
+function callAPI($method, $url, $data){
+   $curl = curl_init();
+
+   switch ($method){
+      case "POST":
+         curl_setopt($curl, CURLOPT_POST, 1);
+         if ($data)
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+         break;
+      case "PUT":
+         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+         if ($data)
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);			 					
+         break;
+      default:
+         if ($data)
+            $url = sprintf("%s?%s", $url, http_build_query($data));
+   }
+
+   // OPTIONS:
+   curl_setopt($curl, CURLOPT_URL, $url);
+   curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+      'Authorization: dGFrYS5zaGlvemFraUBjb250cmFzdHNlY3VyaXR5LmNvbTp0ODQ3MGt2YmQ2MDNudjJzZ282c2pvaTcycw==',
+      'API-Key: AKTORm4SxV1OX1br',
+      'Accept: application/json',
+   ));
+   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+   curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+   // EXECUTE:
+   $result = curl_exec($curl);
+   if(!$result){die("Connection Failure");}
+   curl_close($curl);
+   return $result;
 }
 
