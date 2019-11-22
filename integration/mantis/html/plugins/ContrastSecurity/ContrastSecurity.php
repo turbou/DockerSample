@@ -120,9 +120,6 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $contentType = $p_request->getContentType();
         $json_data = $p_request->getBody();
         $t_issue = json_decode($json_data, true);
-        if ($t_issue["applicationName"] == "ContrastTestApplication") {
-            return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Success");
-        }
         $is_exist = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $match);
         if ($is_exist) {
             plugin_push_current('ContrastSecurity');
