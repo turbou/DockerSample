@@ -66,8 +66,10 @@ class ContrastSecurityPlugin extends MantisPlugin {
     function config() {
         return array(
             'teamserver_url' => '',
-            'api_key' => '',
-            'auth_header' => ''
+            'api_key'        => '',
+            'auth_header'    => '',
+            'vul_issues'      => ON, 
+            'lib_issues'      => ON 
         );
     }
 
@@ -125,12 +127,15 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $is_lib = preg_match('/.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/.+\/([^)]+)\),.+\/applications\/([^)]+)\)./',
              $t_issue['description'], $lib_match
         );
+        plugin_push_current('ContrastSecurity');
         if ($is_vul) {
+            if (plugin_config_get('vul_issues') != ON) {
+                return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Vul Skip");
+            }
             $org_id = $vul_match[1];
             $app_id = $vul_match[2];
             $vul_id = $vul_match[3];
             $lib_id = "";
-            plugin_push_current('ContrastSecurity');
             # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
             $teamserver_url = plugin_config_get('teamserver_url');
             $url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', $teamserver_url, $org_id, $app_id, $vul_id);
@@ -139,8 +144,10 @@ class ContrastSecurityPlugin extends MantisPlugin {
             $summary = $vuln_json["trace"]["title"];
             $description = $t_issue['description'];
             $t_issue['summary'] = $summary;
-            plugin_pop_current('ContrastSecurity');
         } elseif ($is_lib) {
+            if (plugin_config_get('lib_issues') != ON) {
+                return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Lib Skip");
+            }
             $lib_name = $lib_match[1];
             $org_id = $lib_match[2];
             $app_id = $lib_match[4];
@@ -150,6 +157,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
         } else {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Test URL Success");
         }
+        plugin_pop_current('ContrastSecurity');
 
         # CUSTOM FIELD SETUP
         $custom_fields = array();

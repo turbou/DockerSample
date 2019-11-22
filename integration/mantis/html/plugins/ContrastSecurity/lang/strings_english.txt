@@ -10,4 +10,6 @@ $s_plugin_ContrastSecurity_teamserver_url = 'Contrast URL';
 $s_plugin_ContrastSecurity_api_key = 'API Key';
 $s_plugin_ContrastSecurity_auth_header = 'Authorization Header';
 $s_plugin_ContrastSecurity_settings_guide = 'You can get this information with Your Account in TeamServer.';
+$s_plugin_ContrastSecurity_vul_issues = 'Vulnerabilities';
+$s_plugin_ContrastSecurity_lib_issues = 'Libraries';
 
