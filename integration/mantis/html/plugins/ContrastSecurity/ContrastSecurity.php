@@ -8,6 +8,7 @@ require_api('api_token_api.php');
 define('ORG', 'contrast_org_id');
 define('APP', 'contrast_app_id');
 define('VUL', 'contrast_vul_id');
+define('LIB', 'contrast_lib_id');
 
 class ContrastSecurityPlugin extends MantisPlugin {
 
