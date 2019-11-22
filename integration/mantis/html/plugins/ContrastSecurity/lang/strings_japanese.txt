@@ -5,7 +5,9 @@ $s_plugin_ContrastSecurity_title = 'ContrastSecurity';
 $s_plugin_ContrastSecurity_description = 'ContrastSecurity インテグレーション';
 
 /* Configuration page */
+$s_plugin_ContrastSecurity_config_section_general = 'ContrastSecurity 設定';
 $s_plugin_ContrastSecurity_teamserver_url = 'Contrast URL';
 $s_plugin_ContrastSecurity_api_key = 'API Key';
 $s_plugin_ContrastSecurity_auth_header = 'Authorization Header';
+$s_plugin_ContrastSecurity_settings_guide = '上記の情報はTeamServerのYour Accountで確認できます。';
 
