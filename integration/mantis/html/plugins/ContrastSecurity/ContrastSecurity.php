@@ -12,7 +12,7 @@ define('LIB', 'contrast_lib_id');
 
 class ContrastSecurityPlugin extends MantisPlugin {
 
-    const CUSTOM_FIELDS = [ORG, APP, VUL];
+    const CUSTOM_FIELDS = [ORG, APP, VUL, LIB];
 
     function install() {
         foreach (self::CUSTOM_FIELDS as $c_field) {
@@ -119,41 +119,49 @@ class ContrastSecurityPlugin extends MantisPlugin {
      */
     function issue_add(\Slim\Http\Request $p_request, \Slim\Http\Response $p_response, array $p_args) {
         $contentType = $p_request->getContentType();
-        $json_data = $p_request->getBody();
-        $t_issue = json_decode($json_data, true);
-        $is_exist = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $match);
-        if ($is_exist) {
+        $body_data = $p_request->getBody();
+        $t_issue = json_decode($body_data, true);
+        $is_vul = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $vul_match);
+        $is_lib = preg_match('/.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/.+\/([^)]+)\),.+\/applications\/([^)]+)\)./',
+             $t_issue['description'], $lib_match
+        );
+        if ($is_vul) {
+            $org_id = $vul_match[1];
+            $app_id = $vul_match[2];
+            $vul_id = $vul_match[3];
+            $lib_id = "";
             plugin_push_current('ContrastSecurity');
-            $teamserver_url = plugin_config_get('teamserver_url');
-            $org_id = $match[1];
-            $app_id = $match[2];
-            $vul_id = $match[3];
             # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
+            $teamserver_url = plugin_config_get('teamserver_url');
             $url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', $teamserver_url, $org_id, $app_id, $vul_id);
             $get_data = callAPI('GET', $url, false);
             $vuln_json = json_decode($get_data, true);
             $summary = $vuln_json["trace"]["title"];
             $description = $t_issue['description'];
             $t_issue['summary'] = $summary;
-            # CUSTOM FIELD SETUP
-            $custom_fields = array();
-            $org_id_id = custom_field_get_id_from_name(ORG);
-            array_push($custom_fields, array('field' => array('id' => $org_id_id, 'name' => ORG), 'value' => $org_id));
-            $app_id_id = custom_field_get_id_from_name(APP);
-            array_push($custom_fields, array('field' => array('id' => $app_id_id, 'name' => APP), 'value' => $app_id));
-            $app_id_id = custom_field_get_id_from_name(VUL);
-            array_push($custom_fields, array('field' => array('id' => $vul_id_id, 'name' => VUL), 'value' => $vul_id));
-            $t_issue['custom_fields'] = $custom_fields;
             plugin_pop_current('ContrastSecurity');
-        } elseif (strpos($t_issue['description'], 'A new CVE') !== false) {
-            $is_foundin = preg_match('/.+ was found in ([^(]+) \(.+/', $t_issue['description'], $match);
-            if ($is_foundin) {
-                $lib_name = $match[1];
-                $t_issue['summary'] = $lib_name;
-            }
+        } elseif ($is_lib) {
+            $lib_name = $lib_match[1];
+            $org_id = $lib_match[2];
+            $app_id = $lib_match[4];
+            $vul_id = "";
+            $lib_id = $lib_match[3];
+            $t_issue['summary'] = $lib_name;
         } else {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Test URL Success");
         }
+
+        # CUSTOM FIELD SETUP
+        $custom_fields = array();
+        $org_id_id = custom_field_get_id_from_name(ORG);
+        array_push($custom_fields, array('field' => array('id' => $org_id_id, 'name' => ORG), 'value' => $org_id));
+        $app_id_id = custom_field_get_id_from_name(APP);
+        array_push($custom_fields, array('field' => array('id' => $app_id_id, 'name' => APP), 'value' => $app_id));
+        $vul_id_id = custom_field_get_id_from_name(VUL);
+        array_push($custom_fields, array('field' => array('id' => $vul_id_id, 'name' => VUL), 'value' => $vul_id));
+        $lib_id_id = custom_field_get_id_from_name(LIB);
+        array_push($custom_fields, array('field' => array('id' => $lib_id_id, 'name' => LIB), 'value' => $lib_id));
+        $t_issue['custom_fields'] = $custom_fields;
 
         $t_data = array('payload' => array('issue' => $t_issue));
         $t_command = new IssueAddCommand($t_data);
@@ -170,6 +178,9 @@ class ContrastSecurityPlugin extends MantisPlugin {
 
         $vul_id_id = custom_field_get_id_from_name(VUL);
         $vul_id = custom_field_get_value($vul_id_id, $t_updated_bug->id);
+        if (empty($vul_id)) {
+            return;
+        }
 
         # /Contrast/api/ng/[ORG_ID]/orgtraces/mark
         # {traces: ["6J22-DQ96-VN03-LFTD"], status: "Confirmed", note: "test."}
