@@ -8,9 +8,13 @@
     $teamserver_url = gpc_get_string('teamserver_url');
     $api_key = gpc_get_string('api_key');
     $auth_header = gpc_get_string('auth_header');
+    $vul_issues = gpc_get_bool('vul_issues');
+    $lib_issues = gpc_get_bool('lib_issues');
     plugin_config_set('teamserver_url', $teamserver_url);
     plugin_config_set('api_key', $api_key);
     plugin_config_set('auth_header', $auth_header);
+    plugin_config_set('vul_issues', $vul_issues);
+    plugin_config_set('lib_issues', $lib_issues);
 
     form_security_purge('plugin_ContrastSecurity_config_update');
 

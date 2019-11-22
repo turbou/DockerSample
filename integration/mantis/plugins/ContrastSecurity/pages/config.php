@@ -25,24 +25,39 @@ print_manage_menu('manage_plugin_page.php');
             <div class="table-responsive">
               <table class="table table-bordered table-condensed table-striped">
                 <tr <?php echo helper_alternate_class() ?>>
-                  <td class="category" width="150"><?php echo plugin_lang_get('teamserver_url'); ?></td>
+                  <td class="category" width="200"><?php echo plugin_lang_get('teamserver_url'); ?></td>
                   <td>
-                    <input name="teamserver_url" size="75" value="<?php echo plugin_config_get('teamserver_url', '') ?>" />
+                    <input name="teamserver_url" size="75" placeholder="http://XXX.XXX.XXX.XXX:8080/Contrast" value="<?php echo plugin_config_get('teamserver_url', '') ?>" />
                   </td>
                 </tr>
                 <tr <?php echo helper_alternate_class() ?>>
-                  <td class="category" width="150"><?php echo plugin_lang_get('api_key'); ?></td>
+                  <td class="category" width="200"><?php echo plugin_lang_get('api_key'); ?></td>
                   <td><input name="api_key" size="30" value="<?php echo plugin_config_get('api_key', '') ?>" /></td>
                 </tr>
                 <tr <?php echo helper_alternate_class() ?>>
-                  <td class="category" width="150"><?php echo plugin_lang_get('auth_header'); ?></td>
+                  <td class="category" width="200"><?php echo plugin_lang_get('auth_header'); ?></td>
                   <td><input name="auth_header" size="100" value="<?php echo plugin_config_get('auth_header', '') ?>" /></td>
+                </tr>
+                <tr <?php echo helper_alternate_class() ?>> 
+                  <td colspan="2"><?php echo plugin_lang_get('settings_guide'); ?></td>
+                </tr>
+                <tr <?php echo helper_alternate_class() ?>> 
+                  <td class="category" width="200"><?php echo plugin_lang_get('vul_issues'); ?></td>
+                  <td>
+                    <input type="checkbox" name="vul_issues" <?php if (plugin_config_get('vul_issues', ON) == ON) echo ' checked="checked"' ?> />
+                  </td>
+                </tr>
+                <tr <?php echo helper_alternate_class() ?>> 
+                  <td class="category" width="200"><?php echo plugin_lang_get('lib_issues'); ?></td>
+                  <td>
+                    <input type="checkbox" name="lib_issues" <?php if (plugin_config_get('lib_issues', ON) == ON) echo ' checked="checked"' ?> />
+                  </td>
                 </tr>
               </table>
             </div>
           </div>
           <div class="widget-toolbox padding-8 clearfix">
-            <input type="submit" class="btn btn-primary btn-white btn-round" value="<?php echo lang_get( 'change_configuration' )?>" />
+            <input type="submit" class="btn btn-primary btn-white btn-round" value="<?php echo lang_get('change_configuration')?>" />
           </div>
         </div>
       </div>
