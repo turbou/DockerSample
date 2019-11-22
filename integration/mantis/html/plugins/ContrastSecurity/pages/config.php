@@ -27,7 +27,7 @@ print_manage_menu('manage_plugin_page.php');
                 <tr <?php echo helper_alternate_class() ?>>
                   <td class="category" width="150"><?php echo plugin_lang_get('teamserver_url'); ?></td>
                   <td>
-                    <input name="teamserver_url" size="75" value="<?php echo plugin_config_get('teamserver_url', '') ?>" />
+                    <input name="teamserver_url" size="75" placeholder="http://XXX.XXX.XXX.XXX:8080/Contrast" value="<?php echo plugin_config_get('teamserver_url', '') ?>" />
                   </td>
                 </tr>
                 <tr <?php echo helper_alternate_class() ?>>
