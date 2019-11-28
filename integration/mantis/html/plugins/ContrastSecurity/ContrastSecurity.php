@@ -199,11 +199,30 @@ class ContrastSecurityPlugin extends MantisPlugin {
         if (empty($vul_id)) {
             return;
         }
+        $status = "Reported";
+        error_log($t_updated_bug->status);
+        switch ($t_updated_bug->status) {
+            case "10": # NEW
+                $status = "Reported";
+                break;
+            case "30": # ACKNOWLEDGED
+            case "40": # CONFIRMED
+                $status = "Confirmed";
+                break;
+            case "80": # RESOLVED
+                $status = "Remediated";
+                break;
+            case "90": # CLOSED
+                $status = "Fixed";
+                break;
+            default:
+                return;
+        }
 
         # /Contrast/api/ng/[ORG_ID]/orgtraces/mark
         # {traces: ["6J22-DQ96-VN03-LFTD"], status: "Confirmed", note: "test."}
         $url = sprintf('%s/api/ng/%s/orgtraces/mark', $teamserver_url, $org_id);
-        $t_data = array('traces' => array($vul_id), 'status' => 'Confirmed', 'note' => 'by MantisBT.');
+        $t_data = array('traces' => array($vul_id), 'status' => $status, 'note' => 'by MantisBT.');
         $put_result = callAPI('PUT', $url, json_encode($t_data));
         $result = json_decode($put_result, true);
         plugin_pop_current('ContrastSecurity');
