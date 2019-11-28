@@ -259,6 +259,7 @@ function callAPI($method, $url, $data){
    ));
    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+   curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10); 
 
    // EXECUTE:
    $result = curl_exec($curl);
