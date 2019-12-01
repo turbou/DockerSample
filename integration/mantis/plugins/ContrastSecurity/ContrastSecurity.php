@@ -66,10 +66,11 @@ class ContrastSecurityPlugin extends MantisPlugin {
     function config() {
         return array(
             'teamserver_url' => '',
+            'org_id'         => '',
             'api_key'        => '',
             'auth_header'    => '',
-            'vul_issues'      => ON, 
-            'lib_issues'      => ON 
+            'vul_issues'     => ON, 
+            'lib_issues'     => ON 
         );
     }
 
@@ -199,11 +200,30 @@ class ContrastSecurityPlugin extends MantisPlugin {
         if (empty($vul_id)) {
             return;
         }
+        $status = "Reported";
+        error_log($t_updated_bug->status);
+        switch ($t_updated_bug->status) {
+            case "10": # NEW
+                $status = "Reported";
+                break;
+            case "30": # ACKNOWLEDGED
+            case "40": # CONFIRMED
+                $status = "Confirmed";
+                break;
+            case "80": # RESOLVED
+                $status = "Remediated";
+                break;
+            case "90": # CLOSED
+                $status = "Fixed";
+                break;
+            default:
+                return;
+        }
 
         # /Contrast/api/ng/[ORG_ID]/orgtraces/mark
         # {traces: ["6J22-DQ96-VN03-LFTD"], status: "Confirmed", note: "test."}
         $url = sprintf('%s/api/ng/%s/orgtraces/mark', $teamserver_url, $org_id);
-        $t_data = array('traces' => array($vul_id), 'status' => 'Confirmed', 'note' => 'by MantisBT.');
+        $t_data = array('traces' => array($vul_id), 'status' => $status, 'note' => 'by MantisBT.');
         $put_result = callAPI('PUT', $url, json_encode($t_data));
         $result = json_decode($put_result, true);
         plugin_pop_current('ContrastSecurity');
@@ -211,40 +231,41 @@ class ContrastSecurityPlugin extends MantisPlugin {
 }
 
 function callAPI($method, $url, $data){
-   $curl = curl_init();
-   switch ($method){
-      case "POST":
-         curl_setopt($curl, CURLOPT_POST, 1);
-         if ($data)
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-         break;
-      case "PUT":
-         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
-         if ($data)
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);			 					
-         break;
-      default:
-         if ($data)
-            $url = sprintf("%s?%s", $url, http_build_query($data));
-   }
-
-   // OPTIONS:
-   $api_key = plugin_config_get('api_key');
-   $auth_header = plugin_config_get('auth_header');
-   curl_setopt($curl, CURLOPT_URL, $url);
-   curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-      'Authorization: ' . $auth_header,
-      'API-Key: ' . $api_key,
-      'Accept: application/json',
-      'Content-Type: application/json',
-   ));
-   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-   curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-
-   // EXECUTE:
-   $result = curl_exec($curl);
-   if(!$result){die("Connection Failure");}
-   curl_close($curl);
-   return $result;
+    $curl = curl_init();
+    switch ($method){
+        case "POST":
+            curl_setopt($curl, CURLOPT_POST, 1);
+            if ($data)
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            break;
+        case "PUT":
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+            if ($data)
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);			 					
+            break;
+        default:
+            if ($data)
+                $url = sprintf("%s?%s", $url, http_build_query($data));
+    }
+ 
+    // OPTIONS:
+    $api_key = plugin_config_get('api_key');
+    $auth_header = plugin_config_get('auth_header');
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        'Authorization: ' . $auth_header,
+        'API-Key: ' . $api_key,
+        'Accept: application/json',
+        'Content-Type: application/json',
+    ));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10); 
+ 
+    // EXECUTE:
+    $result = curl_exec($curl);
+    if(!$result){die("Connection Failure");}
+    curl_close($curl);
+    return $result;
 }
 
