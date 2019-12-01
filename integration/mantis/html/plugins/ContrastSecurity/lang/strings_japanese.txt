@@ -9,10 +9,13 @@ $s_plugin_ContrastSecurity_config_section_general = 'ContrastSecurity 設定';
 $s_plugin_ContrastSecurity_config_section_connect = 'TeamServer 接続設定';
 $s_plugin_ContrastSecurity_config_section_import = 'Issue 作成対象';
 $s_plugin_ContrastSecurity_teamserver_url = 'Contrast URL';
-$s_plugin_ContrastSecurity_api_key = 'API Key';
-$s_plugin_ContrastSecurity_auth_header = 'Authorization Header';
+$s_plugin_ContrastSecurity_org_id = '組織ID';
+$s_plugin_ContrastSecurity_api_key = 'APIキー';
+$s_plugin_ContrastSecurity_auth_header = '認証ヘッダー';
 $s_plugin_ContrastSecurity_settings_guide = '上記の情報はTeamServerのYour Accountで確認できます。';
 $s_plugin_ContrastSecurity_vul_issues = '脆弱性';
 $s_plugin_ContrastSecurity_lib_issues = 'ライブラリ';
 $s_plugin_ContrastSecurity_submit = '設定保存';
+$s_plugin_ContrastSecurity_connect_error = 'TeamServerとの接続に失敗しました。Contrast URLをご確認ください。';
+$s_plugin_ContrastSecurity_connect_auth_error = '認証に失敗しました。組織ID, APIキー, 認証ヘッダーをご確認ください。';
 

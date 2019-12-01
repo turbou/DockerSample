@@ -30,12 +30,16 @@ print_manage_menu('manage_plugin_page.php');
                 <tr <?php echo helper_alternate_class() ?>>
                   <td class="category" width="200"><?php echo plugin_lang_get('teamserver_url'); ?></td>
                   <td>
-                    <input name="teamserver_url" size="75" placeholder="http://XXX.XXX.XXX.XXX:8080/Contrast" value="<?php echo plugin_config_get('teamserver_url', '') ?>" />
+                    <input name="teamserver_url" size="50" placeholder="http://XXX.XXX.XXX.XXX:8080/Contrast" value="<?php echo plugin_config_get('teamserver_url', '') ?>" />
                   </td>
                 </tr>
                 <tr <?php echo helper_alternate_class() ?>>
+                  <td class="category" width="200"><?php echo plugin_lang_get('org_id'); ?></td>
+                  <td><input name="org_id" size="50" value="<?php echo plugin_config_get('org_id', '') ?>" /></td>
+                </tr>
+                <tr <?php echo helper_alternate_class() ?>>
                   <td class="category" width="200"><?php echo plugin_lang_get('api_key'); ?></td>
-                  <td><input name="api_key" size="30" value="<?php echo plugin_config_get('api_key', '') ?>" /></td>
+                  <td><input name="api_key" size="50" value="<?php echo plugin_config_get('api_key', '') ?>" /></td>
                 </tr>
                 <tr <?php echo helper_alternate_class() ?>>
                   <td class="category" width="200"><?php echo plugin_lang_get('auth_header'); ?></td>

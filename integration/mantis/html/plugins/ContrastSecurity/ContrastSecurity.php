@@ -66,10 +66,11 @@ class ContrastSecurityPlugin extends MantisPlugin {
     function config() {
         return array(
             'teamserver_url' => '',
+            'org_id'         => '',
             'api_key'        => '',
             'auth_header'    => '',
-            'vul_issues'      => ON, 
-            'lib_issues'      => ON 
+            'vul_issues'     => ON, 
+            'lib_issues'     => ON 
         );
     }
 
