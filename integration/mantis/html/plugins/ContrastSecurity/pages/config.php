@@ -13,12 +13,15 @@ print_manage_menu('manage_plugin_page.php');
 
 <div class="col-md-12 col-xs-12">
   <div class="space-10"></div>
-  <div class="form-container" >
-    <form name="plugins_releases" method="post" action="<?php echo plugin_page('config_update') ?>">
-      <?php echo form_security_field('plugin_ContrastSecurity_config_update') ?>
+  <h3><?php echo plugin_lang_get('config_section_general') ?></h3>
+</div>
+<form name="plugins_releases" method="post" action="<?php echo plugin_page('config_update') ?>">
+<?php echo form_security_field('plugin_ContrastSecurity_config_update') ?>
+  <div class="col-md-12 col-xs-12">
+    <div class="form-container" >
       <div class="widget-box widget-color-blue2">
         <div class="widget-header widget-header-small">
-          <h4 class="widget-title lighter"><?php echo plugin_lang_get('config_section_general') ?></h4>
+          <h4 class="widget-title lighter"><?php echo plugin_lang_get('config_section_connect') ?></h4>
         </div>
         <div class="widget-body">
           <div class="widget-main no-padding">
@@ -38,9 +41,27 @@ print_manage_menu('manage_plugin_page.php');
                   <td class="category" width="200"><?php echo plugin_lang_get('auth_header'); ?></td>
                   <td><input name="auth_header" size="100" value="<?php echo plugin_config_get('auth_header', '') ?>" /></td>
                 </tr>
-                <tr <?php echo helper_alternate_class() ?>> 
-                  <td colspan="2"><?php echo plugin_lang_get('settings_guide'); ?></td>
-                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-12 col-xs-12">
+    <?php echo plugin_lang_get('settings_guide'); ?>
+  </div>
+  <div class="col-md-12 col-xs-12">
+    <div class="space-10"></div>
+    <div class="form-container" >
+      <div class="widget-box widget-color-blue2">
+        <div class="widget-header widget-header-small">
+          <h4 class="widget-title lighter"><?php echo plugin_lang_get('config_section_import') ?></h4>
+        </div>
+        <div class="widget-body">
+          <div class="widget-main no-padding">
+            <div class="table-responsive">
+              <table class="table table-bordered table-condensed table-striped">
                 <tr <?php echo helper_alternate_class() ?>> 
                   <td class="category" width="200"><?php echo plugin_lang_get('vul_issues'); ?></td>
                   <td>
@@ -56,15 +77,17 @@ print_manage_menu('manage_plugin_page.php');
               </table>
             </div>
           </div>
-          <div class="widget-toolbox padding-8 clearfix">
-            <input type="submit" class="btn btn-primary btn-white btn-round" value="<?php echo lang_get('change_configuration')?>" />
-          </div>
         </div>
       </div>
-    </form>
+    </div>
   </div>
-</div>
-
+  <div class="col-md-12 col-xs-12">
+    <div class="space-10"></div>
+    <div class="form-container" >
+      <input type="submit" class="btn btn-primary btn-white btn-round" value="<?php echo plugin_lang_get('submit')?>" />
+    </div>
+  </div>
+</form>
 <?php
 layout_page_end();
 

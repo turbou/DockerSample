@@ -6,10 +6,13 @@ $s_plugin_ContrastSecurity_description = 'ContrastSecurity インテグレーシ
 
 /* Configuration page */
 $s_plugin_ContrastSecurity_config_section_general = 'ContrastSecurity 設定';
+$s_plugin_ContrastSecurity_config_section_connect = 'TeamServer 接続設定';
+$s_plugin_ContrastSecurity_config_section_import = 'Issue 作成対象';
 $s_plugin_ContrastSecurity_teamserver_url = 'Contrast URL';
 $s_plugin_ContrastSecurity_api_key = 'API Key';
 $s_plugin_ContrastSecurity_auth_header = 'Authorization Header';
 $s_plugin_ContrastSecurity_settings_guide = '上記の情報はTeamServerのYour Accountで確認できます。';
 $s_plugin_ContrastSecurity_vul_issues = '脆弱性';
 $s_plugin_ContrastSecurity_lib_issues = 'ライブラリ';
+$s_plugin_ContrastSecurity_submit = '設定保存';
 
