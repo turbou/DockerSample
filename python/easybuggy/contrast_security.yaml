@@ -14,4 +14,11 @@ application:
 
 server:
   name: Docker_CentOS7
+  path: /project
+
+protect:
+  enable: false
+  
+assess:
+  enable: true
 
