@@ -9,10 +9,10 @@
   アカウント設定 -> APIトークンで適当な名前で生成
 
 3. TeamServerのGeneric Webhookを設定  
-  Name: ```Mantis（好きな名前）```  
-  URL: ```http://[MANTIS_HOST]:[MANTIS_PORT]/api/rest/plugins/ContrastSecurity/services/[API_TOKEN]```  
-  Applications: ```任意```  
-  Payload:
+  - Name: ```Mantis（好きな名前）```  
+  - URL: ```http://[MANTIS_HOST]:[MANTIS_PORT]/api/rest/plugins/ContrastSecurity/services/[API_TOKEN]```  
+  - Applications: ```任意```  
+  - Payload:
     ```
     {
       "summary":"$Title",
@@ -25,6 +25,8 @@
       }
     }
     ```
-    categoryとprojectは連携するMantis側の内容と合わせてください。  
-    Send as HTML: ```チェックは外してください```
+    categoryとprojectは連携するMantis側の内容と合わせてください。
+  - Send as HTML: ```チェックは外してください```
   
+4. Generic Webhookの設定後、Notfication（ベルマーク）を行ってください。  
+  Libraryも対象にすることでCVEを含むライブラリの情報もMantisに連携されます。
