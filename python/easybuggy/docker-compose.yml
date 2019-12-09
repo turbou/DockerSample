@@ -6,11 +6,9 @@ services:
       context: .
     container_name: easybuggy
     restart: always
-    command: python /project/easybuggy/manage.py runserver 0.0.0.0:8080
+    command: python /project/easybuggy/manage.py runserver 0.0.0.0:8888
     ports:
-      - "8080:8080"
+      - "8888:8888"
     stdin_open: true
     tty: true
-    volumes:
-      - ./contrast_security.yaml:/project/contrast_security.yaml
 

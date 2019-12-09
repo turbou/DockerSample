@@ -10,7 +10,8 @@ RUN cp -p easybuggy/config/settings.py easybuggy/config/settings_org.py && \
     POS=`cat easybuggy/config/settings_org.py | \
     awk '/^MIDDLEWARE/,/^]/{if($1=="]")print NR}'` && cat easybuggy/config/settings_org.py | \
     sed "${POS} i \    'contrast.agent.middlewares.django_middleware.DjangoMiddleware'" > easybuggy/config/settings.py
-COPY contrast-python-agent-2.3.1.tar.gz /project
+COPY contrast-python-agent-2.4.0.tar.gz /project
 RUN pip --disable-pip-version-check install -r /project/easybuggy/requirements.txt
-RUN pip --disable-pip-version-check install /project/contrast-python-agent-2.3.1.tar.gz
+RUN pip --disable-pip-version-check install /project/contrast-python-agent-2.4.0.tar.gz
+COPY contrast_security.yaml /project
 
