@@ -1,6 +1,11 @@
 ## Mantis Docker Sample
 
 ### Steps
+0. Permission
+    ```
+    chown -R 33:33 html
+    ```
+
 1. Build and Run  
     ```bash
     docker-compose up -d
