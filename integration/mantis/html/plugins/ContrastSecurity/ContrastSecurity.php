@@ -126,7 +126,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
         $t_issue = json_decode($body_data, true);
         $is_vul = preg_match('/index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/', $t_issue['description'], $vul_match);
         $is_lib = preg_match('/.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./',
-             $t_issue['description'], $lib_match
+            $t_issue['description'], $lib_match
         );
         plugin_push_current('ContrastSecurity');
         if ($is_vul) {
@@ -179,6 +179,7 @@ class ContrastSecurityPlugin extends MantisPlugin {
             if (plugin_config_get('lib_issues') != ON) {
                 return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Lib Skip");
             }
+            $description = $t_issue['description'];
             $lib_name = $lib_match[1];
             $org_id = $lib_match[2];
             $app_id = $lib_match[5];
@@ -186,13 +187,22 @@ class ContrastSecurityPlugin extends MantisPlugin {
             $lang = $lib_match[3];
             $lib_id = $lib_match[4];
             $teamserver_url = plugin_config_get('teamserver_url');
-            $url = sprintf('%s/api/ng/%s/libraries/%s/%s', $teamserver_url, $org_id, $lang, $lib_id);
+            $url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', $teamserver_url, $org_id, $lang, $lib_id);
             $get_data = callAPI('GET', $url, false);
             $lib_json = json_decode($get_data, true);
             $file_version = $lib_json["library"]["file_version"];
             $latest_version = $lib_json["library"]["latest_version"];
             $classes_used = $lib_json["library"]["classes_used"];
             $class_count = $lib_json["library"]["class_count"];
+            $cve_list = array();
+            foreach ($lib_json["library"]["vulns"] as $c_link) {
+                array_push($cve_list, $c_link["name"]);
+            }
+            $is_liburl = preg_match('/.+ was found in .+\((.+)\),.+/', $description, $liburl_match);
+            $self_url = "";
+            if ($is_liburl) {
+                $self_url = $liburl_match[1];
+            }
             $t_issue['summary'] = $lib_name;
             $t_issue['description'] = 
                 '<b>現在バージョン</b><br />' .
@@ -200,7 +210,11 @@ class ContrastSecurityPlugin extends MantisPlugin {
                 '<b>最新バージョン</b><br />' .
                 $latest_version . '<br />' .
                 '<b>クラス(使用/全体)</b><br />' .
-                $classes_used . '/' . $class_count;
+                $classes_used . '/' . $class_count . '<br />' .
+                '<b>脆弱性</b><br />' .
+                implode("<br />", $cve_list) . '<br />' .
+                '<b>ライブラリURL</b><br />' .
+                $self_url;
         } else {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Test URL Success");
         }
