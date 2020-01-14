@@ -41,3 +41,13 @@ $s_plugin_ContrastSecurity_submit = '設定保存';
 $s_plugin_ContrastSecurity_connect_error = 'TeamServerとの接続に失敗しました。Contrast URLをご確認ください。';
 $s_plugin_ContrastSecurity_connect_auth_error = '認証に失敗しました。組織ID, APIキー, 認証ヘッダーをご確認ください。';
 
+/* Report page */
+$s_plugin_ContrastSecurity_report_vul_overview = '概要';
+$s_plugin_ContrastSecurity_report_vul_howtofix = '修正方法';
+$s_plugin_ContrastSecurity_report_vul_url = '脆弱性URL';
+$s_plugin_ContrastSecurity_report_lib_curver = '現在バージョン';
+$s_plugin_ContrastSecurity_report_lib_newver = '最新バージョン';
+$s_plugin_ContrastSecurity_report_lib_class = 'クラス(使用/全体)';
+$s_plugin_ContrastSecurity_report_lib_cves = '脆弱性';
+$s_plugin_ContrastSecurity_report_lib_url = 'ライブラリURL';
+
