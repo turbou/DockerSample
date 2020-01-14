@@ -9,9 +9,9 @@ _If the version changes, change the file name in Dockerfile._
 1. Download contrast_security.yaml from TeamServer or rewrite the existing file.  
 _If the agent cannot communicate with the service due to an agent bug, add the following settings._
     ```yaml
-	server:
-		name: Docker_CentOS7
-		path: /project
+    server:
+      name: Docker_CentOS7
+      path: /project
     ```
 
 1. Build  
