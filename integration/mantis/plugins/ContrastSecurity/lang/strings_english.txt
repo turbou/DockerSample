@@ -41,3 +41,13 @@ $s_plugin_ContrastSecurity_submit = 'Save';
 $s_plugin_ContrastSecurity_connect_error = 'Connection with TeamServer failed. Make sure Contrast URL.';
 $s_plugin_ContrastSecurity_connect_auth_error = 'Authentication failed. Make sure Organization ID, API Key and Authorization Header.';
 
+/* Report page */
+$s_plugin_ContrastSecurity_report_vul_overview = 'Overview';
+$s_plugin_ContrastSecurity_report_vul_howtofix = 'How to fix';
+$s_plugin_ContrastSecurity_report_vul_url = 'Vul URL';
+$s_plugin_ContrastSecurity_report_lib_curver = 'Version';
+$s_plugin_ContrastSecurity_report_lib_newver = 'Latest';
+$s_plugin_ContrastSecurity_report_lib_class = 'Used/Total Classes';
+$s_plugin_ContrastSecurity_report_lib_cves = 'CVEs';
+$s_plugin_ContrastSecurity_report_lib_url = 'Lib URL';
+

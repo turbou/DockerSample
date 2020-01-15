@@ -191,11 +191,11 @@ class ContrastSecurityPlugin extends MantisPlugin {
 
             $t_issue['summary'] = $summary;
             $t_issue['description'] = 
-                '<b>概要</b><br />' .
+                '<b>' . plugin_lang_get('report_vul_overview') . '</b><br />' .
                 $story . '<br /><br />' .
-                '<b>修正方法</b><br />' .
+                '<b>' . plugin_lang_get('report_vul_howtofix') . '</b><br />' .
                 $howtofix . '<br /><br />' .
-                '<b>脆弱性URL</b><br />' .
+                '<b>' . plugin_lang_get('report_vul_url') . '</b><br />' .
                 $self_url;
         } elseif ($is_lib) {
             if (plugin_config_get('lib_issues') != ON) {
@@ -227,15 +227,15 @@ class ContrastSecurityPlugin extends MantisPlugin {
             }
             $t_issue['summary'] = $lib_name;
             $t_issue['description'] = 
-                '<b>現在バージョン</b><br />' .
+                '<b>' . plugin_lang_get('report_lib_curver') . '</b><br />' .
                 $file_version . '<br />' .
-                '<b>最新バージョン</b><br />' .
+                '<b>' . plugin_lang_get('report_lib_newver') . '</b><br />' .
                 $latest_version . '<br />' .
-                '<b>クラス(使用/全体)</b><br />' .
+                '<b>' . plugin_lang_get('report_lib_class') . '</b><br />' .
                 $classes_used . '/' . $class_count . '<br />' .
-                '<b>脆弱性</b><br />' .
+                '<b>' . plugin_lang_get('report_lib_cves') . '</b><br />' .
                 implode("<br />", $cve_list) . '<br />' .
-                '<b>ライブラリURL</b><br />' .
+                '<b>' . plugin_lang_get('report_lib_url') . '</b><br />' .
                 $self_url;
         } else {
             return $p_response->withHeader(HTTP_STATUS_SUCCESS, "Test URL Success");
