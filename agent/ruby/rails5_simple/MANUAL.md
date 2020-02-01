@@ -119,6 +119,17 @@ Railsアプリケーションフォルダや.gitフォルダなどがクリア�
 
 Gemfile, Gemfile.lockなども元に戻ります。
 
+##### Dockerコンテナのクリーンアップ
+
+```bash
+docker-compoes down # でも基本クリアされますが
+docker container prune
+docker volume prune
+docker image prune
+docker network prune
+# すべてYesで削除してください。
+```
+
 
 
 以上
