@@ -10,11 +10,11 @@ RUN apt-get update -qq && apt-get install -y \
 RUN gem install bundler
 
 WORKDIR /tmp
+COPY contrast-agent-3.5.0.gem /tmp/contrast-agent-3.5.0.gem
+RUN gem install contrast-agent-3.5.0.gem
 ADD Gemfile Gemfile
 ADD Gemfile.lock Gemfile.lock
 RUN bundle install
-COPY contrast-agent-3.5.0.gem /tmp/contrast-agent-3.5.0.gem
-RUN gem install contrast-agent-3.5.0.gem
 
 ENV APP_HOME /myapp
 RUN mkdir -p $APP_HOME
