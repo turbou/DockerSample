@@ -4,6 +4,7 @@ ENV LANG C.UTF-8
 RUN apt-get update -qq && apt-get install -y \
     build-essential \
     nodejs \
+    vim \
  && rm -rf /var/lib/apt/lists/*
 
 RUN gem install bundler
@@ -12,6 +13,8 @@ WORKDIR /tmp
 ADD Gemfile Gemfile
 ADD Gemfile.lock Gemfile.lock
 RUN bundle install
+COPY contrast-agent-3.4.4.gem /tmp/contrast-agent-3.4.4.gem
+RUN gem install contrast-agent-3.4.4.gem
 
 ENV APP_HOME /myapp
 RUN mkdir -p $APP_HOME
