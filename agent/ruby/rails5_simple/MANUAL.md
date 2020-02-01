@@ -45,6 +45,13 @@ ls -l
 
 *エージェントと設定ファイルをTeamServerから落として上記のダミーファイルと入れ替えてください。*
 
+エージェントのバージョンを変える場合は、Dockerfileの中身のバージョンも修正してください。
+
+```dockerfile
+COPY contrast-agent-3.5.0.gem /tmp/contrast-agent-3.5.0.gem
+RUN gem install contrast-agent-3.5.0.gem
+```
+
 #### Railsアプリケーションフォルダを生成
 
 ```bash
@@ -85,6 +92,8 @@ end
 
 ```bash
 docker-compose build
+# すっきりしない時は
+docker-compose build --no-cache
 ```
 
 #### テーブルの生成
