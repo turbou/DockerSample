@@ -7,7 +7,7 @@ from datetime import datetime
 
 CSV_HEADER=[
     'Vulnerability Name',
-    'Vulnerability ID', 
+    'Vulnerability ID',
     'Category',
     'Rule Name',
     'Severity',
@@ -15,7 +15,7 @@ CSV_HEADER=[
     'First Seen Datetime',
     'Last Seen Datetime',
     'Application Name',
-    'Application ID', 
+    'Application ID',
     'Application Code',
     'CWE ID',
     'COMMENT',
@@ -29,11 +29,12 @@ def main():
             env_not_found |= True
     if env_not_found:
         print()
-        print('CONTRAST_BASEURL          : https://eval.contrastsecurity.com/Contrast')
-        print('CONTRAST_AUTHORIZATION    : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==')
-        print('CONTRAST_API_KEY          : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        print('CONTRAST_ORG_ID           : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
-        print('CONTRAST_APP_ID(optional) : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        print('CONTRAST_BASEURL                   : https://eval.contrastsecurity.com/Contrast')
+        print('CONTRAST_AUTHORIZATION             : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==')
+        print('CONTRAST_API_KEY                   : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        print('CONTRAST_ORG_ID                    : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        print('CONTRAST_APP_IDS(optional)         : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,...')
+        print('CONTRAST_APP_EXCLUDE_IDS(optional) : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,...')
         return
 
     BASEURL=os.environ['CONTRAST_BASEURL']
@@ -41,9 +42,15 @@ def main():
     AUTHORIZATION=os.environ['CONTRAST_AUTHORIZATION']
     ORG_ID=os.environ['CONTRAST_ORG_ID']
     API_URL="%s/api/ng/%s" % (BASEURL, ORG_ID)
-    APP_ID=None
-    if 'CONTRAST_APP_ID' in os.environ:
-        APP_ID=os.environ['CONTRAST_APP_ID']
+    APP_IDS=[]
+    if 'CONTRAST_APP_IDS' in os.environ:
+        APP_IDS=os.environ['CONTRAST_APP_IDS'].split(',')
+    EX_APP_IDS=[]
+    if 'CONTRAST_APP_EXCLUDE_IDS' in os.environ:
+        EX_APP_IDS=os.environ['CONTRAST_APP_EXCLUDE_IDS'].split(',')
+    if len(APP_IDS) > 0 and len(EX_APP_IDS) > 0:
+        print('CONTRAST_APP_IDとCONTRAST_APP_EXCLUDE_IDSの両方を設定することはできません。')
+        return
 
     headers = {"Accept": "application/json", "API-Key": API_KEY, "Authorization": AUTHORIZATION}
 
@@ -58,7 +65,9 @@ def main():
     #print('総アプリケーション数: %d' % len(data['applications']))
     csv_lines = []
     for app in data['applications']:
-        if APP_ID and app['app_id'] != APP_ID:
+        if len(APP_IDS) > 0 and not app['app_id'] in APP_IDS:
+            continue
+        if len(EX_APP_IDS) > 0 and app['app_id'] in EX_APP_IDS:
             continue
         #print(json.dumps(data, indent=4))
         url_traces = '%s/traces/%s/ids' % (API_URL, app['app_id'])
@@ -73,6 +82,7 @@ def main():
             #print(json.dumps(data, indent=4))
             if not data['success']:
                 continue
+            print('%s: %s' % (app['app_id'], trace))
             csv_line.append(data['trace']['title'])
             csv_line.append(data['trace']['uuid'])
             csv_line.append(data['trace']['category'])
