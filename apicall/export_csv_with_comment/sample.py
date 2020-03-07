@@ -11,13 +11,13 @@ CSV_HEADER=[
     'Rule Name',
     'Severity',
     'Status',
-    'Number of Events',
     'First Seen Datetime',
     'Last Seen Datetime',
     'Application Name',
     'Application ID', 
     'Application Code',
     'CWE ID',
+    'COMMENT',
 ]
 
 def main():
@@ -53,9 +53,8 @@ def main():
         print('Authorizationヘッダ, APIキー, 組織ID, TeamServerのURLが正しいか、ご確認ください。')
         return
     #print(len(data['traces']))
-    print('総アプリケーション数: %d' % len(data['applications']))
+    #print('総アプリケーション数: %d' % len(data['applications']))
     for app in data['applications']:
-        out_line = []
         #if app['app_id'] != '5be21fa1-e0d8-45d7-baed-a2fd4a3de1c8':
         #    continue
         #print(json.dumps(data, indent=4))
@@ -64,6 +63,7 @@ def main():
         data = r.json()
         #print(json.dumps(data, indent=4))
         for trace in data['traces']:
+            out_line = []
             url_trace = '%s/traces/%s/trace/%s' % (BASEURL, app['app_id'], trace)
             r = requests.get(url_trace, headers=headers)
             data = r.json()
@@ -78,8 +78,8 @@ def main():
             out_line.append(data['trace']['status'])
             out_line.append(datetime.fromtimestamp(data['trace']['first_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
             out_line.append(datetime.fromtimestamp(data['trace']['last_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
-            out_line.append(app['app_id'])
             out_line.append(app['name'])
+            out_line.append(app['app_id'])
             out_line.append(app['code'])
             # How to Fix
             url_trace_howtofix = '%s/traces/%s/recommendation' % (BASEURL, trace)
