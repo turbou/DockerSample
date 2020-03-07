@@ -2,6 +2,7 @@ import os
 import json
 import html
 import requests
+import csv
 from datetime import datetime
 
 CSV_HEADER=[
@@ -28,24 +29,25 @@ def main():
             env_not_found |= True
     if env_not_found:
         print()
-        print('BASEURL               : https://eval.contrastsecurity.com/Contrast')
-        print('CONTRAST_AUTHORIZATION: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==')
-        print('CONTRAST_API_KEY      : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        print('CONTRAST_ORG_ID       : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        print('CONTRAST_BASEURL          : https://eval.contrastsecurity.com/Contrast')
+        print('CONTRAST_AUTHORIZATION    : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==')
+        print('CONTRAST_API_KEY          : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        print('CONTRAST_ORG_ID           : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        print('CONTRAST_APP_ID(optional) : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
         return
 
-    # Print Header
-    print(','.join(CSV_HEADER))
+    BASEURL=os.environ['CONTRAST_BASEURL']
+    API_KEY=os.environ['CONTRAST_API_KEY']
+    AUTHORIZATION=os.environ['CONTRAST_AUTHORIZATION']
+    ORG_ID=os.environ['CONTRAST_ORG_ID']
+    API_URL="%s/api/ng/%s" % (BASEURL, ORG_ID)
+    APP_ID=None
+    if 'CONTRAST_APP_ID' in os.environ:
+        APP_ID=os.environ['CONTRAST_APP_ID']
 
-    CONTRAST_BASEURL=os.environ['CONTRAST_BASEURL']
-    CONTRAST_API_KEY=os.environ['CONTRAST_API_KEY']
-    CONTRAST_AUTHORIZATION=os.environ['CONTRAST_AUTHORIZATION']
-    CONTRAST_ORG_ID=os.environ['CONTRAST_ORG_ID']
-    BASEURL="%s/api/ng/%s" % (CONTRAST_BASEURL, CONTRAST_ORG_ID)
+    headers = {"Accept": "application/json", "API-Key": API_KEY, "Authorization": AUTHORIZATION}
 
-    headers = {"Accept": "application/json", "API-Key": CONTRAST_API_KEY, "Authorization": CONTRAST_AUTHORIZATION}
-
-    url_applications = '%s/applications' % (BASEURL)
+    url_applications = '%s/applications' % (API_URL)
     r = requests.get(url_applications, headers=headers)
     data = r.json()
     #print(json.dumps(data, indent=4))
@@ -54,52 +56,59 @@ def main():
         return
     #print(len(data['traces']))
     #print('総アプリケーション数: %d' % len(data['applications']))
+    csv_lines = []
     for app in data['applications']:
-        #if app['app_id'] != '5be21fa1-e0d8-45d7-baed-a2fd4a3de1c8':
-        #    continue
+        if APP_ID and app['app_id'] != APP_ID:
+            continue
         #print(json.dumps(data, indent=4))
-        url_traces = '%s/traces/%s/ids' % (BASEURL, app['app_id'])
+        url_traces = '%s/traces/%s/ids' % (API_URL, app['app_id'])
         r = requests.get(url_traces, headers=headers)
         data = r.json()
         #print(json.dumps(data, indent=4))
         for trace in data['traces']:
-            out_line = []
-            url_trace = '%s/traces/%s/trace/%s' % (BASEURL, app['app_id'], trace)
+            csv_line = []
+            url_trace = '%s/traces/%s/trace/%s' % (API_URL, app['app_id'], trace)
             r = requests.get(url_trace, headers=headers)
             data = r.json()
             #print(json.dumps(data, indent=4))
             if not data['success']:
                 continue
-            out_line.append(data['trace']['title'])
-            out_line.append(data['trace']['uuid'])
-            out_line.append(data['trace']['category'])
-            out_line.append(data['trace']['rule_name'])
-            out_line.append(data['trace']['severity'])
-            out_line.append(data['trace']['status'])
-            out_line.append(datetime.fromtimestamp(data['trace']['first_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
-            out_line.append(datetime.fromtimestamp(data['trace']['last_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
-            out_line.append(app['name'])
-            out_line.append(app['app_id'])
-            out_line.append(app['code'])
+            csv_line.append(data['trace']['title'])
+            csv_line.append(data['trace']['uuid'])
+            csv_line.append(data['trace']['category'])
+            csv_line.append(data['trace']['rule_name'])
+            csv_line.append(data['trace']['severity'])
+            csv_line.append(data['trace']['status'])
+            csv_line.append(datetime.fromtimestamp(data['trace']['first_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
+            csv_line.append(datetime.fromtimestamp(data['trace']['last_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
+            csv_line.append(app['name'])
+            csv_line.append(app['app_id'])
+            csv_line.append(app['code'])
             # How to Fix
-            url_trace_howtofix = '%s/traces/%s/recommendation' % (BASEURL, trace)
+            url_trace_howtofix = '%s/traces/%s/recommendation' % (API_URL, trace)
             r = requests.get(url_trace_howtofix, headers=headers)
             data = r.json()
             #print(json.dumps(data, indent=4))
             #print(data['cwe'])
-            out_line.append(data['cwe'])
+            csv_line.append(data['cwe'])
 
             # Comments
-            url_trace_notes = '%s/applications/%s/traces/%s/notes' % (BASEURL, app['app_id'], trace)
+            url_trace_notes = '%s/applications/%s/traces/%s/notes' % (API_URL, app['app_id'], trace)
             r = requests.get(url_trace_notes, headers=headers)
             data = r.json()
             #print(json.dumps(data, indent=4))
             for note in data['notes']:
                 #print(html.unescape(note['note']))
-                out_line.append(html.unescape(note['note']))
+                csv_line.append(html.unescape(note['note']))
 
-            maped_out_line = map(str, out_line)
-            print(','.join(maped_out_line))
+            #maped_csv_line = map(str, csv_line)
+            #print(','.join(maped_csv_line))
+            csv_lines.append(csv_line)
+
+    with open('result.csv', 'w', encoding='shift_jis') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        writer.writerow(CSV_HEADER)
+        writer.writerows(csv_lines)
 
 if __name__ == '__main__':
     main()
