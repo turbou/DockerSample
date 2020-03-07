@@ -1,19 +1,50 @@
-import requests
+import os
 import json
-import zipfile
-import io
 import html
-from xml.etree import ElementTree
+import requests
 from datetime import datetime
 
-CONTRAST_AUTHORIZATION="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=="
-CONTRAST_API_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-CONTRAST_ORG="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-## Teamserver URL
-BASEURL="https://eval.contrastsecurity.com/Contrast/api/ng/%s" % CONTRAST_ORG
+CSV_HEADER=[
+    'Vulnerability Name',
+    'Vulnerability ID', 
+    'Category',
+    'Rule Name',
+    'Severity',
+    'Status',
+    'Number of Events',
+    'First Seen Datetime',
+    'Last Seen Datetime',
+    'Application Name',
+    'Application ID', 
+    'Application Code',
+    'CWE ID',
+]
 
 def main():
+    env_not_found = False
+    for env_key in ['CONTRAST_BASEURL', 'CONTRAST_AUTHORIZATION', 'CONTRAST_API_KEY', 'CONTRAST_ORG_ID']:
+        if not env_key in os.environ:
+            print('環境変数 %s が設定されていません。' % env_key)
+            env_not_found |= True
+    if env_not_found:
+        print()
+        print('BASEURL               : https://eval.contrastsecurity.com/Contrast')
+        print('CONTRAST_AUTHORIZATION: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==')
+        print('CONTRAST_API_KEY      : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        print('CONTRAST_ORG_ID       : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        return
+
+    # Print Header
+    print(','.join(CSV_HEADER))
+
+    CONTRAST_BASEURL=os.environ['CONTRAST_BASEURL']
+    CONTRAST_API_KEY=os.environ['CONTRAST_API_KEY']
+    CONTRAST_AUTHORIZATION=os.environ['CONTRAST_AUTHORIZATION']
+    CONTRAST_ORG_ID=os.environ['CONTRAST_ORG_ID']
+    BASEURL="%s/api/ng/%s" % (CONTRAST_BASEURL, CONTRAST_ORG_ID)
+
     headers = {"Accept": "application/json", "API-Key": CONTRAST_API_KEY, "Authorization": CONTRAST_AUTHORIZATION}
+
     url_applications = '%s/applications' % (BASEURL)
     r = requests.get(url_applications, headers=headers)
     data = r.json()
@@ -22,7 +53,7 @@ def main():
         print('Authorizationヘッダ, APIキー, 組織ID, TeamServerのURLが正しいか、ご確認ください。')
         return
     #print(len(data['traces']))
-    print(len(data['applications']))
+    print('総アプリケーション数: %d' % len(data['applications']))
     for app in data['applications']:
         out_line = []
         #if app['app_id'] != '5be21fa1-e0d8-45d7-baed-a2fd4a3de1c8':
@@ -37,27 +68,18 @@ def main():
             r = requests.get(url_trace, headers=headers)
             data = r.json()
             #print(json.dumps(data, indent=4))
-            #print(data['trace']['title'])
+            if not data['success']:
+                continue
             out_line.append(data['trace']['title'])
-            #print(data['trace']['uuid'])
             out_line.append(data['trace']['uuid'])
-            #print(data['trace']['category'])
             out_line.append(data['trace']['category'])
-            #print(data['trace']['rule_name'])
             out_line.append(data['trace']['rule_name'])
-            #print(data['trace']['severity'])
             out_line.append(data['trace']['severity'])
-            #print(data['trace']['status'])
             out_line.append(data['trace']['status'])
-            #print(datetime.fromtimestamp(data['trace']['first_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
             out_line.append(datetime.fromtimestamp(data['trace']['first_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
-            #print(datetime.fromtimestamp(data['trace']['last_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
             out_line.append(datetime.fromtimestamp(data['trace']['last_time_seen']/1000).strftime('%Y/%m/%d %H:%M'))
-            #print(app['app_id'])
             out_line.append(app['app_id'])
-            #print(app['name'])
             out_line.append(app['name'])
-            #print(app['code'])
             out_line.append(app['code'])
             # How to Fix
             url_trace_howtofix = '%s/traces/%s/recommendation' % (BASEURL, trace)
