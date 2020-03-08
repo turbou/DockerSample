@@ -40,9 +40,9 @@ CONTRAST_APP_IDSとCONTRAST_EXCLUDE_APP_IDSの両方をセットすることは�
 環境変数の解除については以下です。
 
 ```bash
+export -n CONTRAST_APP_IDS
+# または以下でも大丈夫です。
 export CONTRAST_APP_IDS=
-または
-export CONTRAST_EXCLUDE_APP_IDS=
 ```
 
 ### 実行方法
