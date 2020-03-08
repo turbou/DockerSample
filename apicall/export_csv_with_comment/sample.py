@@ -34,7 +34,7 @@ def main():
         print('CONTRAST_API_KEY                   : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         print('CONTRAST_ORG_ID                    : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
         print('CONTRAST_APP_IDS(optional)         : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,...')
-        print('CONTRAST_APP_EXCLUDE_IDS(optional) : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,...')
+        print('CONTRAST_EXCLUDE_APP_IDS(optional) : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,...')
         return
 
     BASEURL=os.environ['CONTRAST_BASEURL']
@@ -43,13 +43,13 @@ def main():
     ORG_ID=os.environ['CONTRAST_ORG_ID']
     API_URL="%s/api/ng/%s" % (BASEURL, ORG_ID)
     APP_IDS=[]
-    if 'CONTRAST_APP_IDS' in os.environ:
+    if 'CONTRAST_APP_IDS' in os.environ and len(os.environ['CONTRAST_APP_IDS']) > 0:
         APP_IDS=os.environ['CONTRAST_APP_IDS'].split(',')
     EX_APP_IDS=[]
-    if 'CONTRAST_APP_EXCLUDE_IDS' in os.environ:
-        EX_APP_IDS=os.environ['CONTRAST_APP_EXCLUDE_IDS'].split(',')
+    if 'CONTRAST_EXCLUDE_APP_IDS' in os.environ and len(os.environ['CONTRAST_EXCLUDE_APP_IDS']) > 0:
+        EX_APP_IDS=os.environ['CONTRAST_EXCLUDE_APP_IDS'].split(',')
     if len(APP_IDS) > 0 and len(EX_APP_IDS) > 0:
-        print('CONTRAST_APP_IDとCONTRAST_APP_EXCLUDE_IDSの両方を設定することはできません。')
+        print('CONTRAST_APP_IDとCONTRAST_EXCLUDE_APP_IDSの両方を設定することはできません。')
         return
 
     headers = {"Accept": "application/json", "API-Key": API_KEY, "Authorization": AUTHORIZATION}
