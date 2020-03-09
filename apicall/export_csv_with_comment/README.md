@@ -9,12 +9,15 @@ requests==2.23.0
 ```
 
 ```bash
-python install -r ./requirements.txt
+pip install -r ./requirements.txt
 ```
 
 ### 事前準備
 
 環境変数をセットしてください。
+CONTRAST_AUTHRORIZATIONは下記で作成します。
+$ echo -n 'username:service_key' | openssl base64
+
 
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
