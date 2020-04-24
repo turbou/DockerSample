@@ -1,0 +1,13 @@
+jobConfigHistory:2.22
+rebuild:1.31
+build-with-parameters:1.4
+categorized-view:1.10
+description-setter:1.10
+email-ext:2.66
+envinject:2.1.6
+ws-cleanup:0.37
+pipeline-stage-view:2.11
+ldap:1.20
+matrix-auth:2.4.2
+contrast-continuous-application-security:3.1.1
+

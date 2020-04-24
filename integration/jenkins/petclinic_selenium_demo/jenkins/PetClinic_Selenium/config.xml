@@ -1,0 +1,79 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cd /tmp
+/tmp/petclinic/startup.sh $BUILD_NUMBER &amp;
+sleep 210
+pytest /tmp/selenium/test_sQLInjection.py
+sleep 30
+PID=`jps -l | awk &apos;/spring-petclinic-1.5.1.jar/ {print $1}&apos;`
+kill -9 $PID
+
+exit 0
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <com.aspectsecurity.contrast.contrastjenkins.VulnerabilityTrendRecorder plugin="contrast-continuous-application-security@3.1.1">
+      <conditions>
+        <com.aspectsecurity.contrast.contrastjenkins.ThresholdCondition>
+          <thresholdCount>0</thresholdCount>
+          <thresholdSeverity>Medium</thresholdSeverity>
+          <applicationDefinition>
+            <matchBy>APPLICATION_ORIGIN_NAME</matchBy>
+            <applicationOriginName>PetClinic_8001</applicationOriginName>
+            <agentType>JAVA</agentType>
+            <failOnAppNotFound>true</failOnAppNotFound>
+          </applicationDefinition>
+          <applicationId>db7690b3-a46e-4636-b9b6-0eb2d3898c5e</applicationId>
+          <applicationOriginName>PetClinic_8001</applicationOriginName>
+          <agentType>JAVA</agentType>
+          <failOnAppNotFound>true</failOnAppNotFound>
+          <applicationState>1</applicationState>
+          <matchBy>APPLICATION_ORIGIN_NAME</matchBy>
+          <autoRemediated>false</autoRemediated>
+          <confirmed>false</confirmed>
+          <suspicious>false</suspicious>
+          <notAProblem>false</notAProblem>
+          <remediated>false</remediated>
+          <reported>false</reported>
+          <fixed>false</fixed>
+          <beingTracked>false</beingTracked>
+          <untracked>false</untracked>
+        </com.aspectsecurity.contrast.contrastjenkins.ThresholdCondition>
+      </conditions>
+      <teamServerProfileName>Demo</teamServerProfileName>
+      <overrideGlobalThresholdConditions>true</overrideGlobalThresholdConditions>
+      <queryBy>4</queryBy>
+    </com.aspectsecurity.contrast.contrastjenkins.VulnerabilityTrendRecorder>
+  </publishers>
+  <buildWrappers>
+    <EnvInjectBuildWrapper plugin="envinject@2.1.6">
+      <info>
+        <propertiesContent>APPVERSIONTAG=$BUILD_NUMBER</propertiesContent>
+        <secureGroovyScript plugin="script-security@1.71">
+          <script></script>
+          <sandbox>false</sandbox>
+        </secureGroovyScript>
+        <loadFilesFromMaster>false</loadFilesFromMaster>
+      </info>
+    </EnvInjectBuildWrapper>
+  </buildWrappers>
+</project>

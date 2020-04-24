@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  jenkins:
+    image: jenkins_with_plugins:2.176.1
+    build:
+      context: ./jenkins
+    container_name: petclinic_demo.jenkins
+    restart: always
+    volumes:
+      - ./jenkins_docker:/var/jenkins_home
+      - ./selenium:/tmp/selenium
+      - ./petclinic:/tmp/petclinic
+      - ./contrast:/tmp/contrast
+    environment:
+      - JAVA_OPTS=-Xmx1024m -Duser.timezone=Asia/Tokyo -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
+      - JENKINS_OPTS=--sessionTimeout=1440 --prefix=/jenkins
+      - TZ=Asia/Tokyo
+    ports:
+      - "9000:8080"
+      - "8001:8001"
+
+  selenium:
+    image: selenium/standalone-chrome-debug
+    container_name: petclinic_demo.selenium
+    environment:
+      - TZ=Asia/Tokyo
+    restart: always
+    volumes:
+      - /dev/shm:/dev/shm
+    ports:
+      - "4444:4444"
+      - "5900:5900"
+
