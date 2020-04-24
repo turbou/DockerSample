@@ -90,8 +90,9 @@ CMD+Kで、vnc://localhost:5900に接続。パスワードは secret です。
 #### ジョブを動かしてみる
 
 1. 改めて、http://localhost:9000/jenkins/job/PetClinic_Selenium/ にアクセス
-
-2. ビルド実行を行う。
+2. 脆弱性判定のしきい値はジョブの設定のContrastの箇所で弄ってください。
+   このサンプルではMedium以上の脆弱性が１つでもあればビルド失敗としています。
+3. ビルド実行を行う。
    ちょっと無駄にsleepとか入ってるので時間かかりますが、放っておくと、VNCにchromeが立ち上がってPetClinicに対してSQLインジェクションを実行します。
 
 ### Seleniumテストのカスタマイズについて
