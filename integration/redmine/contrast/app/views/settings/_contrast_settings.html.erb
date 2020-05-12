@@ -1,0 +1,47 @@
+<h4>TeamServer 接続設定（情報はTeamServerのYour Accountで確認できます）</h4>
+<table>
+  <tbody>
+    <tr>
+      <th>Contrast URL</th>
+      <td>
+        <%= text_field_tag('settings[teamserver_url]', @settings['teamserver_url'], {size:"50"})%>
+      </td>
+    </tr>
+    <tr>
+      <th>組織ID</th>
+      <td>
+        <%= text_field_tag('settings[org_id]', @settings['org_id'], {size:"50"})%>
+      </td>
+    </tr>
+    <tr>
+      <th>APIキー</th>
+      <td>
+        <%= text_field_tag('settings[api_key]', @settings['api_key'], {size:"50"})%>
+      </td>
+    </tr>
+    <tr>
+      <th>認証ヘッダー</th>
+      <td>
+        <%= text_field_tag('settings[auth_header]', @settings['auth_header'], {size:"100"})%>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br />
+<h4>Issue 作成対象</h4>
+<table>
+  <tbody>
+    <tr>
+      <th>脆弱性</th>
+      <td>
+        <%= check_box_tag 'settings[vul_issues]', true, @settings['vul_issues'] %>
+      </td>
+    </tr>
+    <tr>
+      <th>ライブラリ</th>
+      <td>
+        <%= check_box_tag 'settings[lib_issues]', true, @settings['lib_issues'] %>
+      </td>
+    </tr>
+  </tbody>
+</table>
