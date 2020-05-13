@@ -7,20 +7,25 @@ class ContrastController < ApplicationController
     #logger.info(request.body.read)
     t_issue = JSON.parse(request.body.read)
     #logger.info(t_issue['description'])
-    project_identifier = t_issue['project']['name']
+    project_identifier = t_issue['project']
+    tracker_str = t_issue['tracker']
     project = Project.find_by_identifier(project_identifier)
-    if project.nil? then
+    tracker = Tracker.find_by_name(tracker_str)
+    priority = IssuePriority.default
+    if t_issue.has_key?('priority')
+      priority_str = t_issue['priority'].gsub(/\\u([\da-fA-F]{4})/){[$1].pack('H*').unpack('n*').pack('U*')}
+      priority = IssuePriority.find_by_name(priority_str)
+    end
+    logger.info(priority)
+    if project.nil? || tracker.nil? || priority.nil?
       return head :not_found
     end
-    logger.info(project.id)
-    issue = Issue.new(project: project, subject: 'Sample')
-    issue.save
     vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
     lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
     is_vul = t_issue['description'].match(vul_pattern)
     is_lib = t_issue['description'].match(lib_pattern)
-    if is_vul then
-      if not Setting.plugin_contrast['vul_issues'] then
+    if is_vul
+      if not Setting.plugin_contrast['vul_issues']
         return render plain: 'Vul Skip'
       end
       org_id = is_vul[1];
@@ -38,13 +43,13 @@ class ContrastController < ApplicationController
       howtofix_url = ''
       self_url = ''
       vuln_json['trace']['links'].each do |c_link|
-        if c_link['rel'] == 'self' then
+        if c_link['rel'] == 'self'
           self_url = c_link['href']
         end
-        if c_link['rel'] == 'story' then
+        if c_link['rel'] == 'story'
           story_url = c_link['href']
         end
-        if c_link['rel'] == 'recommendation' then
+        if c_link['rel'] == 'recommendation'
           howtofix_url = c_link['href']
         end
       end
@@ -60,25 +65,36 @@ class ContrastController < ApplicationController
       get_howtofix_data = callAPI('GET', howtofix_url, false);
       howtofix_json = JSON.parse(get_howtofix_data)
       howtofix = howtofix_json['recommendation']['text'];
-    elsif is_lib then
-      if not Setting.plugin_contrast['lib_issues'] then
+    elsif is_lib
+      if not Setting.plugin_contrast['lib_issues']
         return render plain: 'Lib Skip'
       end
     else
         return render plain: 'Test URL Success'
     end
-    personal = {'name' => 'Yamada', 'old' => 28}
-    render :json => personal
+    #logger.info(User.current)
+    #logger.info(project.id)
+    #logger.info(IssuePriority.default)
+    issue = Issue.new(project: project, subject: summary, tracker: tracker, priority: priority, author: User.current)
+    if issue.save
+      logger.info('ok')
+      return head :ok
+    else
+      logger.info('internal_server_error')
+      return head :internal_server_error
+    end
+    #personal = {'name' => 'Yamada', 'old' => 28}
+    #render :json => personal
   end
 
   def callAPI(method, url, data)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     case method
-      when 'POST' then
+      when 'POST'
         req = Net::HTTP::Post.new(uri.request_uri)
         req.body = data.to_json
-      when 'PUT' then
+      when 'PUT'
         req = Net::HTTP::Put.new(uri.request_uri)
       else
         req = Net::HTTP::Get.new(uri.request_uri)
