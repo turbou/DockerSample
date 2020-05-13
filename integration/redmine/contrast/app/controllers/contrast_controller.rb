@@ -7,6 +7,14 @@ class ContrastController < ApplicationController
     #logger.info(request.body.read)
     t_issue = JSON.parse(request.body.read)
     #logger.info(t_issue['description'])
+    project_identifier = t_issue['project']['name']
+    project = Project.find_by_identifier(project_identifier)
+    if project.nil? then
+      return head :not_found
+    end
+    logger.info(project.id)
+    issue = Issue.new(project: project, subject: 'Sample')
+    issue.save
     vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
     lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
     is_vul = t_issue['description'].match(vul_pattern)
@@ -66,6 +74,15 @@ class ContrastController < ApplicationController
   def callAPI(method, url, data)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
+    case method
+      when 'POST' then
+        req = Net::HTTP::Post.new(uri.request_uri)
+        req.body = data.to_json
+      when 'PUT' then
+        req = Net::HTTP::Put.new(uri.request_uri)
+      else
+        req = Net::HTTP::Get.new(uri.request_uri)
+    end
     req = Net::HTTP::Get.new(uri.request_uri)
     req["Authorization"] = Setting.plugin_contrast['auth_header']
     req["API-Key"] = Setting.plugin_contrast['api_key']
