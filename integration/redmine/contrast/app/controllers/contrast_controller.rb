@@ -89,11 +89,11 @@ class ContrastController < ApplicationController
       howtofix = howtofix_json['recommendation']['text']
       # description
       description = ""
-      description << "概要\n"
+      description << l(:report_vul_overview) + "\n"
       description << story + "\n\n"
-      description << "修正方法\n"
+      description << l(:report_vul_howtofix) + "\n"
       description << howtofix + "\n\n"
-      description << "脆弱性URL\n"
+      description << l(:report_vul_url) + "\n"
       description << self_url
     elsif is_lib
       if not Setting.plugin_contrast['lib_issues']
@@ -125,15 +125,15 @@ class ContrastController < ApplicationController
       end
       summary = lib_name
       description = ""
-      description << "現在バージョン\n"
+      description << l(:report_lib_curver) + "\n"
       description << file_version + "\n"
-      description << "最新バージョン\n"
+      description << l(:report_lib_newver) + "\n"
       description << latest_version + "\n"
-      description << "クラス(使用/全体)\n"
+      description << l(:report_lib_class) + "\n"
       description << classes_used.to_s + "/" + class_count.to_s + "\n"
-      description << "脆弱性\n"
+      description << l(:report_lib_cves) + "\n"
       description << cve_list.join("\n") + "\n"
-      description << "脆弱性URL\n"
+      description << l(:report_lib_url) + "\n"
       description << self_url
     else
         return render plain: 'Test URL Success'
