@@ -26,18 +26,52 @@ class IssueHook < Redmine::Hook::Listener
     if cv_vul.nil?
       return
     end
+    sts_reported_array = [
+      Setting.plugin_contrast['sts_reported_1'],
+      Setting.plugin_contrast['sts_reported_2'],
+      Setting.plugin_contrast['sts_reported_3']
+    ]
+    sts_suspicious_array = [
+      Setting.plugin_contrast['sts_suspicious_1'],
+      Setting.plugin_contrast['sts_suspicious_2'],
+      Setting.plugin_contrast['sts_suspicious_3']
+    ]
+    sts_confirmed_array = [
+      Setting.plugin_contrast['sts_confirmed_1'],
+      Setting.plugin_contrast['sts_confirmed_2'],
+      Setting.plugin_contrast['sts_confirmed_3']
+    ]
+    sts_notaproblem_array = [
+      Setting.plugin_contrast['sts_notaproblem_1'],
+      Setting.plugin_contrast['sts_notaproblem_2'],
+      Setting.plugin_contrast['sts_notaproblem_3']
+    ]
+    sts_remediated_array = [
+      Setting.plugin_contrast['sts_remediated_1'],
+      Setting.plugin_contrast['sts_remediated_2'],
+      Setting.plugin_contrast['sts_remediated_3']
+    ]
+    sts_fixed_array = [
+      Setting.plugin_contrast['sts_fixed_1'],
+      Setting.plugin_contrast['sts_fixed_2'],
+      Setting.plugin_contrast['sts_fixed_3']
+    ]
     org_id = cv_org.value
     vul_id = cv_vul.value
-    status = "Reported"
-    case issue.status.name
-      when "報告"
-        status = "Reported"
-      when "確認"
+    if sts_reported_array.include?(issue.status.name) 
+      status = "Reported"
+    elsif sts_suspicious_array.include?(issue.status.name) 
+      status = "Suspicious"
+    elsif sts_confirmed_array.include?(issue.status.name) 
         status = "Confirmed"
-      when "完了"
+    elsif sts_notaproblem_array.include?(issue.status.name) 
+      status = "NotAProblem"
+    elsif sts_remediated_array.include?(issue.status.name) 
+      status = "Remediated"
+    elsif sts_fixed_array.include?(issue.status.name) 
         status = "Fixed"
-      else
-        return
+    else
+      return
     end
     teamserver_url = Setting.plugin_contrast['teamserver_url']
     url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)

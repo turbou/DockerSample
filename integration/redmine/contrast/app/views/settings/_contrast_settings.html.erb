@@ -2,46 +2,82 @@
 <table>
   <tbody>
     <tr>
-      <th>Contrast URL</th>
-      <td>
-        <%= text_field_tag('settings[teamserver_url]', @settings['teamserver_url'], {size:"50"})%>
-      </td>
+      <th align="left">Contrast URL</th>
+      <td><%= text_field_tag('settings[teamserver_url]', @settings['teamserver_url'], {size:"50"})%></td>
     </tr>
     <tr>
-      <th>組織ID</th>
-      <td>
-        <%= text_field_tag('settings[org_id]', @settings['org_id'], {size:"50"})%>
-      </td>
+      <th align="left">組織ID</th>
+      <td><%= text_field_tag('settings[org_id]', @settings['org_id'], {size:"50"})%></td>
     </tr>
     <tr>
-      <th>APIキー</th>
-      <td>
-        <%= text_field_tag('settings[api_key]', @settings['api_key'], {size:"50"})%>
-      </td>
+      <th align="left">APIキー</th>
+      <td><%= text_field_tag('settings[api_key]', @settings['api_key'], {size:"50"})%></td>
     </tr>
     <tr>
-      <th>認証ヘッダー</th>
-      <td>
-        <%= text_field_tag('settings[auth_header]', @settings['auth_header'], {size:"100"})%>
-      </td>
+      <th align="left">認証ヘッダー</th>
+      <td><%= text_field_tag('settings[auth_header]', @settings['auth_header'], {size:"100"})%></td>
     </tr>
   </tbody>
 </table>
 <br />
-<h4>Issue 作成対象</h4>
+<h4>チケット作成対象</h4>
 <table>
   <tbody>
     <tr>
-      <th>脆弱性</th>
-      <td>
-        <%= check_box_tag 'settings[vul_issues]', true, @settings['vul_issues'] %>
-      </td>
+      <th align="left">脆弱性</th>
+      <td><%= check_box_tag 'settings[vul_issues]', true, @settings['vul_issues'] %></td>
     </tr>
     <tr>
-      <th>ライブラリ</th>
-      <td>
-        <%= check_box_tag 'settings[lib_issues]', true, @settings['lib_issues'] %>
-      </td>
+      <th align="left">ライブラリ</th>
+      <td><%= check_box_tag 'settings[lib_issues]', true, @settings['lib_issues'] %></td>
+    </tr>
+  </tbody>
+</table>
+<br />
+<h4>ステータスマッピング</h4>
+<table>
+  <thead>
+    <tr>
+      <th>TeamServer側</th>
+      <th colspan="3">Redmine側（３つまで紐付け可能）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th align="left">Reported（報告済）</th>
+      <td><%= text_field_tag('settings[sts_reported_1]', @settings['sts_reported_1'], {size:"15", placeholder:"報告など"})%></td>
+      <td><%= text_field_tag('settings[sts_reported_2]', @settings['sts_reported_2'], {size:"15"})%></td>
+      <td><%= text_field_tag('settings[sts_reported_3]', @settings['sts_reported_3'], {size:"15"})%></td>
+    </tr>
+    <tr>
+      <th align="left">Suspicious（疑わしい）</th>
+      <td><%= text_field_tag('settings[sts_suspicious_1]', @settings['sts_suspicious_1'], {size:"15", placeholder:"保留など"})%></td>
+      <td><%= text_field_tag('settings[sts_suspicious_2]', @settings['sts_suspicious_2'], {size:"15"})%></td>
+      <td><%= text_field_tag('settings[sts_suspicious_3]', @settings['sts_suspicious_3'], {size:"15"})%></td>
+    </tr>
+    <tr>
+      <th align="left">Confirmed（確認済）</th>
+      <td><%= text_field_tag('settings[sts_confirmed_1]', @settings['sts_confirmed_1'], {size:"15", placeholder:"確認済など"})%></td>
+      <td><%= text_field_tag('settings[sts_confirmed_2]', @settings['sts_confirmed_2'], {size:"15"})%></td>
+      <td><%= text_field_tag('settings[sts_confirmed_3]', @settings['sts_confirmed_3'], {size:"15"})%></td>
+    </tr>
+    <tr>
+      <th align="left">Not a Problem（問題無し）</th>
+      <td><%= text_field_tag('settings[sts_notaproblem_1]', @settings['sts_notaproblem_1'], {size:"15", placeholder:"無視など"})%></td>
+      <td><%= text_field_tag('settings[sts_notaproblem_2]', @settings['sts_notaproblem_2'], {size:"15"})%></td>
+      <td><%= text_field_tag('settings[sts_notaproblem_3]', @settings['sts_notaproblem_3'], {size:"15"})%></td>
+    </tr>
+    <tr>
+      <th align="left">Remediated（修復済）</th>
+      <td><%= text_field_tag('settings[sts_remediated_1]', @settings['sts_remediated_1'], {size:"15", placeholder:"修正済など"})%></td>
+      <td><%= text_field_tag('settings[sts_remediated_2]', @settings['sts_remediated_2'], {size:"15"})%></td>
+      <td><%= text_field_tag('settings[sts_remediated_3]', @settings['sts_remediated_3'], {size:"15"})%></td>
+    </tr>
+    <tr>
+      <th align="left">Fixed（修正完了）</th>
+      <td><%= text_field_tag('settings[sts_fixed_1]', @settings['sts_fixed_1'], {size:"15", placeholder:"完了など"})%></td>
+      <td><%= text_field_tag('settings[sts_fixed_2]', @settings['sts_fixed_2'], {size:"15"})%></td>
+      <td><%= text_field_tag('settings[sts_fixed_3]', @settings['sts_fixed_3'], {size:"15"})%></td>
     </tr>
   </tbody>
 </table>
