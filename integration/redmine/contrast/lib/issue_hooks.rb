@@ -66,20 +66,20 @@ class IssueHook < Redmine::Hook::Listener
     elsif sts_suspicious_array.include?(issue.status.name) 
       status = "Suspicious"
     elsif sts_confirmed_array.include?(issue.status.name) 
-        status = "Confirmed"
+      status = "Confirmed"
     elsif sts_notaproblem_array.include?(issue.status.name) 
       status = "NotAProblem"
     elsif sts_remediated_array.include?(issue.status.name) 
       status = "Remediated"
     elsif sts_fixed_array.include?(issue.status.name) 
-        status = "Fixed"
+      status = "Fixed"
     else
       return
     end
     teamserver_url = Setting.plugin_contrast['teamserver_url']
     url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
     t_data = {"traces" => [vul_id], "status" => status, "note" => "by MantisBT."}.to_json
-    puts t_data
+    #puts t_data
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Put.new(uri.request_uri)
