@@ -21,11 +21,16 @@
 class IssueHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context)
     issue = context[:issue]
-    cv_org = issue.custom_field_values.detect {|c| c.custom_field.name == 'contrast_org_id'}
-    cv_vul = issue.custom_field_values.detect {|c| c.custom_field.name == 'contrast_vul_id'}
-    if cv_vul.nil?
+    #cv_org = issue.custom_field_values.detect {|c| c.custom_field.name == 'contrast_org_id'}
+    #cv_vul = issue.custom_field_values.detect {|c| c.custom_field.name == 'contrast_vul_id'}
+    cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: 'contrast_org_id'}).first
+    cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: 'contrast_vul_id'}).first
+    org_id = cv_org.try(:value)
+    vul_id = cv_vul.try(:value)
+    if org_id.nil? || vul_id.nil?
       return
     end
+
     sts_reported_array = [
       Setting.plugin_contrast['sts_reported_1'],
       Setting.plugin_contrast['sts_reported_2'],
@@ -56,8 +61,6 @@ class IssueHook < Redmine::Hook::Listener
       Setting.plugin_contrast['sts_fixed_2'],
       Setting.plugin_contrast['sts_fixed_3']
     ]
-    org_id = cv_org.value
-    vul_id = cv_vul.value
     if sts_reported_array.include?(issue.status.name) 
       status = "Reported"
     elsif sts_suspicious_array.include?(issue.status.name) 
