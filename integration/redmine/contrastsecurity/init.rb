@@ -19,13 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-Redmine::Plugin.register :contrast do
+Redmine::Plugin.register :contrastsecurity do
   name 'Contrast plugin'
   author 'Taka Shiozaki'
   description 'This is a Contrast plugin for Redmine'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+  url 'https://github.com/turbou/ContrastSecurity/tree/master/integration/redmine/contrast'
+  author_url 'https://github.com/turbou'
   settings :default => {'vul_issues' => true, 'lib_issues' => true}, :partial => 'settings/contrast_settings'
   require 'issue_hooks'
 end
