@@ -47,7 +47,7 @@ class ContrastController < ApplicationController
     is_vul = t_issue['description'].match(vul_pattern)
     is_lib = t_issue['description'].match(lib_pattern)
     if is_vul
-      if not Setting.plugin_contrast['vul_issues']
+      if not Setting.plugin_contrastsecurity['vul_issues']
         return render plain: 'Vul Skip'
       end
       org_id = is_vul[1]
@@ -55,7 +55,7 @@ class ContrastController < ApplicationController
       vul_id = is_vul[3]
       lib_id = ''
       # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
-      teamserver_url = Setting.plugin_contrast['teamserver_url']
+      teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
       #logger.info(url)
       get_data = callAPI(url)
@@ -96,7 +96,7 @@ class ContrastController < ApplicationController
       description << l(:report_vul_url) + "\n"
       description << self_url
     elsif is_lib
-      if not Setting.plugin_contrast['lib_issues']
+      if not Setting.plugin_contrastsecurity['lib_issues']
         return render plain: 'Lib Skip'
       end
       lib_name = is_lib[1]
@@ -105,7 +105,7 @@ class ContrastController < ApplicationController
       vul_id = ''
       lang = is_lib[3]
       lib_id = is_lib[4]
-      teamserver_url = Setting.plugin_contrast['teamserver_url']
+      teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lang, lib_id)
       get_data = callAPI(url)
       lib_json = JSON.parse(get_data)
@@ -182,8 +182,8 @@ class ContrastController < ApplicationController
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Get.new(uri.request_uri)
-    req["Authorization"] = Setting.plugin_contrast['auth_header']
-    req["API-Key"] = Setting.plugin_contrast['api_key']
+    req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
     return res.body

@@ -32,34 +32,34 @@ class IssueHook < Redmine::Hook::Listener
     end
 
     sts_reported_array = [
-      Setting.plugin_contrast['sts_reported_1'],
-      Setting.plugin_contrast['sts_reported_2'],
-      Setting.plugin_contrast['sts_reported_3']
+      Setting.plugin_contrastsecurity['sts_reported_1'],
+      Setting.plugin_contrastsecurity['sts_reported_2'],
+      Setting.plugin_contrastsecurity['sts_reported_3']
     ]
     sts_suspicious_array = [
-      Setting.plugin_contrast['sts_suspicious_1'],
-      Setting.plugin_contrast['sts_suspicious_2'],
-      Setting.plugin_contrast['sts_suspicious_3']
+      Setting.plugin_contrastsecurity['sts_suspicious_1'],
+      Setting.plugin_contrastsecurity['sts_suspicious_2'],
+      Setting.plugin_contrastsecurity['sts_suspicious_3']
     ]
     sts_confirmed_array = [
-      Setting.plugin_contrast['sts_confirmed_1'],
-      Setting.plugin_contrast['sts_confirmed_2'],
-      Setting.plugin_contrast['sts_confirmed_3']
+      Setting.plugin_contrastsecurity['sts_confirmed_1'],
+      Setting.plugin_contrastsecurity['sts_confirmed_2'],
+      Setting.plugin_contrastsecurity['sts_confirmed_3']
     ]
     sts_notaproblem_array = [
-      Setting.plugin_contrast['sts_notaproblem_1'],
-      Setting.plugin_contrast['sts_notaproblem_2'],
-      Setting.plugin_contrast['sts_notaproblem_3']
+      Setting.plugin_contrastsecurity['sts_notaproblem_1'],
+      Setting.plugin_contrastsecurity['sts_notaproblem_2'],
+      Setting.plugin_contrastsecurity['sts_notaproblem_3']
     ]
     sts_remediated_array = [
-      Setting.plugin_contrast['sts_remediated_1'],
-      Setting.plugin_contrast['sts_remediated_2'],
-      Setting.plugin_contrast['sts_remediated_3']
+      Setting.plugin_contrastsecurity['sts_remediated_1'],
+      Setting.plugin_contrastsecurity['sts_remediated_2'],
+      Setting.plugin_contrastsecurity['sts_remediated_3']
     ]
     sts_fixed_array = [
-      Setting.plugin_contrast['sts_fixed_1'],
-      Setting.plugin_contrast['sts_fixed_2'],
-      Setting.plugin_contrast['sts_fixed_3']
+      Setting.plugin_contrastsecurity['sts_fixed_1'],
+      Setting.plugin_contrastsecurity['sts_fixed_2'],
+      Setting.plugin_contrastsecurity['sts_fixed_3']
     ]
     if sts_reported_array.include?(issue.status.name) 
       status = "Reported"
@@ -76,15 +76,15 @@ class IssueHook < Redmine::Hook::Listener
     else
       return
     end
-    teamserver_url = Setting.plugin_contrast['teamserver_url']
+    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
     t_data = {"traces" => [vul_id], "status" => status, "note" => "by MantisBT."}.to_json
     #puts t_data
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Put.new(uri.request_uri)
-    req["Authorization"] = Setting.plugin_contrast['auth_header']
-    req["API-Key"] = Setting.plugin_contrast['api_key']
+    req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
     req['Content-Type'] = req['Accept'] = 'application/json'
     req.body = t_data
     res = http.request(req)
