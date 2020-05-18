@@ -124,10 +124,11 @@ class ContrastController < ApplicationController
           elsif 'Fixed' == status
             rm_status = Setting.plugin_contrastsecurity['sts_fixed']
           end
-          if rm_status.nil?
+          status_obj = IssueStatus.find_by_name(rm_status)
+          logger.info(status_obj)
+          if status_obj.nil?
             return head :ok
           end
-          status_obj = IssueStatus.find_by_name(rm_status)
           issue.status = status_obj
           if issue.save
             logger.info('[Contrast plugin] Issue status has been updated.')
