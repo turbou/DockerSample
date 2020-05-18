@@ -29,6 +29,7 @@ class ContrastController < ApplicationController
     #logger.info(request.body.read)
     t_issue = JSON.parse(request.body.read)
     #logger.info(t_issue['description'])
+    event_type = t_issue['event_type']
     project_identifier = t_issue['project']
     tracker_str = t_issue['tracker']
     project = Project.find_by_identifier(project_identifier)
@@ -46,7 +47,8 @@ class ContrastController < ApplicationController
     lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
     is_vul = t_issue['description'].match(vul_pattern)
     is_lib = t_issue['description'].match(lib_pattern)
-    if is_vul
+    if 'NEW_VULNERABILITY' == event_type
+      logger.info('NEW_VULNERABILITY')
       if not Setting.plugin_contrastsecurity['vul_issues']
         return render plain: 'Vul Skip'
       end
@@ -95,7 +97,50 @@ class ContrastController < ApplicationController
       description << howtofix + "\n\n"
       description << l(:report_vul_url) + "\n"
       description << self_url
-    elsif is_lib
+    elsif 'VULNERABILITY_CHANGESTATUS_OPEN' == event_type || 'VULNERABILITY_CHANGESTATUS_CLOSED' == event_type
+      logger.info(event_type)
+      status = t_issue['status']
+      logger.info(status)
+      vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
+      is_vul_sts_chg = t_issue['description'].match(vul_sts_chg_pattern)
+      if is_vul_sts_chg
+        vul_id = is_vul_sts_chg[3]
+        logger.info('vul_id: ' + vul_id)
+        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: 'contrast_vul_id'}).first
+        if cv
+          issue = cv.customized
+          logger.info(cv.customized.subject)
+          logger.info(cv.customized.id)
+          if 'Reported' == status
+            rm_status = Setting.plugin_contrastsecurity['sts_reported']
+          elsif 'Suspicious' == status
+            rm_status = Setting.plugin_contrastsecurity['sts_suspicious']
+          elsif 'Confirmed' == status
+            rm_status = Setting.plugin_contrastsecurity['sts_confirmed']
+          elsif 'NotAProblem' == status
+            rm_status = Setting.plugin_contrastsecurity['sts_notaproblem']
+          elsif 'Remediated' == status
+            rm_status = Setting.plugin_contrastsecurity['sts_remediated']
+          elsif 'Fixed' == status
+            rm_status = Setting.plugin_contrastsecurity['sts_fixed']
+          end
+          if rm_status.nil?
+            return head :ok
+          end
+          status_obj = IssueStatus.find_by_name(rm_status)
+          issue.status = status_obj
+          if issue.save
+            logger.info('[Contrast plugin] Issue status has been updated.')
+            return head :ok
+          else
+            logger.error('[Contrast plugin] Issue status updating failed.')
+            return head :internal_server_error
+          end
+        end
+      end
+      return head :ok
+    elsif 'NEW_VULNERABLE_LIBRARY' == event_type
+      logger.info('NEW_VULNERABLE_LIBRARY')
       if not Setting.plugin_contrastsecurity['lib_issues']
         return render plain: 'Lib Skip'
       end
@@ -136,7 +181,12 @@ class ContrastController < ApplicationController
       description << l(:report_lib_url) + "\n"
       description << self_url
     else
-      return render plain: 'Test URL Success'
+      vulnerability_tags = t_issue['vulnerability_tags']
+      if 'VulnerabilityTestTag' == vulnerability_tags
+        logger.info(t_issue['description'])
+        return render plain: 'Test URL Success'
+      end
+      return head :ok
     end
     custom_field_hash = {}
     CUSTOM_FIELDS.each do |custom_field_name|

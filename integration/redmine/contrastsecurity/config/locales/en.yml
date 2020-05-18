@@ -10,7 +10,7 @@ en:
   vul_issues: "Vulnerabilities"
   lib_issues: "Libraries"
   teamserver_side: "TeamServer"
-  redmine_side: "Redmine（You can set up to 3 status）"
+  redmine_side: "Redmine"
   sts_reported: "Reported"
   sts_reported_ph: "e.g. New"
   sts_suspicious: "Suspicious"

@@ -31,36 +31,12 @@ class IssueHook < Redmine::Hook::Listener
       return
     end
 
-    sts_reported_array = [
-      Setting.plugin_contrastsecurity['sts_reported_1'],
-      Setting.plugin_contrastsecurity['sts_reported_2'],
-      Setting.plugin_contrastsecurity['sts_reported_3']
-    ]
-    sts_suspicious_array = [
-      Setting.plugin_contrastsecurity['sts_suspicious_1'],
-      Setting.plugin_contrastsecurity['sts_suspicious_2'],
-      Setting.plugin_contrastsecurity['sts_suspicious_3']
-    ]
-    sts_confirmed_array = [
-      Setting.plugin_contrastsecurity['sts_confirmed_1'],
-      Setting.plugin_contrastsecurity['sts_confirmed_2'],
-      Setting.plugin_contrastsecurity['sts_confirmed_3']
-    ]
-    sts_notaproblem_array = [
-      Setting.plugin_contrastsecurity['sts_notaproblem_1'],
-      Setting.plugin_contrastsecurity['sts_notaproblem_2'],
-      Setting.plugin_contrastsecurity['sts_notaproblem_3']
-    ]
-    sts_remediated_array = [
-      Setting.plugin_contrastsecurity['sts_remediated_1'],
-      Setting.plugin_contrastsecurity['sts_remediated_2'],
-      Setting.plugin_contrastsecurity['sts_remediated_3']
-    ]
-    sts_fixed_array = [
-      Setting.plugin_contrastsecurity['sts_fixed_1'],
-      Setting.plugin_contrastsecurity['sts_fixed_2'],
-      Setting.plugin_contrastsecurity['sts_fixed_3']
-    ]
+    sts_reported_array = [Setting.plugin_contrastsecurity['sts_reported']]
+    sts_suspicious_array = [Setting.plugin_contrastsecurity['sts_suspicious']]
+    sts_confirmed_array = [Setting.plugin_contrastsecurity['sts_confirmed']]
+    sts_notaproblem_array = [Setting.plugin_contrastsecurity['sts_notaproblem']]
+    sts_remediated_array = [Setting.plugin_contrastsecurity['sts_remediated']]
+    sts_fixed_array = [Setting.plugin_contrastsecurity['sts_fixed']]
     if sts_reported_array.include?(issue.status.name) 
       status = "Reported"
     elsif sts_suspicious_array.include?(issue.status.name) 

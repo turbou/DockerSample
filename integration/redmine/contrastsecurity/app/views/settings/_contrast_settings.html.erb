@@ -38,51 +38,40 @@
 <table>
   <thead>
     <tr>
-      <th><%= l(:teamserver_side) %></th>
-      <th colspan="4"><%= l(:redmine_side) %></th>
+      <th width="150px"><%= l(:teamserver_side) %></th>
+      <th width="150px"><%= l(:redmine_side) %></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th align="left"><%= l(:sts_reported) %></th>
-      <td><%= text_field_tag('settings[sts_reported_1]', @settings['sts_reported_1'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_reported_2]', @settings['sts_reported_2'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_reported_3]', @settings['sts_reported_3'], {size:"15"})%></td>
+      <th><%= l(:sts_reported) %></th>
+      <td><%= text_field_tag('settings[sts_reported]', @settings['sts_reported'], {size:"25"})%></td>
       <td><%= l(:sts_reported_ph) %></td>
     </tr>
     <tr>
-      <th align="left"><%= l(:sts_suspicious) %></th>
-      <td><%= text_field_tag('settings[sts_suspicious_1]', @settings['sts_suspicious_1'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_suspicious_2]', @settings['sts_suspicious_2'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_suspicious_3]', @settings['sts_suspicious_3'], {size:"15"})%></td>
+      <th><%= l(:sts_suspicious) %></th>
+      <td><%= text_field_tag('settings[sts_suspicious]', @settings['sts_suspicious'], {size:"25"})%></td>
       <td><%= l(:sts_suspicious_ph) %></td>
     </tr>
     <tr>
-      <th align="left"><%= l(:sts_confirmed) %></th>
-      <td><%= text_field_tag('settings[sts_confirmed_1]', @settings['sts_confirmed_1'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_confirmed_2]', @settings['sts_confirmed_2'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_confirmed_3]', @settings['sts_confirmed_3'], {size:"15"})%></td>
+      <th><%= l(:sts_confirmed) %></th>
+      <td><%= text_field_tag('settings[sts_confirmed]', @settings['sts_confirmed'], {size:"25"})%></td>
       <td><%= l(:sts_confirmed_ph) %></td>
     </tr>
     <tr>
-      <th align="left"><%= l(:sts_notaproblem) %></th>
-      <td><%= text_field_tag('settings[sts_notaproblem_1]', @settings['sts_notaproblem_1'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_notaproblem_2]', @settings['sts_notaproblem_2'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_notaproblem_3]', @settings['sts_notaproblem_3'], {size:"15"})%></td>
+      <th><%= l(:sts_notaproblem) %></th>
+      <td><%= text_field_tag('settings[sts_notaproblem]', @settings['sts_notaproblem'], {size:"25"})%></td>
       <td><%= l(:sts_notaproblem_ph) %></td>
     </tr>
     <tr>
-      <th align="left"><%= l(:sts_remediated) %></th>
-      <td><%= text_field_tag('settings[sts_remediated_1]', @settings['sts_remediated_1'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_remediated_2]', @settings['sts_remediated_2'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_remediated_3]', @settings['sts_remediated_3'], {size:"15"})%></td>
+      <th><%= l(:sts_remediated) %></th>
+      <td><%= text_field_tag('settings[sts_remediated]', @settings['sts_remediated'], {size:"25"})%></td>
       <td><%= l(:sts_remediated_ph) %></td>
     </tr>
     <tr>
-      <th align="left"><%= l(:sts_fixed) %></th>
-      <td><%= text_field_tag('settings[sts_fixed_1]', @settings['sts_fixed_1'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_fixed_2]', @settings['sts_fixed_2'], {size:"15"})%></td>
-      <td><%= text_field_tag('settings[sts_fixed_3]', @settings['sts_fixed_3'], {size:"15"})%></td>
+      <th><%= l(:sts_fixed) %></th>
+      <td><%= text_field_tag('settings[sts_fixed]', @settings['sts_fixed'], {size:"25"})%></td>
       <td><%= l(:sts_fixed_ph) %></td>
     </tr>
   </tbody>

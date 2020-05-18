@@ -10,7 +10,7 @@ ja:
   vul_issues: "脆弱性"
   lib_issues: "ライブラリ"
   teamserver_side: "TeamServer側"
-  redmine_side: "Redmine側（３つまで紐付け可能）"
+  redmine_side: "Redmine側"
   sts_reported: "報告済"
   sts_reported_ph: "例）報告"
   sts_suspicious: "疑わしい"
