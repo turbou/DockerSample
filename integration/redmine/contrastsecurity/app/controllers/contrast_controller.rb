@@ -52,6 +52,7 @@ class ContrastController < ApplicationController
       if not Setting.plugin_contrastsecurity['vul_issues']
         return render plain: 'Vul Skip'
       end
+      app_name = t_issue['application_name']
       org_id = is_vul[1]
       app_id = is_vul[2]
       vul_id = is_vul[3]
@@ -62,7 +63,8 @@ class ContrastController < ApplicationController
       #logger.info(url)
       get_data = callAPI(url)
       vuln_json = JSON.parse(get_data)
-      summary = vuln_json['trace']['title']
+      #logger.info(url)
+      summary = '[' + app_name + '] ' + vuln_json['trace']['title']
       story_url = ''
       howtofix_url = ''
       self_url = ''
@@ -100,17 +102,17 @@ class ContrastController < ApplicationController
     elsif 'VULNERABILITY_CHANGESTATUS_OPEN' == event_type || 'VULNERABILITY_CHANGESTATUS_CLOSED' == event_type
       logger.info(event_type)
       status = t_issue['status']
-      logger.info(status)
+      #logger.info(status)
       vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
       is_vul_sts_chg = t_issue['description'].match(vul_sts_chg_pattern)
       if is_vul_sts_chg
         vul_id = is_vul_sts_chg[3]
-        logger.info('vul_id: ' + vul_id)
+        #logger.info('vul_id: ' + vul_id)
         cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: 'contrast_vul_id'}).first
         if cv
           issue = cv.customized
-          logger.info(cv.customized.subject)
-          logger.info(cv.customized.id)
+          #logger.info(cv.customized.subject)
+          #logger.info(cv.customized.id)
           if 'Reported' == status
             rm_status = Setting.plugin_contrastsecurity['sts_reported']
           elsif 'Suspicious' == status
@@ -125,7 +127,7 @@ class ContrastController < ApplicationController
             rm_status = Setting.plugin_contrastsecurity['sts_fixed']
           end
           status_obj = IssueStatus.find_by_name(rm_status)
-          logger.info(status_obj)
+          #logger.info(status_obj)
           if status_obj.nil?
             return head :ok
           end
@@ -184,7 +186,7 @@ class ContrastController < ApplicationController
     else
       vulnerability_tags = t_issue['vulnerability_tags']
       if 'VulnerabilityTestTag' == vulnerability_tags
-        logger.info(t_issue['description'])
+        #logger.info(t_issue['description'])
         return render plain: 'Test URL Success'
       end
       return head :ok
