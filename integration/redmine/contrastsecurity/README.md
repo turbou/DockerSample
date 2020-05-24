@@ -19,7 +19,7 @@
       ```http://[REDMINE_HOST]:[REDMINE_PORT]/contrast/vote?key=[API_TOKEN]```
     - Applications: ```任意```  
     - Payload:
-      ```
+      ```json
       {
         "summary":"$Title",
         "description":"$Message",
