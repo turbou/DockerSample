@@ -85,7 +85,7 @@ java -javaagent:/tmp/contrast/contrast.jar \
 
 #### VNCでseleniumの動きを見る場合
 
-CMD+Kで、vnc://localhost:5900に接続。パスワードは secret です。
+Finderで、CMD+Kで、vnc://localhost:5900に接続。パスワードは secret です。
 
 #### ジョブを動かしてみる
 
