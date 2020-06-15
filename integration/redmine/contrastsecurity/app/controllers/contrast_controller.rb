@@ -23,7 +23,12 @@ class ContrastController < ApplicationController
   skip_before_filter :verify_authenticity_token
   accept_api_auth :vote
 
-  CUSTOM_FIELDS = ['contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'contrast_lib_id'].freeze
+  CUSTOM_FIELDS = [
+    '【Contrast】ルール名', '【Contrast】カテゴリ', '【Contrast】サーバ', '【Contrast】モジュール',
+    '【Contrast】信頼性', '【Contrast】深刻度', '【Contrast】最後の検出', '【Contrast】最初の検出',
+    '【Contrast】ライブラリID', '【Contrast】脆弱性ID', '【Contrast】アプリID', '【Contrast】組織ID',
+    #'contrast_lib_id', 'contrast_vul_id', 'contrast_app_id', 'contrast_org_id',
+  ].freeze
 
   def vote
     #logger.info(request.body.read)
@@ -47,6 +52,7 @@ class ContrastController < ApplicationController
     lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
     is_vul = t_issue['description'].match(vul_pattern)
     is_lib = t_issue['description'].match(lib_pattern)
+    add_custom_fields = []
     if 'NEW_VULNERABILITY' == event_type
       logger.info('NEW_VULNERABILITY')
       if not Setting.plugin_contrastsecurity['vul_issues']
@@ -59,12 +65,32 @@ class ContrastController < ApplicationController
       lib_id = ''
       # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
-      url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
+      url = sprintf('%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application', teamserver_url, org_id, app_id, vul_id)
       #logger.info(url)
       get_data = callAPI(url)
       vuln_json = JSON.parse(get_data)
-      #logger.info(url)
+      #logger.info(vuln_json)
       summary = '[' + app_name + '] ' + vuln_json['trace']['title']
+      first_time_seen = vuln_json['trace']['first_time_seen']
+      last_time_seen = vuln_json['trace']['last_time_seen']
+      category = vuln_json['trace']['category']
+      confidence = vuln_json['trace']['confidence']
+      rule_title = vuln_json['trace']['rule_title']
+      severity = vuln_json['trace']['severity']
+      module_str = app_name + " (" + vuln_json['trace']['application']['context_path'] + ") - " + vuln_json['trace']['application']['language']
+      server_list = Array.new
+      vuln_json['trace']['servers'].each do |c_server|
+        server_list.push(c_server['name'])
+      end
+      add_custom_fields << {'id_str': '【Contrast】最初の検出', 'value': Time.at(first_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')}
+      add_custom_fields << {'id_str': '【Contrast】最後の検出', 'value': Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')}
+      add_custom_fields << {'id_str': '【Contrast】深刻度', 'value': severity}
+      add_custom_fields << {'id_str': '【Contrast】信頼性', 'value': confidence}
+      add_custom_fields << {'id_str': '【Contrast】モジュール', 'value': module_str}
+      add_custom_fields << {'id_str': '【Contrast】サーバ', 'value': server_list.join(", ")}
+      add_custom_fields << {'id_str': '【Contrast】カテゴリ', 'value': category}
+      add_custom_fields << {'id_str': '【Contrast】ルール名', 'value': rule_title}
+      #logger.info(add_custom_fields)
       story_url = ''
       howtofix_url = ''
       self_url = ''
@@ -86,18 +112,27 @@ class ContrastController < ApplicationController
       # Story
       get_story_data = callAPI(story_url)
       story_json = JSON.parse(get_story_data)
-      story = story_json['story']['risk']['text']
+      story = story_json['story']['risk']['formattedText']
       # How to fix
       get_howtofix_data = callAPI(howtofix_url)
       howtofix_json = JSON.parse(get_howtofix_data)
-      howtofix = howtofix_json['recommendation']['text']
+      #logger.info(howtofix_json)
+      howtofix = howtofix_json['recommendation']['formattedText']
       # description
+      deco_mae = ""
+      deco_ato = ""
+      if Setting.text_formatting == "textile"
+        deco_mae = "h2. "
+        deco_ato = "\n"
+      elsif Setting.text_formatting == "markdown"
+        deco_mae = "##"
+      end
       description = ""
-      description << l(:report_vul_overview) + "\n"
-      description << story + "\n\n"
-      description << l(:report_vul_howtofix) + "\n"
-      description << howtofix + "\n\n"
-      description << l(:report_vul_url) + "\n"
+      description << deco_mae + l(:report_vul_overview) + deco_ato + "\n"
+      description << convertMustache(story) + "\n\n"
+      description << deco_mae + l(:report_vul_howtofix) + deco_ato + "\n"
+      description << convertMustache(howtofix) + "\n\n"
+      description << deco_mae + l(:report_vul_url) + deco_ato + "\n"
       description << self_url
     elsif 'VULNERABILITY_CHANGESTATUS_OPEN' == event_type || 'VULNERABILITY_CHANGESTATUS_CLOSED' == event_type
       logger.info(event_type)
@@ -172,16 +207,26 @@ class ContrastController < ApplicationController
         self_url = is_liburl[1]
       end
       summary = lib_name
+      # description
+      deco_mae = ""
+      deco_ato = ""
+      if Setting.text_formatting == "textile"
+        deco_mae = "*"
+        deco_ato = "*"
+      elsif Setting.text_formatting == "markdown"
+        deco_mae = "**"
+        deco_ato = "**"
+      end
       description = ""
-      description << l(:report_lib_curver) + "\n"
+      description << deco_mae + l(:report_lib_curver) + deco_ato + "\n"
       description << file_version + "\n\n"
-      description << l(:report_lib_newver) + "\n"
+      description << deco_mae + l(:report_lib_newver) + deco_ato + "\n"
       description << latest_version + "\n\n"
-      description << l(:report_lib_class) + "\n"
+      description << deco_mae + l(:report_lib_class) + deco_ato + "\n"
       description << classes_used.to_s + "/" + class_count.to_s + "\n\n"
-      description << l(:report_lib_cves) + "\n"
+      description << deco_mae + l(:report_lib_cves) + deco_ato + "\n"
       description << cve_list.join("\n") + "\n\n"
-      description << l(:report_lib_url) + "\n"
+      description << deco_mae + l(:report_lib_url) + deco_ato + "\n"
       description << self_url
     else
       vulnerability_tags = t_issue['vulnerability_tags']
@@ -208,18 +253,37 @@ class ContrastController < ApplicationController
       end
       custom_field_hash[custom_field_name] = custom_field.id
     end
+    custom_fields = [
+      {'id': custom_field_hash['【Contrast】組織ID'], 'value': org_id},
+      {'id': custom_field_hash['【Contrast】アプリID'], 'value': app_id},
+      {'id': custom_field_hash['【Contrast】脆弱性ID'], 'value': vul_id},
+      {'id': custom_field_hash['【Contrast】ライブラリID'], 'value': lib_id},
+    ]
+    add_custom_fields.each do |add_custom_field|
+      custom_fields << {'id': custom_field_hash[add_custom_field[:id_str]], 'value': add_custom_field[:value]}
+    end
+    #logger.info(custom_fields)
     issue = Issue.new(
       project: project,
       subject: summary,
       tracker: tracker,
       priority: priority,
       description: description,
-      custom_fields: [
-        {'id': custom_field_hash['contrast_org_id'], 'value': org_id},
-        {'id': custom_field_hash['contrast_app_id'], 'value': app_id},
-        {'id': custom_field_hash['contrast_vul_id'], 'value': vul_id},
-        {'id': custom_field_hash['contrast_lib_id'], 'value': lib_id}
-      ],
+      custom_fields: custom_fields,
+      #custom_fields: [
+      #  {'id': custom_field_hash['contrast_org_id'], 'value': org_id},
+      #  {'id': custom_field_hash['contrast_app_id'], 'value': app_id},
+      #  {'id': custom_field_hash['contrast_vul_id'], 'value': vul_id},
+      #  {'id': custom_field_hash['contrast_lib_id'], 'value': lib_id},
+      #  {'id': custom_field_hash['【Contrast】最初の検出'], 'value': Time.at(first_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')},
+      #  {'id': custom_field_hash['【Contrast】最後の検出'], 'value': Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')},
+      #  {'id': custom_field_hash['【Contrast】深刻度'], 'value': severity},
+      #  {'id': custom_field_hash['【Contrast】信頼性'], 'value': confidence},
+      #  {'id': custom_field_hash['【Contrast】モジュール'], 'value': module_str},
+      #  {'id': custom_field_hash['【Contrast】サーバ'], 'value': server_list.join(", ")},
+      #  {'id': custom_field_hash['【Contrast】カテゴリ'], 'value': category},
+      #  {'id': custom_field_hash['【Contrast】ルール名'], 'value': rule_title}
+      #],
       author: User.current
     )
     if issue.save
@@ -240,6 +304,21 @@ class ContrastController < ApplicationController
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
     return res.body
+  end
+
+  def convertMustache(str)
+    if Setting.text_formatting == "textile"
+      new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '"\2":\1')
+      new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>')
+      new_str = new_str.gsub(/{{\/[A-Za-z]+Block}}/, '</pre>')
+    elsif Setting.text_formatting == "markdown"
+      new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
+      new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+Block}}/, '~~~')
+    end
+    new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '')
+    new_str = new_str.gsub(/&lt;/, '<')
+    new_str = new_str.gsub(/&gt;/, '>')
+    return new_str
   end
 end
 
