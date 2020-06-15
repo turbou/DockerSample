@@ -125,7 +125,7 @@ class ContrastController < ApplicationController
         deco_mae = "h2. "
         deco_ato = "\n"
       elsif Setting.text_formatting == "markdown"
-        deco_mae = "##"
+        deco_mae = "## "
       end
       description = ""
       description << deco_mae + l(:report_vul_overview) + deco_ato + "\n"
@@ -308,16 +308,26 @@ class ContrastController < ApplicationController
 
   def convertMustache(str)
     if Setting.text_formatting == "textile"
+      # Link
       new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '"\2":\1')
-      new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>')
-      new_str = new_str.gsub(/{{\/[A-Za-z]+Block}}/, '</pre>')
+      # CodeBlock
+      new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>').gsub(/{{\/[A-Za-z]+Block}}/, '</pre>')
+      # Header
+      new_str = new_str.gsub(/{{#header}}/, 'h3. ').gsub(/{{\/header}}/, "\n")
     elsif Setting.text_formatting == "markdown"
+      # Link
       new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
-      new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+Block}}/, '~~~')
+      # CodeBlock
+      new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, "~~~\n").gsub(/{{\/[A-Za-z]+Block}}/, "\n~~~")
+      # Header
+      new_str = new_str.gsub(/{{#header}}/, '### ').gsub(/{{\/header}}/, '')
     end
+    # List
+    new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
+    # Other
     new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '')
-    new_str = new_str.gsub(/&lt;/, '<')
-    new_str = new_str.gsub(/&gt;/, '>')
+    # <, >
+    new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>')
     return new_str
   end
 end
