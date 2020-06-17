@@ -29,3 +29,10 @@ Redmine::Plugin.register :contrastsecurity do
   settings :default => {'vul_issues' => true, 'lib_issues' => true}, :partial => 'settings/contrast_settings'
   require 'issue_hooks'
 end
+
+Rails.configuration.to_prepare do
+  unless IssuesController.included_modules.include?(IssuesControllerPatch)
+    IssuesController.send :include, IssuesControllerPatch
+  end
+end
+
