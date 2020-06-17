@@ -15,8 +15,9 @@ module IssuesControllerPatch
       org_id = cv_org.try(:value)
       app_id = cv_app.try(:value)
       vul_id = cv_vul.try(:value)
-      if org_id.nil? || app_id.nil? || vul_id.nil?
-        return
+      if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
+        show = show_without_update
+        return show
       end 
   
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']

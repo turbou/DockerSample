@@ -27,7 +27,7 @@ class IssueHook < Redmine::Hook::Listener
     cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
     org_id = cv_org.try(:value)
     vul_id = cv_vul.try(:value)
-    if org_id.nil? || vul_id.nil?
+    if org_id.nil? || org_id.empty? || vul_id.nil? || vul_id.empty?
       return
     end
 
