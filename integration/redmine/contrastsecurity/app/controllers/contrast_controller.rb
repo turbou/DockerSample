@@ -39,13 +39,7 @@ class ContrastController < ApplicationController
     tracker_str = t_issue['tracker']
     project = Project.find_by_identifier(project_identifier)
     tracker = Tracker.find_by_name(tracker_str)
-    priority = IssuePriority.default
-    if t_issue.has_key?('priority')
-      priority_str = t_issue['priority'].gsub(/\\u([\da-fA-F]{4})/){[$1].pack('H*').unpack('n*').pack('U*')}
-      priority = IssuePriority.find_by_name(priority_str)
-    end
-    #logger.info(priority)
-    if project.nil? || tracker.nil? || priority.nil?
+    if project.nil? || tracker.nil?
       return head :not_found
     end
     vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
@@ -77,6 +71,22 @@ class ContrastController < ApplicationController
       confidence = vuln_json['trace']['confidence']
       rule_title = vuln_json['trace']['rule_title']
       severity = vuln_json['trace']['severity']
+      if 'Critical' == severity
+        priority_str = Setting.plugin_contrastsecurity['pri_critical']
+      elsif 'High' == severity
+        priority_str = Setting.plugin_contrastsecurity['pri_high']
+      elsif 'Medium' == severity
+        priority_str = Setting.plugin_contrastsecurity['pri_medium']
+      elsif 'Low' == severity
+        priority_str = Setting.plugin_contrastsecurity['pri_low']
+      elsif 'Note' == severity
+        priority_str = Setting.plugin_contrastsecurity['pri_note']
+      end
+      priority = IssuePriority.find_by_name(priority_str)
+      #logger.info(priority)
+      if priority.nil?
+        return head :not_found
+      end
       module_str = app_name + " (" + vuln_json['trace']['application']['context_path'] + ") - " + vuln_json['trace']['application']['language']
       server_list = Array.new
       vuln_json['trace']['servers'].each do |c_server|
@@ -200,6 +210,12 @@ class ContrastController < ApplicationController
       lib_json['library']['vulns'].each do |c_link|
         cve_list.push(c_link['name'])
       end
+      priority_str = Setting.plugin_contrastsecurity['pri_cvelib']
+      priority = IssuePriority.find_by_name(priority_str)
+      #logger.info(priority)
+      if priority.nil?
+        return head :not_found
+      end
       liburl_pattern = /.+ was found in .+\((.+)\),.+/
       is_liburl = t_issue['description'].match(liburl_pattern)
       self_url = ''
@@ -270,20 +286,6 @@ class ContrastController < ApplicationController
       priority: priority,
       description: description,
       custom_fields: custom_fields,
-      #custom_fields: [
-      #  {'id': custom_field_hash['contrast_org_id'], 'value': org_id},
-      #  {'id': custom_field_hash['contrast_app_id'], 'value': app_id},
-      #  {'id': custom_field_hash['contrast_vul_id'], 'value': vul_id},
-      #  {'id': custom_field_hash['contrast_lib_id'], 'value': lib_id},
-      #  {'id': custom_field_hash['【Contrast】最初の検出'], 'value': Time.at(first_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')},
-      #  {'id': custom_field_hash['【Contrast】最後の検出'], 'value': Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')},
-      #  {'id': custom_field_hash['【Contrast】深刻度'], 'value': severity},
-      #  {'id': custom_field_hash['【Contrast】信頼性'], 'value': confidence},
-      #  {'id': custom_field_hash['【Contrast】モジュール'], 'value': module_str},
-      #  {'id': custom_field_hash['【Contrast】サーバ'], 'value': server_list.join(", ")},
-      #  {'id': custom_field_hash['【Contrast】カテゴリ'], 'value': category},
-      #  {'id': custom_field_hash['【Contrast】ルール名'], 'value': rule_title}
-      #],
       author: User.current
     )
     if issue.save

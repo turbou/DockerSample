@@ -31,4 +31,12 @@ ja:
   report_lib_class: "クラス(使用/全体)"
   report_lib_cves: "脆弱性"
   report_lib_url: "ライブラリURL"
+  config_section_priority: "優先度マッピング"
+  pri_critical: "重大"
+  pri_high: "高"
+  pri_medium: "中"
+  pri_low: "低"
+  pri_note: "注意"
+  pri_cvelib: "脆弱なライブラリ"
+  pri_for_cvelib_ph: "脆弱なライブラリはこの優先度が設定されます。"
 

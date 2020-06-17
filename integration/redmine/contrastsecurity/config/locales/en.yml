@@ -31,4 +31,12 @@ en:
   report_lib_class: "Used/Total Classes"
   report_lib_cves: "CVEs"
   report_lib_url: "Lib URL"
+  config_section_priority: "Priority Mapping"
+  pri_critical: "Critical"
+  pri_high: "High"
+  pri_medium: "Medium"
+  pri_low: "Low"
+  pri_note: "Note"
+  pri_cvelib: "Vulnerable library"
+  pri_for_cvelib_ph: "Vulnerable libraries will use this priority."
 

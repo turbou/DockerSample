@@ -76,3 +76,45 @@
     </tr>
   </tbody>
 </table>
+<h4><%= l(:config_section_priority) %></h4>
+<table>
+  <thead>
+    <tr>
+      <th width="150px"><%= l(:teamserver_side) %></th>
+      <th width="150px"><%= l(:redmine_side) %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th><%= l(:pri_critical) %></th>
+      <td><%= text_field_tag('settings[pri_critical]', @settings['pri_critical'], {size:"25"})%></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th><%= l(:pri_high) %></th>
+      <td><%= text_field_tag('settings[pri_high]', @settings['pri_high'], {size:"25"})%></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th><%= l(:pri_medium) %></th>
+      <td><%= text_field_tag('settings[pri_medium]', @settings['pri_medium'], {size:"25"})%></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th><%= l(:pri_low) %></th>
+      <td><%= text_field_tag('settings[pri_low]', @settings['pri_low'], {size:"25"})%></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th><%= l(:pri_note) %></th>
+      <td><%= text_field_tag('settings[pri_note]', @settings['pri_note'], {size:"25"})%></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th><%= l(:pri_cvelib) %></th>
+      <td><%= text_field_tag('settings[pri_cvelib]', @settings['pri_cvelib'], {size:"25"})%></td>
+      <td><%= l(:pri_for_cvelib_ph) %></td>
+    </tr>
+  </tbody>
+</table>
