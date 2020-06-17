@@ -143,7 +143,7 @@ class ContrastController < ApplicationController
       if is_vul_sts_chg
         vul_id = is_vul_sts_chg[3]
         #logger.info('vul_id: ' + vul_id)
-        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: 'contrast_vul_id'}).first
+        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
         if cv
           issue = cv.customized
           #logger.info(cv.customized.subject)

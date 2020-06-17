@@ -21,10 +21,10 @@
 class IssueHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context)
     issue = context[:issue]
-    #cv_org = issue.custom_field_values.detect {|c| c.custom_field.name == 'contrast_org_id'}
-    #cv_vul = issue.custom_field_values.detect {|c| c.custom_field.name == 'contrast_vul_id'}
-    cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: 'contrast_org_id'}).first
-    cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: 'contrast_vul_id'}).first
+    #cv_org = issue.custom_field_values.detect {|c| c.custom_field.name == '【Contrast】組織ID'}
+    #cv_vul = issue.custom_field_values.detect {|c| c.custom_field.name == '【Contrast】脆弱性ID'}
+    cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】組織ID'}).first
+    cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
     org_id = cv_org.try(:value)
     vul_id = cv_vul.try(:value)
     if org_id.nil? || vul_id.nil?
@@ -54,7 +54,7 @@ class IssueHook < Redmine::Hook::Listener
     end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-    t_data = {"traces" => [vul_id], "status" => status, "note" => "by MantisBT."}.to_json
+    t_data = {"traces" => [vul_id], "status" => status, "note" => "by Redmine."}.to_json
     #puts t_data
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
