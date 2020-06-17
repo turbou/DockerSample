@@ -314,6 +314,8 @@ class ContrastController < ApplicationController
       new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>').gsub(/{{\/[A-Za-z]+Block}}/, '</pre>')
       # Header
       new_str = new_str.gsub(/{{#header}}/, 'h3. ').gsub(/{{\/header}}/, "\n")
+      # List
+      new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
     elsif Setting.text_formatting == "markdown"
       # Link
       new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
@@ -321,9 +323,12 @@ class ContrastController < ApplicationController
       new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, "~~~\n").gsub(/{{\/[A-Za-z]+Block}}/, "\n~~~")
       # Header
       new_str = new_str.gsub(/{{#header}}/, '### ').gsub(/{{\/header}}/, '')
+      # List
+      new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
+    else
+      # Link
+      new_str = str.gsub(/\$\$LINK_DELIM\$\$/, ' ')
     end
-    # List
-    new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
     # Other
     new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '')
     # <, >
