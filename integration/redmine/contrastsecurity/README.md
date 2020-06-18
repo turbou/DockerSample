@@ -25,7 +25,6 @@
         "description":"$Message",
         "project": "petclinic",
         "tracker": "脆弱性",
-        "priority": "高",
         "application_name": "$ApplicationName",
         "application_code": "$ApplicationCode",
         "vulnerability_tags": "$VulnerabilityTags",
@@ -41,12 +40,11 @@
         "event_type": "$EventType"
       }
       ```
-      project, tracker, priorityは連携するRedmine側の内容と合わせてください。  
+      project, trackerは連携するRedmine側の内容と合わせてください。  
       - プロジェクトには名称ではなく識別子を設定してください。  
       - 存在しないプロジェクト名が指定されていると、チケット作成時にエラーとなり、Webhook自体が無効となります。  
         その場合は、Payloadを修正のうえ接続テストからWebhookの保存をやりなおす必要があります。
       - トラッカーも適切に設定してください。  
-      - プライオリティも設定してください。  
     - Send as HTML: ```チェックは外してください```  
   
     設定後、**テスト接続**を行って、保存してください。  
