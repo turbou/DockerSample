@@ -31,9 +31,16 @@ module IssuesControllerPatch
       res = http.request(req)
       vuln_json = JSON.parse(res.body)
       last_time_seen = vuln_json['trace']['last_time_seen']
+      severity = vuln_json['trace']['severity']
+      priority = ContrastUtil.get_priority_by_severity(severity)
+      if not priority.nil?
+        @issue.priority = priority
+      end 
       @issue.custom_field_values.each do |cfv|
         if cfv.custom_field.name == '【Contrast】最後の検出' then
           cfv.value = Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+        elsif cfv.custom_field.name == '【Contrast】深刻度' then
+          cfv.value = severity
         end 
       end 
       @issue.save

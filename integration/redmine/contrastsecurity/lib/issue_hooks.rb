@@ -30,26 +30,8 @@ class IssueHook < Redmine::Hook::Listener
     if org_id.nil? || org_id.empty? || vul_id.nil? || vul_id.empty?
       return
     end
-
-    sts_reported_array = [Setting.plugin_contrastsecurity['sts_reported']]
-    sts_suspicious_array = [Setting.plugin_contrastsecurity['sts_suspicious']]
-    sts_confirmed_array = [Setting.plugin_contrastsecurity['sts_confirmed']]
-    sts_notaproblem_array = [Setting.plugin_contrastsecurity['sts_notaproblem']]
-    sts_remediated_array = [Setting.plugin_contrastsecurity['sts_remediated']]
-    sts_fixed_array = [Setting.plugin_contrastsecurity['sts_fixed']]
-    if sts_reported_array.include?(issue.status.name) 
-      status = "Reported"
-    elsif sts_suspicious_array.include?(issue.status.name) 
-      status = "Suspicious"
-    elsif sts_confirmed_array.include?(issue.status.name) 
-      status = "Confirmed"
-    elsif sts_notaproblem_array.include?(issue.status.name) 
-      status = "NotAProblem"
-    elsif sts_remediated_array.include?(issue.status.name) 
-      status = "Remediated"
-    elsif sts_fixed_array.include?(issue.status.name) 
-      status = "Fixed"
-    else
+    status = ContrastUtil.get_contrast_status(issue.status.name)
+    if status.nil?
       return
     end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']

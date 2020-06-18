@@ -27,7 +27,6 @@ class ContrastController < ApplicationController
     '【Contrast】ルール名', '【Contrast】カテゴリ', '【Contrast】サーバ', '【Contrast】モジュール',
     '【Contrast】信頼性', '【Contrast】深刻度', '【Contrast】最後の検出', '【Contrast】最初の検出',
     '【Contrast】ライブラリID', '【Contrast】脆弱性ID', '【Contrast】アプリID', '【Contrast】組織ID',
-    #'contrast_lib_id', 'contrast_vul_id', 'contrast_app_id', 'contrast_org_id',
   ].freeze
 
   def vote
@@ -71,18 +70,7 @@ class ContrastController < ApplicationController
       confidence = vuln_json['trace']['confidence']
       rule_title = vuln_json['trace']['rule_title']
       severity = vuln_json['trace']['severity']
-      if 'Critical' == severity
-        priority_str = Setting.plugin_contrastsecurity['pri_critical']
-      elsif 'High' == severity
-        priority_str = Setting.plugin_contrastsecurity['pri_high']
-      elsif 'Medium' == severity
-        priority_str = Setting.plugin_contrastsecurity['pri_medium']
-      elsif 'Low' == severity
-        priority_str = Setting.plugin_contrastsecurity['pri_low']
-      elsif 'Note' == severity
-        priority_str = Setting.plugin_contrastsecurity['pri_note']
-      end
-      priority = IssuePriority.find_by_name(priority_str)
+      priority = ContrastUtil.get_priority_by_severity(severity)
       #logger.info(priority)
       if priority.nil?
         return head :not_found
@@ -158,20 +146,7 @@ class ContrastController < ApplicationController
           issue = cv.customized
           #logger.info(cv.customized.subject)
           #logger.info(cv.customized.id)
-          if 'Reported' == status
-            rm_status = Setting.plugin_contrastsecurity['sts_reported']
-          elsif 'Suspicious' == status
-            rm_status = Setting.plugin_contrastsecurity['sts_suspicious']
-          elsif 'Confirmed' == status
-            rm_status = Setting.plugin_contrastsecurity['sts_confirmed']
-          elsif 'NotAProblem' == status
-            rm_status = Setting.plugin_contrastsecurity['sts_notaproblem']
-          elsif 'Remediated' == status
-            rm_status = Setting.plugin_contrastsecurity['sts_remediated']
-          elsif 'Fixed' == status
-            rm_status = Setting.plugin_contrastsecurity['sts_fixed']
-          end
-          status_obj = IssueStatus.find_by_name(rm_status)
+          status_obj = ContrastUtil.get_redmine_status(status)
           #logger.info(status_obj)
           if status_obj.nil?
             return head :ok
