@@ -49,6 +49,11 @@ module IssuesControllerPatch
       req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
       req['Content-Type'] = req['Accept'] = 'application/json'
       res = http.request(req)
+      if res.code != 200
+        flash.now[:warning] = l(:vuln_does_not_exist)
+        show = show_without_update
+        return show
+      end
       vuln_json = JSON.parse(res.body)
       last_time_seen = vuln_json['trace']['last_time_seen']
       severity = vuln_json['trace']['severity']

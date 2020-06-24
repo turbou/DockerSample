@@ -39,4 +39,5 @@ ja:
   pri_note: "注意"
   pri_cvelib: "脆弱なライブラリ"
   pri_for_cvelib_ph: "脆弱なライブラリはこの優先度が設定されます。"
+  vuln_does_not_exist: "この脆弱性はTeamServerに存在しません。"
 

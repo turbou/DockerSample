@@ -39,4 +39,5 @@ en:
   pri_note: "Note"
   pri_cvelib: "Vulnerable library"
   pri_for_cvelib_ph: "Vulnerable libraries will use this priority."
+  vuln_does_not_exist: "This vulnerability does not exist on TeamServer."
 
