@@ -26,7 +26,7 @@ class ContrastController < ApplicationController
   CUSTOM_FIELDS = [
     '【Contrast】ルール名', '【Contrast】カテゴリ', '【Contrast】サーバ', '【Contrast】モジュール',
     '【Contrast】信頼性', '【Contrast】深刻度', '【Contrast】最後の検出', '【Contrast】最初の検出',
-    '【Contrast】ライブラリID', '【Contrast】脆弱性ID', '【Contrast】アプリID', '【Contrast】組織ID',
+    '【Contrast】ライブラリ言語', '【Contrast】ライブラリID', '【Contrast】脆弱性ID', '【Contrast】アプリID', '【Contrast】組織ID',
   ].freeze
 
   def vote
@@ -171,10 +171,10 @@ class ContrastController < ApplicationController
       org_id = is_lib[2]
       app_id = is_lib[5]
       vul_id = ''
-      lang = is_lib[3]
+      lib_lang = is_lib[3]
       lib_id = is_lib[4]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
-      url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lang, lib_id)
+      url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
       get_data = callAPI(url)
       lib_json = JSON.parse(get_data)
       file_version = lib_json['library']['file_version']
@@ -249,6 +249,7 @@ class ContrastController < ApplicationController
       {'id': custom_field_hash['【Contrast】アプリID'], 'value': app_id},
       {'id': custom_field_hash['【Contrast】脆弱性ID'], 'value': vul_id},
       {'id': custom_field_hash['【Contrast】ライブラリID'], 'value': lib_id},
+      {'id': custom_field_hash['【Contrast】ライブラリ言語'], 'value': lib_lang},
     ]
     add_custom_fields.each do |add_custom_field|
       custom_fields << {'id': custom_field_hash[add_custom_field[:id_str]], 'value': add_custom_field[:value]}

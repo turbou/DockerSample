@@ -32,43 +32,79 @@ module IssuesControllerPatch
       cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】組織ID'}).first
       cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】アプリID'}).first
       cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
+      cv_lib = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】ライブラリID'}).first
+      cv_lib_lang = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】ライブラリ言語'}).first
       org_id = cv_org.try(:value)
       app_id = cv_app.try(:value)
       vul_id = cv_vul.try(:value)
-      if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
+      lib_id = cv_lib.try(:value)
+      lib_lang = cv_lib_lang.try(:value)
+      type = nil
+      if ! vul_id.nil? && ! vul_id.empty?
+        if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty?
+          show = show_without_update
+          return show
+        end 
+        type = "VUL"
+      elsif ! lib_id.nil? && ! lib_id.empty?
+        if org_id.nil? || org_id.empty? || lib_lang.nil? || lib_lang.empty?
+          show = show_without_update
+          return show
+        end 
+        type = "LIB"
+      else
         show = show_without_update
         return show
       end 
   
-      teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
-      url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
-      uri = URI.parse(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      req = Net::HTTP::Get.new(uri.request_uri)
-      req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
-      req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-      req['Content-Type'] = req['Accept'] = 'application/json'
-      res = http.request(req)
-      if res.code != 200
-        flash.now[:warning] = l(:vuln_does_not_exist)
-        show = show_without_update
-        return show
-      end
-      vuln_json = JSON.parse(res.body)
-      last_time_seen = vuln_json['trace']['last_time_seen']
-      severity = vuln_json['trace']['severity']
-      priority = ContrastUtil.get_priority_by_severity(severity)
-      if not priority.nil?
-        @issue.priority = priority
-      end 
-      @issue.custom_field_values.each do |cfv|
-        if cfv.custom_field.name == '【Contrast】最後の検出' then
-          cfv.value = Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')
-        elsif cfv.custom_field.name == '【Contrast】深刻度' then
-          cfv.value = severity
+      if type == "VUL"
+        teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+        url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
+        uri = URI.parse(url)
+        http = Net::HTTP.new(uri.host, uri.port)
+        req = Net::HTTP::Get.new(uri.request_uri)
+        req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+        req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
+        req['Content-Type'] = req['Accept'] = 'application/json'
+        res = http.request(req)
+        # puts res.code
+        if res.code != "200"
+          flash.now[:warning] = l(:vuln_does_not_exist)
+          show = show_without_update
+          return show
+        end
+        vuln_json = JSON.parse(res.body)
+        last_time_seen = vuln_json['trace']['last_time_seen']
+        severity = vuln_json['trace']['severity']
+        priority = ContrastUtil.get_priority_by_severity(severity)
+        if not priority.nil?
+          @issue.priority = priority
         end 
-      end 
-      @issue.save
+        @issue.custom_field_values.each do |cfv|
+          if cfv.custom_field.name == '【Contrast】最後の検出' then
+            cfv.value = Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+          elsif cfv.custom_field.name == '【Contrast】深刻度' then
+            cfv.value = severity
+          end 
+        end 
+        @issue.save
+      else
+        teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+        url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
+        uri = URI.parse(url)
+        http = Net::HTTP.new(uri.host, uri.port)
+        req = Net::HTTP::Get.new(uri.request_uri)
+        req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+        req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
+        req['Content-Type'] = req['Accept'] = 'application/json'
+        res = http.request(req)
+        # puts res.code
+        if res.code != "200"
+          flash.now[:warning] = l(:lib_does_not_exist)
+          show = show_without_update
+          return show
+        end
+      end
       show = show_without_update
       return show
     end
