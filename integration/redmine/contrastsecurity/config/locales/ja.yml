@@ -44,10 +44,13 @@ ja:
   event_new_vulnerability: "[Contrast plugin] 新しい脆弱性を受信"
   event_vulnerability_changestatus: "[Contrast plugin] 脆弱性のステータス変更を受信"
   event_new_vulnerable_library: "[Contrast plugin] 新しい脆弱性ライブラリを受信"
+  event_new_vulnerability_comment: "[Contrast plugin] 新しいコメントを受信"
   problem_with_priority: "[Contrast plugin] プラグインの優先度マッピング設定に問題があるようです。"
   problem_with_status: "[Contrast plugin] プラグインのステータスマッピング設定に問題があるようです。"
   issue_create_success: "[Contrast plugin] チケットを作成しました。"
   issue_create_failure: "[Contrast plugin] チケットの作成に失敗しました。"
   issue_status_change_success: "[Contrast plugin] チケットのステータスを変更しました。"
   issue_status_change_failure: "[Contrast plugin] チケットのステータスの変更に失敗しました。"
+  journal_create_success: "[Contrast plugin] 履歴を追加しました。"
+  journal_create_failure: "[Contrast plugin] 履歴の追加に失敗しました。"
 
