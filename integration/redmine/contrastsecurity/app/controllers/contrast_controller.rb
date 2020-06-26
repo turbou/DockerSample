@@ -148,14 +148,15 @@ class ContrastController < ApplicationController
           status_obj = ContrastUtil.get_redmine_status(status)
           #logger.info(status_obj)
           if status_obj.nil?
+            logger.error(l(:problem_with_status))
             return head :ok
           end
           issue.status = status_obj
           if issue.save
-            logger.info('[Contrast plugin] Issue status has been updated.')
+            logger.info(l(:issue_status_change_success))
             return head :ok
           else
-            logger.error('[Contrast plugin] Issue status updating failed.')
+            logger.error(l(:issue_status_change_failure))
             return head :internal_server_error
           end
         end
@@ -190,6 +191,7 @@ class ContrastController < ApplicationController
       priority = IssuePriority.find_by_name(priority_str)
       #logger.info(priority)
       if priority.nil?
+        logger.error(l(:problem_with_priority))
         return head :not_found
       end
       liburl_pattern = /.+ was found in .+\((.+)\),.+/
@@ -266,10 +268,10 @@ class ContrastController < ApplicationController
       author: User.current
     )
     if issue.save
-      logger.info('[Contrast plugin] Issue has been reported.')
+      logger.info(l(:issue_create_success))
       return head :ok
     else
-      logger.error('[Contrast plugin] Issue creation failed.')
+      logger.error(l(:issue_create_failure))
       return head :internal_server_error
     end
   end
