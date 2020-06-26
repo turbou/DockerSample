@@ -41,17 +41,15 @@ class ContrastController < ApplicationController
     if project.nil? || tracker.nil?
       return head :not_found
     end
-    vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
-    lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
-    is_vul = t_issue['description'].match(vul_pattern)
-    is_lib = t_issue['description'].match(lib_pattern)
     add_custom_fields = []
     if 'NEW_VULNERABILITY' == event_type
-      logger.info('NEW_VULNERABILITY')
+      logger.info(l(:event_new_vulnerability))
       if not Setting.plugin_contrastsecurity['vul_issues']
         return render plain: 'Vul Skip'
       end
       app_name = t_issue['application_name']
+      vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
+      is_vul = t_issue['description'].match(vul_pattern)
       org_id = is_vul[1]
       app_id = is_vul[2]
       vul_id = is_vul[3]
@@ -73,6 +71,7 @@ class ContrastController < ApplicationController
       priority = ContrastUtil.get_priority_by_severity(severity)
       #logger.info(priority)
       if priority.nil?
+        logger.error(l(:problem_with_priority))
         return head :not_found
       end
       module_str = app_name + " (" + vuln_json['trace']['application']['context_path'] + ") - " + vuln_json['trace']['application']['language']
@@ -133,7 +132,7 @@ class ContrastController < ApplicationController
       description << deco_mae + l(:report_vul_url) + deco_ato + "\n"
       description << self_url
     elsif 'VULNERABILITY_CHANGESTATUS_OPEN' == event_type || 'VULNERABILITY_CHANGESTATUS_CLOSED' == event_type
-      logger.info(event_type)
+      logger.info(l(:event_vulnerability_changestatus))
       status = t_issue['status']
       #logger.info(status)
       vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
@@ -163,10 +162,12 @@ class ContrastController < ApplicationController
       end
       return head :ok
     elsif 'NEW_VULNERABLE_LIBRARY' == event_type
-      logger.info('NEW_VULNERABLE_LIBRARY')
+      logger.info(l(:event_new_vulnerable_library))
       if not Setting.plugin_contrastsecurity['lib_issues']
         return render plain: 'Lib Skip'
       end
+      lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
+      is_lib = t_issue['description'].match(lib_pattern)
       lib_name = is_lib[1]
       org_id = is_lib[2]
       app_id = is_lib[5]

@@ -41,4 +41,8 @@ ja:
   pri_for_cvelib_ph: "脆弱なライブラリはこの優先度が設定されます。"
   vuln_does_not_exist: "この脆弱性はTeamServerに存在しません。"
   lib_does_not_exist: "このライブラリはTeamServerに存在しません。"
+  event_new_vulnerability: "[ContrastSecurity] 新しい脆弱性を受信"
+  event_vulnerability_changestatus: "[ContrastSecurity] 脆弱性のステータス変更を受信"
+  event_new_vulnerable_library: "[ContrastSecurity] 新しい脆弱性ライブラリを受信"
+  problem_with_priority: "[ContrastSecurity] プラグインの優先度マッピング設定に問題があるようです。"
 

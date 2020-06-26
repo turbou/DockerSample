@@ -41,4 +41,8 @@ en:
   pri_for_cvelib_ph: "Vulnerable libraries will use this priority."
   vuln_does_not_exist: "This vulnerability does not exist on TeamServer."
   lib_does_not_exist: "This library does not exist on TeamServer."
+  event_new_vulnerability: "[ContrastSecurity] NEW_VULNERABILITY"
+  event_vulnerability_changestatus: "[ContrastSecurity] VULNERABILITY_CHANGESTATUS"
+  event_new_vulnerable_library: "[ContrastSecurity] NEW_VULNERABLE_LIBRARY"
+  problem_with_priority: "[ContrastSecurity] There seems to be a problem with the plugin Priority Mapping settings."
 
