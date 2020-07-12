@@ -20,15 +20,16 @@
 # SOFTWARE.
 module ContrastUtil
   def self.get_priority_by_severity(severity)
-    if 'Critical' == severity
+    case severity
+    when "Critical"
       priority_str = Setting.plugin_contrastsecurity['pri_critical']
-    elsif 'High' == severity
+    when "High"
       priority_str = Setting.plugin_contrastsecurity['pri_high']
-    elsif 'Medium' == severity
+    when "Medium"
       priority_str = Setting.plugin_contrastsecurity['pri_medium']
-    elsif 'Low' == severity
+    when "Low"
       priority_str = Setting.plugin_contrastsecurity['pri_low']
-    elsif 'Note' == severity
+    when "Note"
       priority_str = Setting.plugin_contrastsecurity['pri_note']
     end 
     priority = IssuePriority.find_by_name(priority_str)
@@ -36,17 +37,18 @@ module ContrastUtil
   end
 
   def self.get_redmine_status(contrast_status)
-    if 'Reported' == contrast_status
+    case contrast_status
+    when "Reported"
       rm_status = Setting.plugin_contrastsecurity['sts_reported']
-    elsif 'Suspicious' == contrast_status
+    when "Suspicious"
       rm_status = Setting.plugin_contrastsecurity['sts_suspicious']
-    elsif 'Confirmed' == contrast_status
+    when "Confirmed"
       rm_status = Setting.plugin_contrastsecurity['sts_confirmed']
-    elsif 'NotAProblem' == contrast_status
+    when "NotAProblem"
       rm_status = Setting.plugin_contrastsecurity['sts_notaproblem']
-    elsif 'Remediated' == contrast_status
+    when "Remediated"
       rm_status = Setting.plugin_contrastsecurity['sts_remediated']
-    elsif 'Fixed' == contrast_status
+    when "Fixed"
       rm_status = Setting.plugin_contrastsecurity['sts_fixed']
     end 
     status = IssueStatus.find_by_name(rm_status)

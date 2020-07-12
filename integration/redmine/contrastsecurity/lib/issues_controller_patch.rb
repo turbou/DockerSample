@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 module IssuesControllerPatch
   def self.included(base)
     base.send(:include, InstanceMethods)
@@ -60,18 +61,7 @@ module IssuesControllerPatch
       if type == "VUL"
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
-        uri = URI.parse(url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = false
-        if uri.scheme === "https"
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        end
-        req = Net::HTTP::Get.new(uri.request_uri)
-        req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
-        req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-        req['Content-Type'] = req['Accept'] = 'application/json'
-        res = http.request(req)
+        res = callAPI(url)
         # puts res.code
         if res.code != "200"
           flash.now[:warning] = l(:vuln_does_not_exist)
@@ -100,18 +90,7 @@ module IssuesControllerPatch
       else
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
-        uri = URI.parse(url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = false
-        if uri.scheme === "https"
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        end
-        req = Net::HTTP::Get.new(uri.request_uri)
-        req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
-        req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-        req['Content-Type'] = req['Accept'] = 'application/json'
-        res = http.request(req)
+        res = callAPI(url)
         # puts res.code
         if res.code != "200"
           flash.now[:warning] = l(:lib_does_not_exist)
@@ -122,6 +101,22 @@ module IssuesControllerPatch
       show = show_without_update
       return show
     end
+  end
+
+  def callAPI(url)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = false
+    if uri.scheme === "https"
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    req = Net::HTTP::Get.new(uri.request_uri)
+    req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
+    req['Content-Type'] = req['Accept'] = 'application/json'
+    res = http.request(req)
+    return res
   end
 end
 

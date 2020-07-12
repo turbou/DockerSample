@@ -59,8 +59,8 @@ class ContrastController < ApplicationController
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application', teamserver_url, org_id, app_id, vul_id)
       #logger.info(url)
-      get_data = callAPI(url)
-      vuln_json = JSON.parse(get_data)
+      res = callAPI(url)
+      vuln_json = JSON.parse(res.body)
       #logger.info(vuln_json)
       summary = '[' + app_name + '] ' + vuln_json['trace']['title']
       first_time_seen = vuln_json['trace']['first_time_seen']
@@ -112,12 +112,12 @@ class ContrastController < ApplicationController
       #logger.info(howtofix_url)
       #logger.info(self_url)
       # Story
-      get_story_data = callAPI(story_url)
-      story_json = JSON.parse(get_story_data)
+      get_story_res = callAPI(story_url)
+      story_json = JSON.parse(get_story_res.body)
       story = story_json['story']['risk']['formattedText']
       # How to fix
-      get_howtofix_data = callAPI(howtofix_url)
-      howtofix_json = JSON.parse(get_howtofix_data)
+      get_howtofix_res = callAPI(howtofix_url)
+      howtofix_json = JSON.parse(get_howtofix_res.body)
       #logger.info(howtofix_json)
       howtofix = howtofix_json['recommendation']['formattedText']
       # description
@@ -182,8 +182,8 @@ class ContrastController < ApplicationController
       lib_id = is_lib[4]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
-      get_data = callAPI(url)
-      lib_json = JSON.parse(get_data)
+      res = callAPI(url)
+      lib_json = JSON.parse(res.body)
       file_version = lib_json['library']['file_version']
       latest_version = lib_json['library']['latest_version']
       classes_used = lib_json['library']['classes_used']
@@ -321,7 +321,7 @@ class ContrastController < ApplicationController
     req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
-    return res.body
+    return res
   end
 
   def convertMustache(str)

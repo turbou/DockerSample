@@ -23,7 +23,6 @@ class IssueHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context)
     params = context[:params]
     issue = context[:issue]
-    journal = context[:journal]
     cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】組織ID'}).first
     cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】アプリID'}).first
     cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
@@ -40,6 +39,23 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
+    res = callAPI(url, "GET", nil)
+    vuln_json = JSON.parse(res.body)
+    if vuln_json['trace']['status'] != status
+      # Put Status from TeamServer
+      url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
+      t_data = {"traces" => [vul_id], "status" => status, "note" => "by Redmine."}.to_json
+      callAPI(url, "PUT", t_data)
+    end
+    note = params['issue']['notes']
+    if (not note.nil?) && (not note.empty?)
+      url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
+      t_data = {"note" => note}.to_json
+      callAPI(url, "POST", t_data)
+    end
+  end
+
+  def callAPI(url, method, data)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = false
@@ -47,31 +63,23 @@ class IssueHook < Redmine::Hook::Listener
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
-    req = Net::HTTP::Get.new(uri.request_uri)
+    case method
+    when "GET"
+      req = Net::HTTP::Get.new(uri.request_uri)
+    when "POST"
+      req = Net::HTTP::Post.new(uri.request_uri)
+      req.body = data
+    when "PUT"
+      req = Net::HTTP::Put.new(uri.request_uri)
+      req.body = data
+    else
+      return
+    end
     req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
     req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
-    vuln_json = JSON.parse(res.body)
-    if vuln_json['trace']['status'] != status
-      # Put Status from TeamServer
-      url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-      t_data = {"traces" => [vul_id], "status" => status, "note" => "by Redmine."}.to_json
-      #puts t_data
-      uri = URI.parse(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = false
-      if uri.scheme === "https"
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end
-      req = Net::HTTP::Put.new(uri.request_uri)
-      req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
-      req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-      req['Content-Type'] = req['Accept'] = 'application/json'
-      req.body = t_data
-      res = http.request(req)
-    end
+    return res
   end
 end
 
