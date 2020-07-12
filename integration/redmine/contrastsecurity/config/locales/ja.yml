@@ -53,4 +53,7 @@ ja:
   issue_status_change_failure: "[Contrast plugin] チケットのステータスの変更に失敗しました。"
   journal_create_success: "[Contrast plugin] 履歴を追加しました。"
   journal_create_failure: "[Contrast plugin] 履歴の追加に失敗しました。"
+  config_section_other: "その他"
+  vul_seen_datetime_format: "検出日時フォーマット"
+  problem_with_vul_seen_dt_format: "[Contrast plugin] 脆弱性の検出日時のフォーマット指定に問題があるようです。"
 

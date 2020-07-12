@@ -53,4 +53,7 @@ en:
   issue_status_change_failure: "[Contrast plugin] Issue status updating failed."
   journal_create_success: "[Contrast plugin] Journal has been added."
   journal_create_failure: "[Contrast plugin] Journal adding failed."
+  config_section_other: "Other"
+  vul_seen_datetime_format: "Vul detection datetime format"
+  problem_with_vul_seen_dt_format: "[Contrast plugin] There seems to be a problem with the Vul detection datetime format settings."
 

@@ -85,9 +85,13 @@ module IssuesControllerPatch
         if not priority.nil?
           @issue.priority = priority
         end 
+        dt_format = Setting.plugin_contrastsecurity['vul_seen_dt_format']
+        if dt_format.nil? || dt_format.empty?
+          dt_format = "%Y/%m/%d %H:%M"
+        end
         @issue.custom_field_values.each do |cfv|
           if cfv.custom_field.name == '【Contrast】最後の検出' then
-            cfv.value = Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+            cfv.value = Time.at(last_time_seen/1000.0).strftime(dt_format)
           elsif cfv.custom_field.name == '【Contrast】深刻度' then
             cfv.value = severity
           end 

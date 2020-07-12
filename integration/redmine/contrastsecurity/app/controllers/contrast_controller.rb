@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 class ContrastController < ApplicationController
   before_action :require_login
   skip_before_filter :verify_authenticity_token
@@ -79,8 +80,12 @@ class ContrastController < ApplicationController
       vuln_json['trace']['servers'].each do |c_server|
         server_list.push(c_server['name'])
       end
-      add_custom_fields << {'id_str': '【Contrast】最初の検出', 'value': Time.at(first_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')}
-      add_custom_fields << {'id_str': '【Contrast】最後の検出', 'value': Time.at(last_time_seen/1000.0).strftime('%Y-%m-%dT%H:%M:%S.%LZ')}
+      dt_format = Setting.plugin_contrastsecurity['vul_seen_dt_format']
+      if dt_format.nil? || dt_format.empty?
+        dt_format = "%Y/%m/%d %H:%M"
+      end
+      add_custom_fields << {'id_str': '【Contrast】最初の検出', 'value': Time.at(first_time_seen/1000.0).strftime(dt_format)}
+      add_custom_fields << {'id_str': '【Contrast】最後の検出', 'value': Time.at(last_time_seen/1000.0).strftime(dt_format)}
       add_custom_fields << {'id_str': '【Contrast】深刻度', 'value': severity}
       add_custom_fields << {'id_str': '【Contrast】信頼性', 'value': confidence}
       add_custom_fields << {'id_str': '【Contrast】モジュール', 'value': module_str}

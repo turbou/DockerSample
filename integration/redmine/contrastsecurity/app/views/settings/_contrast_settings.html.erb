@@ -118,3 +118,13 @@
     </tr>
   </tbody>
 </table>
+<br />
+<h4><%= l(:config_section_other) %></h4>
+<table>
+  <tbody>
+    <tr>
+      <th align="left"><%= l(:vul_seen_datetime_format) %></th>
+      <td><%= text_field_tag('settings[vul_seen_dt_format]', @settings['vul_seen_dt_format'], {size:"30", placeholder:"%Y/%m/%d %H:%M"})%></td>
+    </tr>
+  </tbody>
+</table>
