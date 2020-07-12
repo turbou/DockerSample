@@ -18,16 +18,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 class IssueHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context)
+    params = context[:params]
     issue = context[:issue]
-    #cv_org = issue.custom_field_values.detect {|c| c.custom_field.name == '【Contrast】組織ID'}
-    #cv_vul = issue.custom_field_values.detect {|c| c.custom_field.name == '【Contrast】脆弱性ID'}
+    journal = context[:journal]
     cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】組織ID'}).first
+    cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】アプリID'}).first
     cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
     org_id = cv_org.try(:value)
+    app_id = cv_app.try(:value)
     vul_id = cv_vul.try(:value)
-    if org_id.nil? || org_id.empty? || vul_id.nil? || vul_id.empty?
+    if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
       return
     end
     status = ContrastUtil.get_contrast_status(issue.status.name)
@@ -35,9 +38,8 @@ class IssueHook < Redmine::Hook::Listener
       return
     end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
-    url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-    t_data = {"traces" => [vul_id], "status" => status, "note" => "by Redmine."}.to_json
-    #puts t_data
+    # Get Status from TeamServer
+    url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = false
@@ -45,12 +47,31 @@ class IssueHook < Redmine::Hook::Listener
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
-    req = Net::HTTP::Put.new(uri.request_uri)
+    req = Net::HTTP::Get.new(uri.request_uri)
     req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
     req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
     req['Content-Type'] = req['Accept'] = 'application/json'
-    req.body = t_data
     res = http.request(req)
+    vuln_json = JSON.parse(res.body)
+    if vuln_json['trace']['status'] != status
+      # Put Status from TeamServer
+      url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
+      t_data = {"traces" => [vul_id], "status" => status, "note" => "by Redmine."}.to_json
+      #puts t_data
+      uri = URI.parse(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = false
+      if uri.scheme === "https"
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
+      req = Net::HTTP::Put.new(uri.request_uri)
+      req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+      req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
+      req['Content-Type'] = req['Accept'] = 'application/json'
+      req.body = t_data
+      res = http.request(req)
+    end
   end
 end
 
