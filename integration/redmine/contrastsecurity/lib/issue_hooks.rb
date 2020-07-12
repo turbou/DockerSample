@@ -40,6 +40,11 @@ class IssueHook < Redmine::Hook::Listener
     #puts t_data
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = false
+    if uri.scheme === "https"
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
     req = Net::HTTP::Put.new(uri.request_uri)
     req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
     req["API-Key"] = Setting.plugin_contrastsecurity['api_key']

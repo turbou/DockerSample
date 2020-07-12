@@ -62,6 +62,11 @@ module IssuesControllerPatch
         url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
         uri = URI.parse(url)
         http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = false
+        if uri.scheme === "https"
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
         req = Net::HTTP::Get.new(uri.request_uri)
         req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
         req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
@@ -93,6 +98,11 @@ module IssuesControllerPatch
         url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
         uri = URI.parse(url)
         http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = false
+        if uri.scheme === "https"
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
         req = Net::HTTP::Get.new(uri.request_uri)
         req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
         req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
