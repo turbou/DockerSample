@@ -236,14 +236,10 @@ class ContrastController < ApplicationController
       if is_vul_id && is_comment
         vul_id = is_vul_id[1]
         comment = is_comment[1]
-        comment_list = []
-        comment.split("&#xa;").each do |cmt|
-          comment_list << cmt.gsub(/&#x([\da-fA-F]+);/) { [$1].pack('H*').unpack('n*').pack('U') }
-        end
         cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
         if cv
           issue = cv.customized
-          journal = issue.init_journal(User.current, comment_list.join("\n"))
+          journal = issue.init_journal(User.current, CGI.unescapeHTML(comment))
           if journal.save
             logger.info(l(:journal_create_success))
             return head :ok
