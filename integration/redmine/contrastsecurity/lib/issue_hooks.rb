@@ -37,6 +37,10 @@ class IssueHook < Redmine::Hook::Listener
       return
     end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+    comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
+    if comment_suffix.nil? || comment_suffix.empty?
+      comment_suffix = "by Redmine."
+    end
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
     res = callAPI(url, "GET", nil)
@@ -44,13 +48,13 @@ class IssueHook < Redmine::Hook::Listener
     if vuln_json['trace']['status'] != status
       # Put Status from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-      t_data = {"traces" => [vul_id], "status" => status, "note" => "by Redmine."}.to_json
+      t_data = {"traces" => [vul_id], "status" => status, "note" => comment_suffix}.to_json
       callAPI(url, "PUT", t_data)
     end
     note = params['issue']['notes']
     if (not note.nil?) && (not note.empty?)
       url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-      t_data = {"note" => note}.to_json
+      t_data = {"note" => note + " " + comment_suffix}.to_json
       callAPI(url, "POST", t_data)
     end
   end

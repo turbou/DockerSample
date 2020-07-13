@@ -236,6 +236,13 @@ class ContrastController < ApplicationController
       if is_vul_id && is_comment
         vul_id = is_vul_id[1]
         comment = is_comment[1]
+        comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
+        if comment_suffix.nil? || comment_suffix.empty?
+          comment_suffix = "by Redmine."
+        end
+        if comment.end_with?(comment_suffix)
+          return
+        end
         cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
         if cv
           issue = cv.customized

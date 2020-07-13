@@ -56,4 +56,5 @@ ja:
   config_section_other: "その他"
   vul_seen_datetime_format: "検出日時フォーマット"
   problem_with_vul_seen_dt_format: "[Contrast plugin] 脆弱性の検出日時のフォーマット指定に問題があるようです。"
+  comment_suffix: "コメント接尾辞"
 
