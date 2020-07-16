@@ -57,4 +57,5 @@ en:
   vul_seen_datetime_format: "Vul detection datetime format"
   problem_with_vul_seen_dt_format: "[Contrast plugin] There seems to be a problem with the Vul detection datetime format settings."
   comment_suffix: "Comment Suffix"
+  status_changed_comment: "Status changed from %{old} to %{new} by TeamServer"
 

@@ -156,9 +156,18 @@ class ContrastController < ApplicationController
             logger.error(l(:problem_with_status))
             return head :ok
           end
+          old_status_obj = issue.status
           issue.status = status_obj
           if issue.save
             logger.info(l(:issue_status_change_success))
+            journal = issue.init_journal(User.current, l(:status_changed_comment, :old => old_status_obj.name, :new => status_obj.name))
+            if journal.save
+              logger.info(l(:journal_create_success))
+              return head :ok
+            else
+              logger.error(l(:journal_create_failure))
+              return head :internal_server_error
+            end
             return head :ok
           else
             logger.error(l(:issue_status_change_failure))
