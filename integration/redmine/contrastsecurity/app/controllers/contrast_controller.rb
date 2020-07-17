@@ -99,12 +99,21 @@ class ContrastController < ApplicationController
       vuln_json['trace']['links'].each do |c_link|
         if c_link['rel'] == 'self'
           self_url = c_link['href']
+          if self_url.include?("{traceUuid}")
+            self_url = self_url.sub(/{traceUuid}/, vul_id)
+          end
         end
         if c_link['rel'] == 'story'
           story_url = c_link['href']
+          if story_url.include?("{traceUuid}")
+            story_url = story_url.sub(/{traceUuid}/, vul_id)
+          end
         end
         if c_link['rel'] == 'recommendation'
           howtofix_url = c_link['href']
+          if howtofix_url.include?("{traceUuid}")
+            howtofix_url = howtofix_url.sub(/{traceUuid}/, vul_id)
+          end
         end
       end
       #logger.info(summary)
@@ -118,7 +127,6 @@ class ContrastController < ApplicationController
       # How to fix
       get_howtofix_res = callAPI(howtofix_url)
       howtofix_json = JSON.parse(get_howtofix_res.body)
-      #logger.info(howtofix_json)
       howtofix = howtofix_json['recommendation']['formattedText']
       # description
       deco_mae = ""
@@ -238,31 +246,16 @@ class ContrastController < ApplicationController
       description << self_url
     elsif 'NEW_VULNERABILITY_COMMENT' == event_type
       logger.info(l(:event_new_vulnerability_comment))
-      vul_id_pattern = /.+ commented on a .+[^(]+ \(.+index.html#\/.+\/applications\/.+\/vulns\/([^)]+)\)/
-      comment_pattern = /\.'([^']+)'$/
+      vul_id_pattern = /.+ commented on a .+[^(]+ \(.+index.html#\/(.+)\/applications\/(.+)\/vulns\/([^)]+)\)/
       is_vul_id = t_issue['description'].match(vul_id_pattern)
-      is_comment = t_issue['description'].match(comment_pattern)
-      if is_vul_id && is_comment
-        vul_id = is_vul_id[1]
-        comment = is_comment[1]
-        comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
-        if comment_suffix.nil? || comment_suffix.empty?
-          comment_suffix = "by Redmine."
-        end
-        if comment.end_with?(comment_suffix)
-          return
-        end
+      if is_vul_id
+        org_id = is_vul_id[1]
+        app_id = is_vul_id[2]
+        vul_id = is_vul_id[3]
         cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
         if cv
           issue = cv.customized
-          journal = issue.init_journal(User.current, CGI.unescapeHTML(comment))
-          if journal.save
-            logger.info(l(:journal_create_success))
-            return head :ok
-          else
-            logger.error(l(:journal_create_failure))
-            return head :internal_server_error
-          end
+          syncComment(org_id, app_id, vul_id, issue)
         end
       end
       return head :ok 
@@ -317,6 +310,40 @@ class ContrastController < ApplicationController
     else
       logger.error(l(:issue_create_failure))
       return head :internal_server_error
+    end
+  end
+
+  def syncComment(org_id, app_id, vul_id, issue)
+    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+    url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
+    res = callAPI(url)
+    notes_json = JSON.parse(res.body)
+    note_ids = Array.new
+    note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
+    issue.journals.each do |c_journal|
+      is_note_id = c_journal.notes.match(note_id_pattern)
+      if is_note_id
+        note_id = is_note_id[1]
+        note_ids.push(note_id)
+      end
+    end
+    comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
+    if comment_suffix.nil? || comment_suffix.empty?
+      comment_suffix = "by Redmine."
+    end
+    notes_json['notes'].reverse.each do |c_note|
+      if CGI.unescapeHTML(c_note['note']).end_with?(comment_suffix)
+        next
+      end
+      if not note_ids.include? c_note['id']
+        journal = Journal.new(
+          :journalized => issue,
+          :user => User.current,
+          :notes => CGI.unescapeHTML(c_note['note']) + "\n[" + c_note['id'] + "]",
+          :created_on => Time.at(c_note['creation']/1000.0)
+        )
+        journal.save()
+      end
     end
   end
 
