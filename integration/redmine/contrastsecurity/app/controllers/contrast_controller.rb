@@ -335,7 +335,6 @@ class ContrastController < ApplicationController
         new_status_str = ""
         if c_note.has_key?("properties")
           c_note['properties'].each do |c_prop|
-            logger.info(c_prop['name'])
             if c_prop['name'] == "status.change.previous.status"
               status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
               if not status_obj.nil?
