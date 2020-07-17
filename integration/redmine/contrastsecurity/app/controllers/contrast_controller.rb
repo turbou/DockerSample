@@ -151,6 +151,8 @@ class ContrastController < ApplicationController
       vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
       is_vul_sts_chg = t_issue['description'].match(vul_sts_chg_pattern)
       if is_vul_sts_chg
+        org_id = is_vul_sts_chg[1]
+        app_id = is_vul_sts_chg[2]
         vul_id = is_vul_sts_chg[3]
         #logger.info('vul_id: ' + vul_id)
         cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
@@ -168,14 +170,7 @@ class ContrastController < ApplicationController
           issue.status = status_obj
           if issue.save
             logger.info(l(:issue_status_change_success))
-            journal = issue.init_journal(User.current, l(:status_changed_comment, :old => old_status_obj.name, :new => status_obj.name))
-            if journal.save
-              logger.info(l(:journal_create_success))
-              return head :ok
-            else
-              logger.error(l(:journal_create_failure))
-              return head :internal_server_error
-            end
+            syncComment(org_id, app_id, vul_id, issue)
             return head :ok
           else
             logger.error(l(:issue_status_change_failure))
@@ -336,10 +331,33 @@ class ContrastController < ApplicationController
         next
       end
       if not note_ids.include? c_note['id']
+        old_status_str = ""
+        new_status_str = ""
+        if c_note.has_key?("properties")
+          c_note['properties'].each do |c_prop|
+            logger.info(c_prop['name'])
+            if c_prop['name'] == "status.change.previous.status"
+              status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+              if not status_obj.nil?
+                old_status_str = status_obj.name
+              end
+            elsif c_prop['name'] == "status.change.status"
+              status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+              if not status_obj.nil?
+                new_status_str = status_obj.name
+              end
+            end
+          end
+        end
+        note_str = CGI.unescapeHTML(c_note['note']) + "\n[" + c_note['id'] + "]"
+        if (not old_status_str.empty?) && (not new_status_str.empty?)
+          cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
+          note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(c_note['note']) + "\n[" + c_note['id'] + "]"
+        end
         journal = Journal.new(
           :journalized => issue,
           :user => User.current,
-          :notes => CGI.unescapeHTML(c_note['note']) + "\n[" + c_note['id'] + "]",
+          :notes => note_str,
           :created_on => Time.at(c_note['creation']/1000.0)
         )
         journal.save()
