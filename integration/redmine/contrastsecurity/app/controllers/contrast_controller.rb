@@ -25,9 +25,9 @@ class ContrastController < ApplicationController
   accept_api_auth :vote
 
   CUSTOM_FIELDS = [
-    '【Contrast】ルール名', '【Contrast】カテゴリ', '【Contrast】サーバ', '【Contrast】モジュール',
-    '【Contrast】信頼性', '【Contrast】深刻度', '【Contrast】最後の検出', '【Contrast】最初の検出',
-    '【Contrast】ライブラリ言語', '【Contrast】ライブラリID', '【Contrast】脆弱性ID', '【Contrast】アプリID', '【Contrast】組織ID',
+    l('contrast_custom_fields.rule'), l('contrast_custom_fields.category'), l('contrast_custom_fields.server'), l('contrast_custom_fields.module'),
+    l('contrast_custom_fields.confidence'), l('contrast_custom_fields.severity'), l('contrast_custom_fields.last_seen'), l('contrast_custom_fields.first_seen'),
+    l('contrast_custom_fields.lib_lang'), l('contrast_custom_fields.lib_id'), l('contrast_custom_fields.vul_id'), l('contrast_custom_fields.app_id'), l('contrast_custom_fields.org_id'),
   ].freeze
 
   def vote
@@ -84,14 +84,14 @@ class ContrastController < ApplicationController
       if dt_format.nil? || dt_format.empty?
         dt_format = "%Y/%m/%d %H:%M"
       end
-      add_custom_fields << {'id_str': '【Contrast】最初の検出', 'value': Time.at(first_time_seen/1000.0).strftime(dt_format)}
-      add_custom_fields << {'id_str': '【Contrast】最後の検出', 'value': Time.at(last_time_seen/1000.0).strftime(dt_format)}
-      add_custom_fields << {'id_str': '【Contrast】深刻度', 'value': severity}
-      add_custom_fields << {'id_str': '【Contrast】信頼性', 'value': confidence}
-      add_custom_fields << {'id_str': '【Contrast】モジュール', 'value': module_str}
-      add_custom_fields << {'id_str': '【Contrast】サーバ', 'value': server_list.join(", ")}
-      add_custom_fields << {'id_str': '【Contrast】カテゴリ', 'value': category}
-      add_custom_fields << {'id_str': '【Contrast】ルール名', 'value': rule_title}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.first_seen'), 'value': Time.at(first_time_seen/1000.0).strftime(dt_format)}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.last_seen'), 'value': Time.at(last_time_seen/1000.0).strftime(dt_format)}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.severity'), 'value': severity}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.confidence'), 'value': confidence}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.module'), 'value': module_str}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.server'), 'value': server_list.join(", ")}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.category'), 'value': category}
+      add_custom_fields << {'id_str': l('contrast_custom_fields.rule'), 'value': rule_title}
       #logger.info(add_custom_fields)
       story_url = ''
       howtofix_url = ''
@@ -155,7 +155,7 @@ class ContrastController < ApplicationController
         app_id = is_vul_sts_chg[2]
         vul_id = is_vul_sts_chg[3]
         #logger.info('vul_id: ' + vul_id)
-        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
+        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
         if cv
           issue = cv.customized
           #logger.info(cv.customized.subject)
@@ -247,7 +247,7 @@ class ContrastController < ApplicationController
         org_id = is_vul_id[1]
         app_id = is_vul_id[2]
         vul_id = is_vul_id[3]
-        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
+        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
         if cv
           issue = cv.customized
           syncComment(org_id, app_id, vul_id, issue)
@@ -280,11 +280,11 @@ class ContrastController < ApplicationController
       custom_field_hash[custom_field_name] = custom_field.id
     end
     custom_fields = [
-      {'id': custom_field_hash['【Contrast】組織ID'], 'value': org_id},
-      {'id': custom_field_hash['【Contrast】アプリID'], 'value': app_id},
-      {'id': custom_field_hash['【Contrast】脆弱性ID'], 'value': vul_id},
-      {'id': custom_field_hash['【Contrast】ライブラリID'], 'value': lib_id},
-      {'id': custom_field_hash['【Contrast】ライブラリ言語'], 'value': lib_lang},
+      {'id': custom_field_hash[l('contrast_custom_fields.org_id')], 'value': org_id},
+      {'id': custom_field_hash[l('contrast_custom_fields.app_id')], 'value': app_id},
+      {'id': custom_field_hash[l('contrast_custom_fields.vul_id')], 'value': vul_id},
+      {'id': custom_field_hash[l('contrast_custom_fields.lib_id')], 'value': lib_id},
+      {'id': custom_field_hash[l('contrast_custom_fields.lib_lang')], 'value': lib_lang},
     ]
     add_custom_fields.each do |add_custom_field|
       custom_fields << {'id': custom_field_hash[add_custom_field[:id_str]], 'value': add_custom_field[:value]}

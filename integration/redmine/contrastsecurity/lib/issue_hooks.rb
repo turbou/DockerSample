@@ -23,9 +23,9 @@ class IssueHook < Redmine::Hook::Listener
   def controller_issues_edit_after_save(context)
     params = context[:params]
     issue = context[:issue]
-    cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】組織ID'}).first
-    cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】アプリID'}).first
-    cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
+    cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
+    cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first
+    cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
     org_id = cv_org.try(:value)
     app_id = cv_app.try(:value)
     vul_id = cv_vul.try(:value)

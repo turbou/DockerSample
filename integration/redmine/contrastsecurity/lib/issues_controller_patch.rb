@@ -30,11 +30,11 @@ module IssuesControllerPatch
 
   module InstanceMethods
     def show_with_update
-      cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】組織ID'}).first
-      cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】アプリID'}).first
-      cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】脆弱性ID'}).first
-      cv_lib = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】ライブラリID'}).first
-      cv_lib_lang = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: '【Contrast】ライブラリ言語'}).first
+      cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
+      cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first
+      cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
+      cv_lib = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.lib_id')}).first
+      cv_lib_lang = CustomValue.where(customized_type: 'Issue').where(customized_id: @issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.lib_lang')}).first
       org_id = cv_org.try(:value)
       app_id = cv_app.try(:value)
       vul_id = cv_vul.try(:value)
@@ -80,9 +80,9 @@ module IssuesControllerPatch
           dt_format = "%Y/%m/%d %H:%M"
         end
         @issue.custom_field_values.each do |cfv|
-          if cfv.custom_field.name == '【Contrast】最後の検出' then
+          if cfv.custom_field.name == l('contrast_custom_fields.last_seen') then
             cfv.value = Time.at(last_time_seen/1000.0).strftime(dt_format)
-          elsif cfv.custom_field.name == '【Contrast】深刻度' then
+          elsif cfv.custom_field.name == l('contrast_custom_fields.severity') then
             cfv.value = severity
           end 
         end 
