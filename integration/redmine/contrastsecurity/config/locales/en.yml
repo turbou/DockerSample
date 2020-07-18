@@ -1,5 +1,19 @@
 # English strings go here for Rails i18n
 en:
+  contrast_custom_fields:
+    org_id: "[Contrast] ORG_ID"
+    app_id: "[Contrast] APP_ID"
+    vul_id: "[Contrast] VUL_ID"
+    lib_id: "[Contrast] LIB_ID"
+    lib_lang: "[Contrast] LIB_LANG"
+    first_seen: "[Contrast] FIRST_SEEN"
+    last_seen: "[Contrast] LAST_SEEN"
+    severity: "[Contrast] SEVERITY"
+    confidence: "[Contrast] CONFIDENCE"
+    module: "[Contrast] MODULE"
+    server: "[Contrast] SERVER"
+    category: "[Contrast] CATEGORY"
+    rule: "[Contrast] RULE"
   config_section_connect: "TeamServer Connect（You can get this information with Your Account in TeamServer.）"
   config_section_import: "Issue Target"
   config_section_status: "Status Mapping"
