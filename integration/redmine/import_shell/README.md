@@ -24,15 +24,6 @@
     ```
 
 ### Steps
-1. Configuration  
-    ```bash
-    # URLは正規ライセンス環境の場合はapp, 評価(POC)用ライセンス環境の場合はevalとなります。
-    CONTRAST_BASEURL       : https://(app|eval).contrastsecurity.com/Contrast/
-    CONTRAST_AUTHORIZATION : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==
-    CONTRAST_API_KEY       : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    CONTRAST_ORG_ID        : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-    CONTRAST_APP_NAME      : PetClinic_8001
-    ```
 1. Environment
     ```bash
     export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
@@ -40,6 +31,9 @@
     export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
     export CONTRAST_APP_NAME=PetClinic
+    export REDMINE_BASEURL=http://host/redmine/
+    export REDMINE_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    export REDMINE_PROJECT_ID=contrastsecurity
     ```
 1. Run  
     ```bash
