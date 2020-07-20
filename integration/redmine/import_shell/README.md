@@ -36,7 +36,7 @@
     ```
 1. Run  
     ```bash
-    chmod 755 nttdata_v2.sh
-    ./nttdata_v2.sh
+    chmod 755 import.sh
+    ./import.sh
     ```
 
