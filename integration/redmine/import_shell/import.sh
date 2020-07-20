@@ -7,6 +7,9 @@ if [ -z "$CONTRAST_BASEURL" -o -z "$CONTRAST_AUTHORIZATION" -o -z "$CONTRAST_API
     echo 'CONTRAST_API_KEY       : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
     echo 'CONTRAST_ORG_ID        : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
     echo 'CONTRAST_APP_NAME      : PetClinic_8001'
+    echo 'REDMINE_BASEURL        : https://XXXXXXXXXXX/redmine'
+    echo 'REDMINE_API_KEY        : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    echo 'REDMINE_PROJECT_ID     : contrastsecurity'
     exit 1
 fi
 
@@ -16,6 +19,9 @@ AUTHORIZATION=$CONTRAST_AUTHORIZATION
 ORG_ID=$CONTRAST_ORG_ID
 API_URL="${BASEURL}api/ng/${ORG_ID}"
 APP_NAME=$CONTRAST_APP_NAME
+RM_BASEURL=$REDMINE_BASEURL
+RM_API_KEY=$REDMINE_API_KEY
+RM_PROJ_ID=$REDMINE_PROJECT_ID
 
 rm -f ./applications.json
 curl -X GET -sS \
@@ -76,6 +82,9 @@ while read -r LINE; do
     echo "重大度        : ${SEVERITY}"
     echo "ステータス    : ${STATUS}"
     echo "検出日時      : ${FIRST_TIME_SEEN}"
+
+    jq -n --arg subject "${RULE_TITLE}" --arg proj_id "${RM_PROJ_ID}" -f issues.jq > ${LINE}.json
+    curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}issues.json?key=${RM_API_KEY} -d @${LINE}.json
 
     # Overview
     rm -f ./story.json
