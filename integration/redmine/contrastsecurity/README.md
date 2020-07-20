@@ -6,6 +6,7 @@
 - Redmineのチケットのステータスを変更すると、Contrast TeamServerに連携することができます。
 - Contrast TeamServerで脆弱性のステータスが変更されると、これもWebhookでRedmineに通知され  
   Redmineのチケットのステータスも合わせて更新されます。
+- コメントについても相互の共有されます。ステータス変更時のコメントも同様です。
 - Redmineのチケットの詳細を表示する際に、Contrast TeamServerの以下の情報が自動で同期されます。  
   - 最終検出日時
   - 重大度（重大度に応じて、Redmineのチケットの優先度が同期されます）
