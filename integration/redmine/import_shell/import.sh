@@ -17,5 +17,24 @@ ORG_ID=$CONTRAST_ORG_ID
 API_URL="${BASEURL}api/ng/${ORG_ID}"
 APP_NAME=$CONTRAST_APP_NAME
 
+rm -f ./applications.json
+curl -X GET -sS \
+     ${API_URL}/applications?expand=skip_links \
+     -H "Authorization: ${AUTHORIZATION}" \
+     -H "API-Key: ${API_KEY}" \
+     -H 'Accept: application/json' -J -o applications.json
+
+if [ -s ./applications.json ]; then
+    SUCCESS=`cat ./applications.json | jq -r '.success'`
+    if [ "${SUCCESS}" != "true" ]; then
+        echo "アプリケーション一覧の取得に失敗しました。権限などをご確認ください。"
+        exit 1
+    fi
+else
+    echo "Authorizationヘッダ, APIキー, 組織ID, TeamServerのURLが正しいか、ご確認ください。"
+    echo "接続先URL: " $API_URL
+    exit 1
+fi
+
 exit 0
 
