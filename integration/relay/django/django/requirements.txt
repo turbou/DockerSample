@@ -1,0 +1,8 @@
+Django==2.0.13
+pyasn1==0.4.5
+pytz==2019.1
+python-dateutil==2.8.0
+PyYAML==5.3
+requests==2.23.0
+djangorestframework==3.11.0
+

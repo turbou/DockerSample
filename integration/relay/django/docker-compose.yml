@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  django:
+    image: django:1.0.0
+    build:
+      context: ./django
+    container_name: django
+    restart: always
+    command: python /project/django_project/manage.py runserver 0.0.0.0:8081
+    volumes:
+      - ./relay_django:/project/django_project
+    ports:
+      - "8081:8081"
+
