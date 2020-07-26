@@ -392,7 +392,7 @@ class ContrastController < ApplicationController
   def convertMustache(str)
     if Setting.text_formatting == "textile"
       # Link
-      new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '"\2":\1')
+      new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '"\2":\1 ')
       # CodeBlock
       new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>').gsub(/{{\/[A-Za-z]+Block}}/, '</pre>')
       # Header
