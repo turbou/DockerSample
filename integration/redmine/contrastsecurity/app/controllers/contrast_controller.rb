@@ -49,8 +49,18 @@ class ContrastController < ApplicationController
         return render plain: 'Vul Skip'
       end
       app_name = t_issue['application_name']
+      self_url = ""
+      self_url_pattern = /.+\((.+)\) was found in/
+      is_self_url = t_issue['description'].match(self_url_pattern)
+      if is_self_url
+        self_url = is_self_url[1]
+      end
       vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
       is_vul = t_issue['description'].match(vul_pattern)
+      if not is_vul
+        logger.error(l(:problem_with_hook_description))
+        return head :not_found
+      end
       org_id = is_vul[1]
       app_id = is_vul[2]
       vul_id = is_vul[3]
@@ -95,14 +105,7 @@ class ContrastController < ApplicationController
       #logger.info(add_custom_fields)
       story_url = ''
       howtofix_url = ''
-      self_url = ''
       vuln_json['trace']['links'].each do |c_link|
-        if c_link['rel'] == 'self'
-          self_url = c_link['href']
-          if self_url.include?("{traceUuid}")
-            self_url = self_url.sub(/{traceUuid}/, vul_id)
-          end
-        end
         if c_link['rel'] == 'story'
           story_url = c_link['href']
           if story_url.include?("{traceUuid}")
@@ -121,13 +124,19 @@ class ContrastController < ApplicationController
       #logger.info(howtofix_url)
       #logger.info(self_url)
       # Story
-      get_story_res = callAPI(story_url)
-      story_json = JSON.parse(get_story_res.body)
-      story = story_json['story']['risk']['formattedText']
+      story = ""
+      if not story_url.empty?
+        get_story_res = callAPI(story_url)
+        story_json = JSON.parse(get_story_res.body)
+        story = story_json['story']['risk']['formattedText']
+      end
       # How to fix
-      get_howtofix_res = callAPI(howtofix_url)
-      howtofix_json = JSON.parse(get_howtofix_res.body)
-      howtofix = howtofix_json['recommendation']['formattedText']
+      howtofix = ""
+      if not howtofix_url.empty?
+        get_howtofix_res = callAPI(howtofix_url)
+        howtofix_json = JSON.parse(get_howtofix_res.body)
+        howtofix = howtofix_json['recommendation']['formattedText']
+      end
       # description
       deco_mae = ""
       deco_ato = ""

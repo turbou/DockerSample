@@ -59,6 +59,7 @@ ja:
   event_vulnerability_changestatus: "[Contrast plugin] 脆弱性のステータス変更を受信"
   event_new_vulnerable_library: "[Contrast plugin] 新しい脆弱性ライブラリを受信"
   event_new_vulnerability_comment: "[Contrast plugin] 新しいコメントを受信"
+  problem_with_hook_description: "[Contrast plugin] TeamServerからのペイロードの内容に問題があります。"
   problem_with_priority: "[Contrast plugin] プラグインの優先度マッピング設定に問題があるようです。"
   problem_with_status: "[Contrast plugin] プラグインのステータスマッピング設定に問題があるようです。"
   issue_create_success: "[Contrast plugin] チケットを作成しました。"

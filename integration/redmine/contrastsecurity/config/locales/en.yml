@@ -59,6 +59,7 @@ en:
   event_vulnerability_changestatus: "[Contrast plugin] VULNERABILITY CHANGESTATUS"
   event_new_vulnerable_library: "[Contrast plugin] NEW VULNERABLE LIBRARY"
   event_new_vulnerability_comment: "[Contrast plugin] NEW VULNERABILITY COMMENT"
+  problem_with_hook_description: "[Contrast plugin] There is a problem with the payload from TeamServer."
   problem_with_priority: "[Contrast plugin] There seems to be a problem with the plugin Priority Mapping settings."
   problem_with_status: "[Contrast plugin] There seems to be a problem with the plugin Status Mapping settings."
   issue_create_success: "[Contrast plugin] Issue has been reported."
