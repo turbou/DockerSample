@@ -50,10 +50,10 @@ class ContrastController < ApplicationController
       end
       app_name = t_issue['application_name']
       self_url = ""
-      self_url_pattern = /.+\((.+)\) was found in/
-      is_self_url = t_issue['description'].match(self_url_pattern)
-      if is_self_url
-        self_url = is_self_url[1]
+      vulurl_pattern = /.+\((.+)\) was found in/
+      is_vulurl = t_issue['description'].match(vulurl_pattern)
+      if is_vulurl
+        self_url = is_vulurl[1]
       end
       vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
       is_vul = t_issue['description'].match(vul_pattern)
