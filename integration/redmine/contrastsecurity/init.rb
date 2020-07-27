@@ -26,7 +26,7 @@ Redmine::Plugin.register :contrastsecurity do
   version '0.0.5'
   url 'https://github.com/turbou/ContrastSecurity/tree/master/integration/redmine/contrast'
   author_url 'https://github.com/turbou'
-  settings :default => {'vul_issues' => true, 'lib_issues' => true, 'vul_seen_dt_format' => '%Y/%m/%d %H:%M', 'comment_suffix' => 'by Redmine.', 'hide_comment_id' => false}, :partial => 'settings/contrast_settings'
+  settings :default => {'vul_issues' => true, 'lib_issues' => true, 'vul_seen_dt_format' => '%Y/%m/%d %H:%M', 'comment_suffix' => 'by Redmine', 'hide_comment_id' => false}, :partial => 'settings/contrast_settings'
   require 'issue_hooks'
 end
 

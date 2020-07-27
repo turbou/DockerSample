@@ -49,15 +49,15 @@ class IssueHook < Redmine::Hook::Listener
     if vuln_json['trace']['status'] != status
       # Put Status(and Comment) from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-      t_data_dict = {"traces" => [vul_id], "status" => status, "note" => comment_suffix}
+      t_data_dict = {"traces" => [vul_id], "status" => status, "note" => comment_suffix + "(" + issue.last_updated_by.name + ")."}
       if (not note.nil?) && (not note.empty?)
-        t_data_dict["note"] = note + " " + comment_suffix
+        t_data_dict["note"] = note + " " + comment_suffix + "(" + issue.last_updated_by.name + ")."
       end
       callAPI(url, "PUT", t_data_dict.to_json)
     else
       if (not note.nil?) && (not note.empty?)
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-        t_data = {"note" => note + " " + comment_suffix}.to_json
+        t_data = {"note" => note + " " + comment_suffix + "(" + issue.last_updated_by.name + ")."}.to_json
         callAPI(url, "POST", t_data)
       end
     end
