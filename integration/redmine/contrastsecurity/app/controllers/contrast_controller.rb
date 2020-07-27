@@ -335,6 +335,7 @@ class ContrastController < ApplicationController
     if comment_suffix.nil? || comment_suffix.empty?
       comment_suffix = "by Redmine."
     end
+    hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
     notes_json['notes'].reverse.each do |c_note|
       if CGI.unescapeHTML(c_note['note']).end_with?(comment_suffix)
         next
@@ -357,10 +358,14 @@ class ContrastController < ApplicationController
             end
           end
         end
-        note_str = CGI.unescapeHTML(c_note['note']) + "\n[" + c_note['id'] + "]"
+        comment_id_str = "[" + c_note['id'] + "]"
+        if hide_comment_id
+          comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + c_note['id'] + "\" />"
+        end
+        note_str = CGI.unescapeHTML(c_note['note']) + "\n" + comment_id_str
         if (not old_status_str.empty?) && (not new_status_str.empty?)
           cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
-          note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(c_note['note']) + "\n[" + c_note['id'] + "]"
+          note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(c_note['note']) + "\n" + comment_id_str
         end
         journal = Journal.new(
           :journalized => issue,

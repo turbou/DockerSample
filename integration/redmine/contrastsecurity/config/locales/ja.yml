@@ -73,4 +73,6 @@ ja:
   problem_with_vul_seen_dt_format: "[Contrast plugin] 脆弱性の検出日時のフォーマット指定に問題があるようです。"
   comment_suffix: "コメント接尾辞"
   status_changed_comment: "ステータス を %{old} から %{new} に変更 by TeamServer"
+  hide_comment_id: "コメントIDを隠す"
+  hide_comment_id_hint: "hiddenインプットを使うため、有効にする場合はredmineのALLOWED_TAGSにinputタグを追加してください。"
 
