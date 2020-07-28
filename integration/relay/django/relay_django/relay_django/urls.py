@@ -17,7 +17,11 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('hook/', views.hook, name='hook'),
+    path('vote/<key>/', views.vote, name='vote'),
 ] + static('static/', document_root=settings.STATIC_ROOT)
+
