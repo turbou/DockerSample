@@ -39,7 +39,7 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
     if comment_suffix.nil? || comment_suffix.empty?
-      comment_suffix = "by Redmine."
+      comment_suffix = "by Redmine"
     end
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
