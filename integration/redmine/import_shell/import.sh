@@ -75,6 +75,7 @@ while read -r LINE; do
     FIRST_TIME_SEEN_UNIX_TIME=`echo ${FIRST_TIME_SEEN_UNIX_TIME} | cut -c 1-10`
     FIRST_TIME_SEEN=`date -d @${FIRST_TIME_SEEN_UNIX_TIME} +"%Y/%m/%d %H:%M"`
     RULE_TITLE=`cat ./trace.json | jq -r '.trace.rule_title'`
+    RULE_NAME=`cat ./trace.json | jq -r '.trace.rule_name'`
     SEVERITY=`cat ./trace.json | jq -r '.trace.severity'`
     STATUS=`cat ./trace.json | jq -r '.trace.status'`
     echo "脆弱性タイトル: ${RULE_TITLE}"
@@ -82,10 +83,12 @@ while read -r LINE; do
     echo "ステータス    : ${STATUS}"
     echo "検出日時      : ${FIRST_TIME_SEEN}"
 
+    DESCRIPTION="${BASEURL}static/ng/index.html#/${ORG_ID}/applications/${APP_ID}/vulns/${LINE}) was found in ${CORRECT_APP_NAME}"
+
     jq -n \
       --arg Title "Contrast Security" \
-      --arg Message "" \
-      --arg Project "contrastsecurity" \
+      --arg Message "${DESCRIPTION}" \
+      --arg Project "contrastsecurity4shell" \
       --arg Tracker "脆弱性" \
       --arg ApplicationName "${CORRECT_APP_NAME}" \
       --arg ApplicationCode "" \
@@ -94,15 +97,14 @@ while read -r LINE; do
       --arg ServerName "" \
       --arg ServerId "" \
       --arg OrganizationId "" \
-      --arg Severity "" \
-      --arg Status "" \
-      --arg TraceId "" \
-      --arg VulnerabilityRule "" \
+      --arg Severity "${SEVERITY}" \
+      --arg Status "${STATUS}" \
+      --arg TraceId "${LINE}" \
+      --arg VulnerabilityRule "${RULE_NAME}" \
       --arg Environment "" \
       --arg EventType "NEW_VULNERABILITY" \
       -f webhook.jq > ${LINE}.json
-    #curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${LINE}.json
-    exit 0
+    curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${LINE}.json
 done < <(cat ./traces_ids.json | jq -r '.traces[]')
 
 exit 0
