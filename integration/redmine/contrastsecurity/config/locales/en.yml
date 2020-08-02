@@ -14,6 +14,7 @@ en:
     server: "【Contrast】サーバ"
     category: "【Contrast】カテゴリ"
     rule: "【Contrast】ルール名"
+  test_connect_fail: "Test connection failed. Please confirm the settings."
   config_section_connect: "TeamServer Connect（You can get this information with Your Account in TeamServer.）"
   config_section_import: "Issue Target"
   config_section_status: "Status Mapping"
