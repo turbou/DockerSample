@@ -157,6 +157,7 @@ class ContrastController < ApplicationController
       description << self_url
     elsif 'VULNERABILITY_CHANGESTATUS_OPEN' == event_type || 'VULNERABILITY_CHANGESTATUS_CLOSED' == event_type
       logger.info(l(:event_vulnerability_changestatus))
+      project = t_issue['project']
       status = t_issue['status']
       #logger.info(status)
       vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
@@ -166,9 +167,12 @@ class ContrastController < ApplicationController
         app_id = is_vul_sts_chg[2]
         vul_id = is_vul_sts_chg[3]
         #logger.info('vul_id: ' + vul_id)
-        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
-        if cv
+        cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
+        cvs.each do |cv|
           issue = cv.customized
+          if project != issue.project.identifier
+            next
+          end
           #logger.info(cv.customized.subject)
           #logger.info(cv.customized.id)
           status_obj = ContrastUtil.get_redmine_status(status)
