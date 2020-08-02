@@ -23,10 +23,28 @@ Redmine::Plugin.register :contrastsecurity do
   name 'Contrast plugin'
   author 'Taka Shiozaki'
   description 'This is a Contrast plugin for Redmine'
-  version '0.0.5'
+  version '0.0.6'
   url 'https://github.com/turbou/ContrastSecurity/tree/master/integration/redmine/contrast'
   author_url 'https://github.com/turbou'
-  settings :default => {'vul_issues' => true, 'lib_issues' => true, 'vul_seen_dt_format' => '%Y/%m/%d %H:%M', 'comment_suffix' => 'by Redmine', 'hide_comment_id' => false}, :partial => 'settings/contrast_settings'
+  settings :default => {
+    'vul_issues' => true,
+    'lib_issues' => true,
+    'vul_seen_dt_format' => '%Y/%m/%d %H:%M',
+    'comment_suffix' => 'by Redmine',
+    'hide_comment_id' => false,
+    'sts_reported' => '報告済',
+    'sts_suspicious' => '疑わしい',
+    'sts_confirmed' => '確認済',
+    'sts_notaproblem' => '問題無し',
+    'sts_remediated' => '修復済',
+    'sts_fixed' => '修復完了',
+    'pri_critical' => '最高',
+    'pri_high' => '高',
+    'pri_medium' => '中',
+    'pri_low' => '低',
+    'pri_note' => '最低',
+    'pri_cvelib' => '高'
+  }, :partial => 'settings/contrast_settings'
   require 'issue_hooks'
 end
 
