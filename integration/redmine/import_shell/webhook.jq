@@ -1,6 +1,6 @@
 {
-  "summary":$Title,
-  "description":$Message,
+  "summary": $Title,
+  "description": $Message,
   "project": "contrastsecurity4shell",
   "tracker": "脆弱性",
   "application_name": $ApplicationName,
