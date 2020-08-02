@@ -3,7 +3,7 @@
   <tbody>
     <tr>
       <th align="left"><%= l(:teamserver_url) %></th>
-      <td><%= text_field_tag('settings[teamserver_url]', @settings['teamserver_url'], {size:"50"})%></td>
+      <td><%= text_field_tag('settings[teamserver_url]', @settings['teamserver_url'], {size:"50", placeholder:"https://teamserver-host/Contrast"})%></td>
     </tr>
     <tr>
       <th align="left"><%= l(:org_id) %></th>
