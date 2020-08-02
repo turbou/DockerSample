@@ -1,8 +1,8 @@
 {
   "summary":$Title,
   "description":$Message,
-  "project": $Project,
-  "tracker": $Tracker,
+  "project": "contrastsecurity4shell",
+  "tracker": "脆弱性",
   "application_name": $ApplicationName,
   "application_code": $ApplicationCode,
   "vulnerability_tags": $VulnerabilityTags,

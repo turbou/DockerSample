@@ -80,8 +80,6 @@ while read -r LINE; do
   jq -n \
     --arg Title "Contrast Security" \
     --arg Message "${DESCRIPTION}" \
-    --arg Project "contrastsecurity4shell" \
-    --arg Tracker "脆弱性" \
     --arg ApplicationName "${CORRECT_APP_NAME}" \
     --arg ApplicationCode "" \
     --arg VulnerabilityTags "" \
@@ -104,8 +102,6 @@ while read -r LINE; do
   jq -n \
     --arg Title "Contrast Security" \
     --arg Message "${DESCRIPTION}" \
-    --arg Project "contrastsecurity4shell" \
-    --arg Tracker "脆弱性" \
     --arg ApplicationName "" \
     --arg ApplicationCode "" \
     --arg VulnerabilityTags "" \
@@ -143,8 +139,6 @@ for i in `seq 0 $(expr ${json_length} - 1)`; do
   jq -n \
     --arg Title "Contrast Security" \
     --arg Message "${DESCRIPTION}" \
-    --arg Project "contrastsecurity4shell" \
-    --arg Tracker "脆弱性" \
     --arg ApplicationName "${CORRECT_APP_NAME}" \
     --arg ApplicationCode "" \
     --arg VulnerabilityTags "" \
