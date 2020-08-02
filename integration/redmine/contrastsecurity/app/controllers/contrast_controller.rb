@@ -253,15 +253,18 @@ class ContrastController < ApplicationController
     elsif 'NEW_VULNERABILITY_COMMENT' == event_type
       logger.info(l(:event_new_vulnerability_comment))
       vul_id_pattern = /.+ commented on a .+[^(]+ \(.+index.html#\/(.+)\/applications\/(.+)\/vulns\/([^)]+)\)/
+      project = t_issue['project']
       is_vul_id = t_issue['description'].match(vul_id_pattern)
       if is_vul_id
         org_id = is_vul_id[1]
         app_id = is_vul_id[2]
         vul_id = is_vul_id[3]
-        cv = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
-        if cv
+        cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
+        cvs.each do |cv|
           issue = cv.customized
-          syncComment(org_id, app_id, vul_id, issue)
+          if project == issue.project.identifier
+            syncComment(org_id, app_id, vul_id, issue)
+          end
         end
       end
       return head :ok 
