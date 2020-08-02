@@ -42,9 +42,11 @@ module SettingsControllerPatch
         org_id = setting['org_id']
         api_key = setting['api_key']
         auth_header = setting['auth_header']
-        puts auth_header
+        if teamserver_url.empty? || org_id.empty? || org_id.empty? || auth_header.empty?
+          flash[:error] = l(:test_connect_fail)
+          redirect_to plugin_settings_path(@plugin) and return
+        end
         url = sprintf('%s/api/ng/%s/applications/', teamserver_url, org_id)
-        puts url
         uri = URI.parse(url)
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = false
@@ -57,19 +59,40 @@ module SettingsControllerPatch
         req["API-Key"] = api_key
         req['Content-Type'] = req['Accept'] = 'application/json'
         res = http.request(req)
-        puts res.code
-        puts res.body
-        #apps_json = JSON.parse(res.body)
-        #puts apps_json
         if res.code != "200"
-          flash.now[:notice] = l(:test_connect_fail)
-          #redirect_to plugin_settings_path(@plugin) and return
-        else
-          plugin = plugin_without_validate
-          return plugin
+          flash[:error] = l(:test_connect_fail)
+          redirect_to plugin_settings_path(@plugin) and return
         end
-        plugin = plugin_without_validate
-        return plugin
+        # ステータスマッピングチェック
+        statuses = []
+        statuses << setting['sts_reported']
+        statuses << setting['sts_suspicious']
+        statuses << setting['sts_confirmed']
+        statuses << setting['sts_notaproblem']
+        statuses << setting['sts_remediated']
+        statuses << setting['sts_fixed']
+        statuses.each do |status|
+          status_obj = IssueStatus.find_by_name(status)
+          if status_obj.nil?
+            flash[:error] = l(:status_settings_fail)
+            redirect_to plugin_settings_path(@plugin) and return
+          end
+        end
+        # 優先度マッピングチェック
+        priorities = []
+        priorities << setting['pri_critical']
+        priorities << setting['pri_high']
+        priorities << setting['pri_medium']
+        priorities << setting['pri_low']
+        priorities << setting['pri_note']
+        priorities << setting['pri_cvelib']
+        priorities.each do |priority|
+          priority_obj = IssuePriority.find_by_name(priority)
+          if priority_obj.nil?
+            flash[:error] = l(:priority_settings_fail)
+            redirect_to plugin_settings_path(@plugin) and return
+          end
+        end
       end
       plugin = plugin_without_validate
       return plugin
