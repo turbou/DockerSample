@@ -158,5 +158,7 @@ for i in `seq 0 $(expr ${json_length} - 1)`; do
   curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${HASH}.json
 done
 
+rm -f *.json
+
 exit 0
 
