@@ -52,6 +52,7 @@ if [ "$APP_ID" = "" ]; then
 fi
 echo "${CORRECT_APP_NAME} -> ${APP_ID}"
 
+echo "脆弱性"
 # まずは検知した脆弱性のUUIDリストを取得
 rm -f ./traces_ids.json
 curl -X GET -sS \
@@ -62,7 +63,7 @@ curl -X GET -sS \
 
 while read -r LINE; do
   # UUIDでまわす
-  echo "- ${LINE} -----------------------------------"
+  echo " - ${LINE}"
   rm -f ./trace.json
   curl -X GET -sS \
     ${API_URL}/traces/${APP_ID}/filter/${LINE}?expand=events,notes,skip_links \
@@ -96,6 +97,8 @@ while read -r LINE; do
     --arg EventType "NEW_VULNERABILITY" \
     -f webhook.jq > ${LINE}.json
   curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${LINE}.json
+
+  # コメント同期のためのトリガ
   sleep 1
   DESCRIPTION="X commented on a ${SEVERITY} vulnerability (${BASEURL}static/ng/index.html#/${ORG_ID}/applications/${APP_ID}/vulns/${LINE}) vulnerability in ${CORRECT_APP_NAME}"
   jq -n \
@@ -121,6 +124,7 @@ while read -r LINE; do
 done < <(cat ./traces_ids.json | jq -r '.traces[]')
 
 # 次に検知したライブラリ脆弱性のリストを取得
+echo "ライブラリ脆弱性"
 rm -f ./libraries.json
 curl -X GET -sS \
   ${API_URL}/applications/${APP_ID}/libraries?quickFilter=VULNERABLE \
@@ -135,7 +139,7 @@ for i in `seq 0 $(expr ${json_length} - 1)`; do
   LANGUAGE=`echo ${json_file} | jq -r .libraries[${i}].app_language | tr '[:upper:]' '[:lower:]'`
   HASH=`echo ${json_file} | jq -r .libraries[${i}].hash`
   DESCRIPTION="X was found in ${FILENAME} (${BASEURL}static/ng/index.html#/${ORG_ID}/libraries/${LANGUAGE}/${HASH}), used in ${CORRECT_APP_NAME} (${BASEURL}static/ng/index.html#/${ORG_ID}/applications/${APP_ID})."
-
+  echo " - ${FILENAME}"
   jq -n \
     --arg Title "Contrast Security" \
     --arg Message "${DESCRIPTION}" \
