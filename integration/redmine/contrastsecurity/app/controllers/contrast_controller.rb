@@ -80,6 +80,8 @@ class ContrastController < ApplicationController
       rule_title = vuln_json['trace']['rule_title']
       severity = vuln_json['trace']['severity']
       priority = ContrastUtil.get_priority_by_severity(severity)
+      status = vuln_json['trace']['status']
+      status_obj = ContrastUtil.get_redmine_status(status)
       #logger.info(priority)
       if priority.nil?
         logger.error(l(:problem_with_priority))
@@ -308,6 +310,9 @@ class ContrastController < ApplicationController
       custom_fields: custom_fields,
       author: User.current
     )
+    if not status_obj.nil?
+      issue.status = status_obj
+    end
     if issue.save
       logger.info(l(:issue_create_success))
       return head :ok
