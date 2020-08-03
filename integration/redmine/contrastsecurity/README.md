@@ -16,8 +16,10 @@
   ```plugins/``` 直下にcontrastsecurityディレクトリを配置
 
 2. マイグレート  
-    ```
+    ```bash
+    # インストール時
     bundle exec rake redmine:plugins:migrate
+    # アンインストール時は必要に応じて以下のコマンドを実行してください。
     bundle exec rake redmine:plugins:migrate VERSION=0 NAME=contrastsecurity
     ```
     Contrastプラグインのモデルを新たに作るわけではなく、デフォルトの選択肢（ステータス、優先度）、トラッカー、カスタムフィールドを作成します。
