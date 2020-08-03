@@ -299,6 +299,10 @@ class ContrastController < ApplicationController
           custom_field.projects << project
           custom_field.save
         end
+        if not custom_field.trackers.include? tracker
+          custom_field.trackers << tracker
+          custom_field.save
+        end
       end
       custom_field_hash[custom_field_name] = custom_field.id
     end
