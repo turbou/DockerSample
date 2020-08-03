@@ -42,6 +42,10 @@ class ContrastController < ApplicationController
     if project.nil? || tracker.nil?
       return head :not_found
     end
+    if not tracker.projects.include? project
+      tracker.projects << project
+      tracker.save
+    end
     add_custom_fields = []
     if 'NEW_VULNERABILITY' == event_type
       logger.info(l(:event_new_vulnerability))
