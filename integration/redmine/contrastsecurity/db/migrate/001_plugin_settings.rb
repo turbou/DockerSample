@@ -55,7 +55,7 @@ class PluginSettings < ActiveRecord::Migration
     end
 
     puts "Tracker create..."
-    if not Tracker.exists?(name: name)
+    if not Tracker.exists?(name: '脆弱性')
       tracker = Tracker.new(name: '脆弱性')
       tracker.default_status = IssueStatus.find_by_name('報告済')
       tracker.save
@@ -87,7 +87,7 @@ class PluginSettings < ActiveRecord::Migration
     end
 
     puts "Tracker destroy..."
-    if Tracker.exists?(name: name)
+    if Tracker.exists?(name: '脆弱性')
       Tracker.find_by_name('脆弱性').destroy
     end
 
