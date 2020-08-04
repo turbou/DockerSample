@@ -53,7 +53,12 @@ docker-compose up -d
 
 ### Djangoのマイグレートとスーパーユーザーの作成
 ```
+docker exec -i django python /project/django_project/manage.py migrate
+docker exec -i django python /project/django_project/manage.py batch_createsuperuser --username admin --email xxxxx@contrastsecurity.com --password xxxxx
 ```
+
+### Djangoへの接続（とくに必要はないですが）
+http://xxx.xxx.xxx.xxx:8085/admin/
 
 ### Backlogのチケット一括削除コマンド
 ```
