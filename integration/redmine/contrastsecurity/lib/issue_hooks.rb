@@ -20,9 +20,40 @@
 # SOFTWARE.
 
 class IssueHook < Redmine::Hook::Listener
+  def controller_journals_edit_post(context)
+    journal = context[:journal]
+    issue = journal.journalized
+    cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
+    cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first
+    cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
+    org_id = cv_org.try(:value)
+    app_id = cv_app.try(:value)
+    vul_id = cv_vul.try(:value)
+    if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
+      return
+    end
+    note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
+    is_note_id = journal.notes.match(note_id_pattern)
+    note_id = nil
+    if is_note_id
+      note_id = is_note_id[1]
+    else
+      return
+    end
+    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+    url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id, note_id)
+    note = journal.notes
+    note = note.gsub(/\[[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\]/, '')
+    note = note.gsub(/<input type="hidden" .+\/>/, '')
+    puts note
+    t_data = {"note" => note}.to_json
+    callAPI(url, "PUT", t_data)
+  end
+
   def controller_issues_edit_after_save(context)
     params = context[:params]
     issue = context[:issue]
+    journal = context[:journal]
     cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
     cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first
     cv_vul = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')}).first
@@ -57,8 +88,20 @@ class IssueHook < Redmine::Hook::Listener
     else
       if (not note.nil?) && (not note.empty?)
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-        t_data = {"note" => note + " " + comment_suffix + "(" + issue.last_updated_by.name + ")."}.to_json
-        callAPI(url, "POST", t_data)
+        t_data = {"note" => note + " (" + issue.last_updated_by.name + ")"}.to_json
+        res = callAPI(url, "POST", t_data)
+        # note idを取得してredmine側のコメントに反映する。
+        note_json = JSON.parse(res.body)
+        if note_json['success']
+          hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
+          comment_id_str = "[" + note_json['note']['id'] + "]"
+          if hide_comment_id
+            comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + note_json['note']['id'] + "\" />"
+          end
+          note_str = CGI.unescapeHTML(note_json['note']['note'] + "\n" + comment_id_str)
+          journal.notes = note_str
+          journal.save()
+        end
       end
     end
   end

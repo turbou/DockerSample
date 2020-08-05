@@ -356,20 +356,23 @@ class ContrastController < ApplicationController
         note_id_map[note_id] = c_journal.id
       end
     end
-    comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
-    if comment_suffix.nil? || comment_suffix.empty?
-      comment_suffix = "by Redmine"
-    end
+    #comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
+    #if comment_suffix.nil? || comment_suffix.empty?
+    #  comment_suffix = "by Redmine"
+    #end
     hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
     notes_json['notes'].reverse.each do |c_note|
-      if CGI.unescapeHTML(c_note['note']).include?(comment_suffix)
-        next
-      end
+      #if CGI.unescapeHTML(c_note['note']).include?(comment_suffix)
+      #  next
+      #end
       journal = nil
+      creator = nil
       if note_id_map.has_key?(c_note['id'])
         journal = Journal.find(note_id_map[c_note['id']])
+        creator = ""
       else
         journal = Journal.new
+        creator = "\n(" + c_note['creator'] + ")"
       end
       old_status_str = ""
       new_status_str = ""
@@ -391,15 +394,14 @@ class ContrastController < ApplicationController
           end
         end
       end
-      creator = c_note['creator']
       comment_id_str = "[" + c_note['id'] + "]"
       if hide_comment_id
         comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + c_note['id'] + "\" />"
       end
-      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + "\n" + "by Contrast(" + creator + ").\n" + comment_id_str
+      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
       if old_status_str.present? && new_status_str.present?
         cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
-        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + "\n" + "by Contrast(" + creator + ").\n" + comment_id_str
+        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
       end
       journal.journalized = issue
       journal.user = User.current
