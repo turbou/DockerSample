@@ -131,14 +131,14 @@ class ContrastController < ApplicationController
       #logger.info(self_url)
       # Story
       story = ""
-      if not story_url.empty?
+      if story_url.present?
         get_story_res = callAPI(story_url)
         story_json = JSON.parse(get_story_res.body)
         story = story_json['story']['risk']['formattedText']
       end
       # How to fix
       howtofix = ""
-      if not howtofix_url.empty?
+      if howtofix_url.present?
         get_howtofix_res = callAPI(howtofix_url)
         howtofix_json = JSON.parse(get_howtofix_res.body)
         howtofix = howtofix_json['recommendation']['formattedText']
@@ -368,6 +368,7 @@ class ContrastController < ApplicationController
       if not note_ids.include? c_note['id']
         old_status_str = ""
         new_status_str = ""
+        status_change_reason_str = ""
         if c_note.has_key?("properties")
           c_note['properties'].each do |c_prop|
             if c_prop['name'] == "status.change.previous.status"
@@ -380,6 +381,8 @@ class ContrastController < ApplicationController
               if not status_obj.nil?
                 new_status_str = status_obj.name
               end
+            elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?
+              status_change_reason_str = "問題無しへの変更理由: " + c_prop['value'] + "\n"
             end
           end
         end
@@ -388,10 +391,10 @@ class ContrastController < ApplicationController
         if hide_comment_id
           comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + c_note['id'] + "\" />"
         end
-        note_str = CGI.unescapeHTML(c_note['note']) + "\n" + "by Contrast(" + creator + ").\n" + comment_id_str
-        if (not old_status_str.empty?) && (not new_status_str.empty?)
+        note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + "\n" + "by Contrast(" + creator + ").\n" + comment_id_str
+        if old_status_str.present? && new_status_str.present?
           cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
-          note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(c_note['note']) + "\n" + "by Contrast(" + creator + ").\n" + comment_id_str
+          note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + "\n" + "by Contrast(" + creator + ").\n" + comment_id_str
         end
         journal = Journal.new(
           :journalized => issue,

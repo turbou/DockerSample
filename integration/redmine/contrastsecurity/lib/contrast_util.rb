@@ -45,7 +45,7 @@ module ContrastUtil
       rm_status = Setting.plugin_contrastsecurity['sts_suspicious']
     when "Confirmed"
       rm_status = Setting.plugin_contrastsecurity['sts_confirmed']
-    when "NotAProblem"
+    when "NotAProblem", "Not a Problem"
       rm_status = Setting.plugin_contrastsecurity['sts_notaproblem']
     when "Remediated"
       rm_status = Setting.plugin_contrastsecurity['sts_remediated']
