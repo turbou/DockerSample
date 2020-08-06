@@ -58,6 +58,7 @@ ja:
   pri_for_cvelib_ph: "脆弱なライブラリはこの優先度が設定されます。"
   vuln_does_not_exist: "この脆弱性はTeamServerに存在しません。"
   lib_does_not_exist: "このライブラリはTeamServerに存在しません。"
+  sync_comment_failure: "コメントの同期に失敗しました。"
   event_new_vulnerability: "[Contrast plugin] 新しい脆弱性を受信"
   event_vulnerability_changestatus: "[Contrast plugin] 脆弱性のステータス変更を受信"
   event_new_vulnerable_library: "[Contrast plugin] 新しい脆弱性ライブラリを受信"

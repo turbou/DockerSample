@@ -97,7 +97,7 @@ class ContrastController < ApplicationController
         server_list.push(c_server['name'])
       end
       dt_format = Setting.plugin_contrastsecurity['vul_seen_dt_format']
-      if dt_format.nil? || dt_format.empty?
+      if dt_format.blank?
         dt_format = "%Y/%m/%d %H:%M"
       end
       add_custom_fields << {'id_str': l('contrast_custom_fields.first_seen'), 'value': Time.at(first_time_seen/1000.0).strftime(dt_format)}
@@ -330,7 +330,7 @@ class ContrastController < ApplicationController
       custom_fields: custom_fields,
       author: User.current
     )
-    if not status_obj.nil?
+    unless status_obj.nil?
       issue.status = status_obj
     end
     if issue.save
@@ -381,12 +381,12 @@ class ContrastController < ApplicationController
         c_note['properties'].each do |c_prop|
           if c_prop['name'] == "status.change.previous.status"
             status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
-            if not status_obj.nil?
+            unless status_obj.nil?
               old_status_str = status_obj.name
             end
           elsif c_prop['name'] == "status.change.status"
             status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
-            if not status_obj.nil?
+            unless status_obj.nil?
               new_status_str = status_obj.name
             end
           elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?

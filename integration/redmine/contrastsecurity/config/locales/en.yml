@@ -58,6 +58,7 @@ en:
   pri_for_cvelib_ph: "Vulnerable libraries will use this priority."
   vuln_does_not_exist: "This vulnerability does not exist on TeamServer."
   lib_does_not_exist: "This library does not exist on TeamServer."
+  sync_comment_failure: "Comment synchronization failed."
   event_new_vulnerability: "[Contrast plugin] NEW VULNERABILITY"
   event_vulnerability_changestatus: "[Contrast plugin] VULNERABILITY CHANGESTATUS"
   event_new_vulnerable_library: "[Contrast plugin] NEW VULNERABLE LIBRARY"

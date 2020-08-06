@@ -41,14 +41,14 @@ module IssuesControllerPatch
       lib_id = cv_lib.try(:value)
       lib_lang = cv_lib_lang.try(:value)
       type = nil
-      if ! vul_id.nil? && ! vul_id.empty?
-        if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty?
+      if vul_id.present?
+        if org_id.blank? || app_id.blank?
           show = show_without_update
           return show
         end 
         type = "VUL"
-      elsif ! lib_id.nil? && ! lib_id.empty?
-        if org_id.nil? || org_id.empty? || lib_lang.nil? || lib_lang.empty?
+      elsif lib_id.present?
+        if org_id.blank? || lib_lang.blank?
           show = show_without_update
           return show
         end 
@@ -72,11 +72,11 @@ module IssuesControllerPatch
         last_time_seen = vuln_json['trace']['last_time_seen']
         severity = vuln_json['trace']['severity']
         priority = ContrastUtil.get_priority_by_severity(severity)
-        if not priority.nil?
+        unless priority.nil?
           @issue.priority = priority
         end 
         dt_format = Setting.plugin_contrastsecurity['vul_seen_dt_format']
-        if dt_format.nil? || dt_format.empty?
+        if dt_format.blank?
           dt_format = "%Y/%m/%d %H:%M"
         end
         @issue.custom_field_values.each do |cfv|
@@ -87,7 +87,9 @@ module IssuesControllerPatch
           end 
         end 
         @issue.save
-        syncDeletedComment(org_id, app_id, vul_id, @issue)
+        unless syncDeletedComment(org_id, app_id, vul_id, @issue)
+          flash.now[:warning] = l(:sync_comment_failure)
+        end
       else
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
@@ -124,6 +126,9 @@ module IssuesControllerPatch
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
     res = callAPI(url)
+    if res.code != "200"
+      return false
+    end
     notes_json = JSON.parse(res.body)
     note_id_map = {}
     note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
@@ -139,12 +144,13 @@ module IssuesControllerPatch
         note_id_map.delete(c_note['id'])
       end
     end
-    note_id_map.each{|value|
+    note_id_map.each do |value|
       journal = Journal.find_by(id: value)
       if journal
         journal.destroy
       end
-    }
+    end
+    return true
   end
 end
 
