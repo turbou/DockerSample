@@ -87,6 +87,7 @@ module IssuesControllerPatch
           end 
         end 
         @issue.save
+        syncDeletedComment(org_id, app_id, vul_id, @issue)
       else
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
@@ -117,6 +118,33 @@ module IssuesControllerPatch
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
     return res
+  end
+
+  def syncDeletedComment(org_id, app_id, vul_id, issue)
+    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+    url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
+    res = callAPI(url)
+    notes_json = JSON.parse(res.body)
+    note_id_map = {}
+    note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
+    issue.journals.each do |c_journal|
+      is_note_id = c_journal.notes.match(note_id_pattern)
+      if is_note_id
+        note_id = is_note_id[1]
+        note_id_map[note_id] = c_journal.id
+      end
+    end
+    notes_json['notes'].each do |c_note|
+      if note_id_map.has_key?(c_note['id'])
+        note_id_map.delete(c_note['id'])
+      end
+    end
+    note_id_map.each{|value|
+      journal = Journal.find_by(id: value)
+      if journal
+        journal.destroy
+      end
+    }
   end
 end
 
