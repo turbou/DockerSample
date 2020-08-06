@@ -43,9 +43,14 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id, note_id)
     note = journal.notes
+    ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)"
+    sts_chg_pattern = /#{ptn}/
+    is_sts_chg = note.match(sts_chg_pattern)
+    if is_sts_chg
+      note = note.sub(/#{ptn}/, "").gsub(/^$/, "")
+    end
     note = note.gsub(/\[[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\]/, '')
     note = note.gsub(/<input type="hidden" .+\/>/, '')
-    puts note
     t_data = {"note" => note}.to_json
     callAPI(url, "PUT", t_data)
   end
@@ -73,20 +78,24 @@ class IssueHook < Redmine::Hook::Listener
     res = callAPI(url, "GET", nil)
     vuln_json = JSON.parse(res.body)
     note = params['issue']['notes']
+    ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)"
+    sts_chg_pattern = /#{ptn}/
+    is_sts_chg = note.match(sts_chg_pattern)
+    if is_sts_chg
+      note = note.sub(/#{ptn}/, "").sub(/^$/, "")
+    end
     if vuln_json['trace']['status'] != status
       # Put Status(and Comment) from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
       t_data_dict = {"traces" => [vul_id], "status" => status, "note" => " (by " + issue.last_updated_by.name + ")"}
-      if (not note.nil?) && (not note.empty?)
+      if note.present?
         t_data_dict["note"] = note + " (by " + issue.last_updated_by.name + ")"
       end
       res = callAPI(url, "PUT", t_data_dict.to_json)
-      puts res.code
       # note idを取得してredmine側のコメントに反映する。
       note_json = JSON.parse(res.body)
-      puts note_json
     else
-      if (not note.nil?) && (not note.empty?)
+      if note.present?
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
         t_data = {"note" => note + " (by " + issue.last_updated_by.name + ")"}.to_json
         res = callAPI(url, "POST", t_data)
