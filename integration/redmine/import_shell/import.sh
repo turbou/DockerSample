@@ -114,7 +114,7 @@ while read -r LINE; do
     --arg TraceId "" \
     --arg VulnerabilityRule "" \
     --arg Environment "" \
-    --arg EventType "NEW_VULNERABILITY_COMMENT" \
+    --arg EventType "NEW_VULNERABILITY_COMMENT_FROM_SCRIPT" \
     -f webhook.jq > ${LINE}_cmt.json
   curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${LINE}_cmt.json
 done < <(cat ./traces_ids.json | jq -r '.traces[]')

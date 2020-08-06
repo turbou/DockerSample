@@ -257,24 +257,24 @@ class ContrastController < ApplicationController
       description << cve_list.join("\n") + "\n\n"
       description << deco_mae + l(:report_lib_url) + deco_ato + "\n"
       description << self_url
-    #elsif 'NEW_VULNERABILITY_COMMENT' == event_type
-    #  logger.info(l(:event_new_vulnerability_comment))
-    #  vul_id_pattern = /.+ commented on a .+[^(]+ \(.+index.html#\/(.+)\/applications\/(.+)\/vulns\/([^)]+)\)/
-    #  project = t_issue['project']
-    #  is_vul_id = t_issue['description'].match(vul_id_pattern)
-    #  if is_vul_id
-    #    org_id = is_vul_id[1]
-    #    app_id = is_vul_id[2]
-    #    vul_id = is_vul_id[3]
-    #    cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
-    #    cvs.each do |cv|
-    #      issue = cv.customized
-    #      if project == issue.project.identifier
-    #        syncComment(org_id, app_id, vul_id, issue)
-    #      end
-    #    end
-    #  end
-    #  return head :ok 
+    elsif 'NEW_VULNERABILITY_COMMENT_FROM_SCRIPT' == event_type
+      logger.info(l(:event_new_vulnerability_comment))
+      vul_id_pattern = /.+ commented on a .+[^(]+ \(.+index.html#\/(.+)\/applications\/(.+)\/vulns\/([^)]+)\)/
+      project = t_issue['project']
+      is_vul_id = t_issue['description'].match(vul_id_pattern)
+      if is_vul_id
+        org_id = is_vul_id[1]
+        app_id = is_vul_id[2]
+        vul_id = is_vul_id[3]
+        cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
+        cvs.each do |cv|
+          issue = cv.customized
+          if project == issue.project.identifier
+            syncComment(org_id, app_id, vul_id, issue)
+          end
+        end
+      end
+      return head :ok
     else
       vulnerability_tags = t_issue['vulnerability_tags']
       if 'VulnerabilityTestTag' == vulnerability_tags
@@ -339,6 +339,64 @@ class ContrastController < ApplicationController
       logger.error(l(:issue_create_failure))
       return head :internal_server_error
     end
+  end
+
+  def syncComment(org_id, app_id, vul_id, issue)
+    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+    url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
+    res = callAPI(url)
+    if res.code != "200"
+      return false
+    end
+    notes_json = JSON.parse(res.body)
+    issue.journals.each do |c_journal|
+      c_journal.destroy
+    end
+    hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
+    exist_creator_pattern = /\(by .+\)/
+    notes_json['notes'].reverse.each do |c_note|
+      journal = Journal.new
+      creator = "(by " + c_note['creator'] + ")"
+      is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
+      if is_exist_creator
+        creator = ""
+      end
+      old_status_str = ""
+      new_status_str = ""
+      status_change_reason_str = ""
+      if c_note.has_key?("properties")
+        c_note['properties'].each do |c_prop|
+          if c_prop['name'] == "status.change.previous.status"
+            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+            unless status_obj.nil?
+              old_status_str = status_obj.name
+            end
+          elsif c_prop['name'] == "status.change.status"
+            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+            unless status_obj.nil?
+              new_status_str = status_obj.name
+            end
+          elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?
+            status_change_reason_str = l(:notaproblem_reason) + " " + c_prop['value'] + "\n"
+          end
+        end
+      end
+      comment_id_str = "[" + c_note['id'] + "]"
+      if hide_comment_id
+        comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + c_note['id'] + "\" />"
+      end
+      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
+      if old_status_str.present? && new_status_str.present?
+        cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
+        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
+      end
+      journal.journalized = issue
+      journal.user = User.current
+      journal.notes = note_str
+      journal.created_on = Time.at(c_note['creation']/1000.0)
+      journal.save()
+    end
+    return true
   end
 
   def callAPI(url)
