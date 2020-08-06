@@ -158,7 +158,7 @@ module IssuesControllerPatch
               new_status_str = status_obj.name
             end
           elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?
-            status_change_reason_str = "問題無しへの変更理由: " + c_prop['value'] + "\n"
+            status_change_reason_str = l(:notaproblem_reason) + " " + c_prop['value'] + "\n"
           end
         end
       end

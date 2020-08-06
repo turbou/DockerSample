@@ -43,12 +43,12 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id, note_id)
     note = journal.notes
-    ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)"
-    sts_chg_pattern = /#{ptn}/
-    is_sts_chg = note.match(sts_chg_pattern)
-    if is_sts_chg
-      note = note.sub(/#{ptn}/, "").gsub(/^$/, "")
-    end
+    sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
+    sts_chg_pattern = /#{sts_chg_ptn}/
+    reason_ptn = l(:notaproblem_reason) + ".+\\R"
+    reason_pattern = /#{reason_ptn}/
+    note = note.sub(/#{sts_chg_ptn}/, "")
+    note = note.sub(/#{reason_ptn}/, "")
     note = note.gsub(/\[[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\]/, '')
     note = note.gsub(/<input type="hidden" .+\/>/, '')
     t_data = {"note" => note}.to_json
@@ -78,12 +78,12 @@ class IssueHook < Redmine::Hook::Listener
     res = callAPI(url, "GET", nil)
     vuln_json = JSON.parse(res.body)
     note = params['issue']['notes']
-    ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)"
-    sts_chg_pattern = /#{ptn}/
-    is_sts_chg = note.match(sts_chg_pattern)
-    if is_sts_chg
-      note = note.sub(/#{ptn}/, "").sub(/^$/, "")
-    end
+    st_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
+    sts_chg_pattern = /#{sts_chg_ptn}/
+    reason_ptn = l(:notaproblem_reason) + ".+\\R"
+    reason_pattern = /#{reason_ptn}/
+    note = note.sub(/#{sts_chg_ptn}/, "")
+    note = note.sub(/#{reason_ptn}/, "")
     if vuln_json['trace']['status'] != status
       # Put Status(and Comment) from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
