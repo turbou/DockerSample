@@ -30,7 +30,6 @@ Redmine::Plugin.register :contrastsecurity do
     'vul_issues' => true,
     'lib_issues' => true,
     'vul_seen_dt_format' => '%Y/%m/%d %H:%M',
-    'comment_suffix' => 'by Redmine',
     'hide_comment_id' => false,
     'sts_reported' => '報告済',
     'sts_suspicious' => '疑わしい',

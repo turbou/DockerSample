@@ -87,7 +87,7 @@ module IssuesControllerPatch
           end 
         end 
         @issue.save
-        unless syncDeletedComment(org_id, app_id, vul_id, @issue)
+        unless syncComment(org_id, app_id, vul_id, @issue)
           flash.now[:warning] = l(:sync_comment_failure)
         end
       else
@@ -122,7 +122,7 @@ module IssuesControllerPatch
     return res
   end
 
-  def syncDeletedComment(org_id, app_id, vul_id, issue)
+  def syncComment(org_id, app_id, vul_id, issue)
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
     res = callAPI(url)
@@ -130,25 +130,52 @@ module IssuesControllerPatch
       return false
     end
     notes_json = JSON.parse(res.body)
-    note_id_map = {}
-    note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
     issue.journals.each do |c_journal|
-      is_note_id = c_journal.notes.match(note_id_pattern)
-      if is_note_id
-        note_id = is_note_id[1]
-        note_id_map[note_id] = c_journal.id
-      end
+      c_journal.destroy
     end
-    notes_json['notes'].each do |c_note|
-      if note_id_map.has_key?(c_note['id'])
-        note_id_map.delete(c_note['id'])
+    hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
+    exist_creator_pattern = /\(by .+\)/
+    notes_json['notes'].reverse.each do |c_note|
+      journal = Journal.new
+      creator = "(by " + c_note['creator'] + ")"
+      is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
+      if is_exist_creator
+        creator = ""
       end
-    end
-    note_id_map.each do |value|
-      journal = Journal.find_by(id: value)
-      if journal
-        journal.destroy
+      old_status_str = ""
+      new_status_str = ""
+      status_change_reason_str = ""
+      if c_note.has_key?("properties")
+        c_note['properties'].each do |c_prop|
+          if c_prop['name'] == "status.change.previous.status"
+            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+            unless status_obj.nil?
+              old_status_str = status_obj.name
+            end
+          elsif c_prop['name'] == "status.change.status"
+            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+            unless status_obj.nil?
+              new_status_str = status_obj.name
+            end
+          elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?
+            status_change_reason_str = "問題無しへの変更理由: " + c_prop['value'] + "\n"
+          end
+        end
       end
+      comment_id_str = "[" + c_note['id'] + "]"
+      if hide_comment_id
+        comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + c_note['id'] + "\" />"
+      end
+      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
+      if old_status_str.present? && new_status_str.present?
+        cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
+        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
+      end
+      journal.journalized = issue
+      journal.user = User.current
+      journal.notes = note_str
+      journal.created_on = Time.at(c_note['creation']/1000.0)
+      journal.save()
     end
     return true
   end

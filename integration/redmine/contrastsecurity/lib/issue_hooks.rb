@@ -68,10 +68,6 @@ class IssueHook < Redmine::Hook::Listener
       return
     end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
-    comment_suffix = Setting.plugin_contrastsecurity['comment_suffix']
-    if comment_suffix.nil? || comment_suffix.empty?
-      comment_suffix = "by Redmine"
-    end
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
     res = callAPI(url, "GET", nil)
@@ -80,15 +76,19 @@ class IssueHook < Redmine::Hook::Listener
     if vuln_json['trace']['status'] != status
       # Put Status(and Comment) from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-      t_data_dict = {"traces" => [vul_id], "status" => status, "note" => comment_suffix + "(" + issue.last_updated_by.name + ")."}
+      t_data_dict = {"traces" => [vul_id], "status" => status, "note" => " (by " + issue.last_updated_by.name + ")"}
       if (not note.nil?) && (not note.empty?)
-        t_data_dict["note"] = note + " " + comment_suffix + "(" + issue.last_updated_by.name + ")."
+        t_data_dict["note"] = note + " (by " + issue.last_updated_by.name + ")"
       end
-      callAPI(url, "PUT", t_data_dict.to_json)
+      res = callAPI(url, "PUT", t_data_dict.to_json)
+      puts res.code
+      # note idを取得してredmine側のコメントに反映する。
+      note_json = JSON.parse(res.body)
+      puts note_json
     else
       if (not note.nil?) && (not note.empty?)
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-        t_data = {"note" => note + " (" + issue.last_updated_by.name + ")"}.to_json
+        t_data = {"note" => note + " (by " + issue.last_updated_by.name + ")"}.to_json
         res = callAPI(url, "POST", t_data)
         # note idを取得してredmine側のコメントに反映する。
         note_json = JSON.parse(res.body)

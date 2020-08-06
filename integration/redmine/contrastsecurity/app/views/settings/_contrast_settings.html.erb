@@ -127,10 +127,6 @@
       <td><%= text_field_tag('settings[vul_seen_dt_format]', @settings['vul_seen_dt_format'], {size:"30", placeholder:"%Y/%m/%d %H:%M"})%></td>
     </tr>
     <tr>
-      <th align="left"><%= l(:comment_suffix) %></th>
-      <td><%= text_field_tag('settings[comment_suffix]', @settings['comment_suffix'], {size:"30", placeholder:"by Redmine"})%></td>
-    </tr>
-    <tr>
       <th align="left"><%= l(:hide_comment_id) %></th>
       <td><%= check_box_tag 'settings[hide_comment_id]', false, @settings['hide_comment_id'] %> <%= l(:hide_comment_id_hint) %></td>
     </tr>
