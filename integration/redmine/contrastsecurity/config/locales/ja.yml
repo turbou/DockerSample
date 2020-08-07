@@ -76,7 +76,5 @@ ja:
   vul_seen_datetime_format: "検出日時フォーマット"
   problem_with_vul_seen_dt_format: "[Contrast plugin] 脆弱性の検出日時のフォーマット指定に問題があるようです。"
   status_changed_comment: "ステータス を %{old} から %{new} に変更"
-  hide_comment_id: "コメントIDを隠す"
-  hide_comment_id_hint: "hiddenインプットを使うため、有効にする場合はredmineのALLOWED_TAGSにinputタグを追加してください。"
   notaproblem_reason: "問題無しへの変更理由:"
 

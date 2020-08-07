@@ -32,12 +32,13 @@ class IssueHook < Redmine::Hook::Listener
     if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
       return
     end
-    note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
-    is_note_id = journal.notes.match(note_id_pattern)
     note_id = nil
-    if is_note_id
-      note_id = is_note_id[1]
-    else
+    journal.details.each do |detail|
+      if detail.prop_key == "note_id"
+        note_id = detail.value
+      end
+    end
+    if note_id.blank?
       return
     end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
@@ -49,8 +50,6 @@ class IssueHook < Redmine::Hook::Listener
     reason_pattern = /#{reason_ptn}/
     note = note.sub(/#{sts_chg_ptn}/, "")
     note = note.sub(/#{reason_ptn}/, "")
-    note = note.gsub(/\[[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\]/, '')
-    note = note.gsub(/<input type="hidden" .+\/>/, '')
     t_data = {"note" => note}.to_json
     callAPI(url, "PUT", t_data)
   end
@@ -102,13 +101,8 @@ class IssueHook < Redmine::Hook::Listener
         # note idを取得してredmine側のコメントに反映する。
         note_json = JSON.parse(res.body)
         if note_json['success']
-          hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
-          comment_id_str = "[" + note_json['note']['id'] + "]"
-          if hide_comment_id
-            comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + note_json['note']['id'] + "\" />"
-          end
-          note_str = CGI.unescapeHTML(note_json['note']['note'] + "\n" + comment_id_str)
-          journal.notes = note_str
+          journal.notes = CGI.unescapeHTML(note_json['note']['note'])
+          journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: note_json['note']['id'])
           journal.save()
         end
       end

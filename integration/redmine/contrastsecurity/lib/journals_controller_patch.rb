@@ -32,7 +32,7 @@ module JournalsControllerPatch
     def update_with_sync
       notes = @journal.notes
       @journal.safe_attributes = params[:journal]
-      if @journal.details.empty? && @journal.notes.blank?
+      if @journal.notes.blank?
         issue = @journal.journalized
         cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
         cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first
@@ -44,12 +44,13 @@ module JournalsControllerPatch
           update = update_without_sync
           return update
         end
-        note_id_pattern = /([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/
-        is_note_id = notes.match(note_id_pattern)
         note_id = nil
-        if is_note_id
-          note_id = is_note_id[1]
-        else
+        @journal.details.each do |detail|
+          if detail.prop_key == "note_id"
+            note_id = detail.value
+          end
+        end
+        if note_id.blank?
           update = update_without_sync
           return update
         end
@@ -67,6 +68,9 @@ module JournalsControllerPatch
         req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
         req['Content-Type'] = req['Accept'] = 'application/json'
         res = http.request(req)
+        if res.code == "200"
+          @journal.details = []
+        end
       end
       update = update_without_sync
       return update

@@ -133,7 +133,6 @@ module IssuesControllerPatch
     issue.journals.each do |c_journal|
       c_journal.destroy
     end
-    hide_comment_id = Setting.plugin_contrastsecurity['hide_comment_id']
     exist_creator_pattern = /\(by .+\)/
     notes_json['notes'].reverse.each do |c_note|
       journal = Journal.new
@@ -162,19 +161,16 @@ module IssuesControllerPatch
           end
         end
       end
-      comment_id_str = "[" + c_note['id'] + "]"
-      if hide_comment_id
-        comment_id_str = "<input type=\"hidden\" name=\"comment_id\" value=\"" + c_note['id'] + "\" />"
-      end
-      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
+      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
       if old_status_str.present? && new_status_str.present?
         cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
-        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator + "\n" + comment_id_str
+        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
       end
       journal.journalized = issue
       journal.user = User.current
       journal.notes = note_str
       journal.created_on = Time.at(c_note['creation']/1000.0)
+      journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
       journal.save()
     end
     return true
