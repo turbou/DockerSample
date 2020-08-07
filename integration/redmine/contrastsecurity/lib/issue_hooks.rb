@@ -78,7 +78,7 @@ class IssueHook < Redmine::Hook::Listener
     res = callAPI(url, "GET", nil)
     vuln_json = JSON.parse(res.body)
     note = params['issue']['notes']
-    st_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
+    sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
     reason_ptn = l(:notaproblem_reason) + ".+\\R"
     reason_pattern = /#{reason_ptn}/
