@@ -29,7 +29,7 @@ class IssueHook < Redmine::Hook::Listener
     org_id = cv_org.try(:value)
     app_id = cv_app.try(:value)
     vul_id = cv_vul.try(:value)
-    if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
+    if org_id.blank? || app_id.blank? || vul_id.blank?
       return
     end
     note_id = nil
@@ -64,7 +64,7 @@ class IssueHook < Redmine::Hook::Listener
     org_id = cv_org.try(:value)
     app_id = cv_app.try(:value)
     vul_id = cv_vul.try(:value)
-    if org_id.nil? || org_id.empty? || app_id.nil? || app_id.empty? || vul_id.nil? || vul_id.empty?
+    if org_id.blank? || app_id.blank? || vul_id.blank?
       return
     end
     status = ContrastUtil.get_contrast_status(issue.status.name)
