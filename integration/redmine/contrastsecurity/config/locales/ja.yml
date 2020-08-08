@@ -66,6 +66,7 @@ ja:
   problem_with_hook_description: "[Contrast plugin] TeamServerからのペイロードの内容に問題があります。"
   problem_with_priority: "[Contrast plugin] プラグインの優先度マッピング設定に問題があるようです。"
   problem_with_status: "[Contrast plugin] プラグインのステータスマッピング設定に問題があるようです。"
+  problem_with_customfield: "[Contrast plugin] カスタムフィールドの値に問題があるようです。"
   issue_create_success: "[Contrast plugin] チケットを作成しました。"
   issue_create_failure: "[Contrast plugin] チケットの作成に失敗しました。"
   issue_status_change_success: "[Contrast plugin] チケットのステータスを変更しました。"

@@ -66,6 +66,7 @@ en:
   problem_with_hook_description: "[Contrast plugin] There is a problem with the payload from TeamServer."
   problem_with_priority: "[Contrast plugin] There seems to be a problem with the plugin Priority Mapping settings."
   problem_with_status: "[Contrast plugin] There seems to be a problem with the plugin Status Mapping settings."
+  problem_with_customfield: "[Contrast plugin] There seems to be a problem with the Custom Field."
   issue_create_success: "[Contrast plugin] Issue has been reported."
   issue_create_failure: "[Contrast plugin] Issue creation failed."
   issue_status_change_success: "[Contrast plugin] Issue status has been updated."

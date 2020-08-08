@@ -167,20 +167,20 @@ class ContrastController < ApplicationController
       vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
       is_vul_sts_chg = t_issue['description'].match(vul_sts_chg_pattern)
       if is_vul_sts_chg
-        org_id = is_vul_sts_chg[1]
-        app_id = is_vul_sts_chg[2]
+        #org_id = is_vul_sts_chg[1]
+        #app_id = is_vul_sts_chg[2]
         vul_id = is_vul_sts_chg[3]
-        #logger.info('vul_id: ' + vul_id)
+        if vul_id.blank?
+          logger.error(l(:problem_with_customfield))
+          return head :ok
+        end
         cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
         cvs.each do |cv|
           issue = cv.customized
           if project != issue.project.identifier
             next
           end
-          #logger.info(cv.customized.subject)
-          #logger.info(cv.customized.id)
           status_obj = ContrastUtil.get_redmine_status(status)
-          #logger.info(status_obj)
           if status_obj.nil?
             logger.error(l(:problem_with_status))
             return head :ok
