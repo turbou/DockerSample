@@ -46,7 +46,7 @@ class IssueHook < Redmine::Hook::Listener
     note = journal.notes
     sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
-    reason_ptn = l(:notaproblem_reason) + ".+\\R"
+    reason_ptn = l(:notaproblem_reason, :reason => ".+") + "\\R"
     reason_pattern = /#{reason_ptn}/
     note = note.sub(/#{sts_chg_ptn}/, "")
     note = note.sub(/#{reason_ptn}/, "")
@@ -79,7 +79,7 @@ class IssueHook < Redmine::Hook::Listener
     note = params['issue']['notes']
     sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
-    reason_ptn = l(:notaproblem_reason) + ".+\\R"
+    reason_ptn = l(:notaproblem_reason, :reason => ".+") + "\\R"
     reason_pattern = /#{reason_ptn}/
     note = note.sub(/#{sts_chg_ptn}/, "")
     note = note.sub(/#{reason_ptn}/, "")
