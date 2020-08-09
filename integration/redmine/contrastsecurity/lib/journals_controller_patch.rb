@@ -32,7 +32,7 @@ module JournalsControllerPatch
     def update_with_sync
       notes = @journal.notes
       @journal.safe_attributes = params[:journal]
-      if @journal.notes.blank?
+      if @journal.notes.blank? # コメントが削除された場合
         issue = @journal.journalized
         cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
         cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first

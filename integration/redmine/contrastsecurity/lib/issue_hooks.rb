@@ -22,6 +22,7 @@
 class IssueHook < Redmine::Hook::Listener
   def controller_journals_edit_post(context)
     journal = context[:journal]
+    private_note = journal.private_notes
     issue = journal.journalized
     cv_org = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.org_id')}).first
     cv_app = CustomValue.where(customized_type: 'Issue').where(customized_id: issue.id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.app_id')}).first
@@ -38,11 +39,21 @@ class IssueHook < Redmine::Hook::Listener
         note_id = detail.value
       end
     end
-    if note_id.blank?
-      return
-    end
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id, note_id)
+    if note_id.present?
+      if private_note
+        # プライベート注記に変更された場合
+        details = journal.details.to_a.delete_if{|detail| detail.prop_key == "note_id"}
+        journal.details = details
+        journal.save
+        callAPI(url, "DELETE", nil)
+      else
+        # プライベート注記のものがそのまま保存された場合
+        return
+      end
+    end
+
     note = journal.notes
     sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
@@ -51,7 +62,18 @@ class IssueHook < Redmine::Hook::Listener
     note = note.sub(/#{sts_chg_ptn}/, "")
     note = note.sub(/#{reason_ptn}/, "")
     t_data = {"note" => note}.to_json
-    callAPI(url, "PUT", t_data)
+    if note_id.blank? && !private_note # note idがなく、でもプライベート注記じゃない（またプライベート注記じゃなくなった）場合
+      res = callAPI(url, "POST", t_data)
+      # note idを取得してredmine側のコメントに反映する。
+      note_json = JSON.parse(res.body)
+      if note_json['success']
+        journal.notes = CGI.unescapeHTML(note_json['note']['note'])
+        journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: note_json['note']['id'])
+        journal.save()
+      end
+    else
+      callAPI(url, "PUT", t_data)
+    end
   end
 
   def controller_issues_edit_after_save(context)
@@ -77,6 +99,7 @@ class IssueHook < Redmine::Hook::Listener
     res = callAPI(url, "GET", nil)
     vuln_json = JSON.parse(res.body)
     note = params['issue']['notes']
+    private_note = params['issue']['private_notes']
     sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
     reason_ptn = l(:notaproblem_reason, :reason => ".+") + "\\R"
@@ -86,13 +109,13 @@ class IssueHook < Redmine::Hook::Listener
     if vuln_json['trace']['status'] != status
       # Put Status(and Comment) from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
-      t_data_dict = {"traces" => [vul_id], "status" => status, "note" => " (by " + issue.last_updated_by.name + ")"}
-      if note.present?
+      t_data_dict = {"traces" => [vul_id], "status" => status}
+      if note.present? && private_note == "0"
         t_data_dict["note"] = note + " (by " + issue.last_updated_by.name + ")"
       end
       callAPI(url, "PUT", t_data_dict.to_json)
     else
-      if note.present?
+      if note.present? && private_note == "0"
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
         t_data = {"note" => note + " (by " + issue.last_updated_by.name + ")"}.to_json
         res = callAPI(url, "POST", t_data)
@@ -124,6 +147,8 @@ class IssueHook < Redmine::Hook::Listener
     when "PUT"
       req = Net::HTTP::Put.new(uri.request_uri)
       req.body = data
+    when "DELETE"
+      req = Net::HTTP::Delete.new(uri.request_uri)
     else
       return
     end

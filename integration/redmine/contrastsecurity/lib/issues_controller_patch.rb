@@ -131,7 +131,9 @@ module IssuesControllerPatch
     end
     notes_json = JSON.parse(res.body)
     issue.journals.each do |c_journal|
-      c_journal.destroy
+      if not c_journal.private_notes
+        c_journal.destroy
+      end
     end
     exist_creator_pattern = /\(by .+\)/
     notes_json['notes'].reverse.each do |c_note|
