@@ -90,9 +90,7 @@ class IssueHook < Redmine::Hook::Listener
       if note.present?
         t_data_dict["note"] = note + " (by " + issue.last_updated_by.name + ")"
       end
-      res = callAPI(url, "PUT", t_data_dict.to_json)
-      # note idを取得してredmine側のコメントに反映する。
-      note_json = JSON.parse(res.body)
+      callAPI(url, "PUT", t_data_dict.to_json)
     else
       if note.present?
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
