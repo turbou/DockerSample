@@ -48,9 +48,6 @@ class IssueHook < Redmine::Hook::Listener
         journal.details = details
         journal.save
         callAPI(url, "DELETE", nil)
-      else
-        # プライベート注記のものがそのまま保存された場合
-        return
       end
     end
 
