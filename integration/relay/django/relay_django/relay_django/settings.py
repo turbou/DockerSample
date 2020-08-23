@@ -24,8 +24,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-USE_X_FORWARDED_HOST = True
-FORCE_SCRIPT_NAME = "/django"
+#USE_X_FORWARDED_HOST = True
+#FORCE_SCRIPT_NAME = "/django"
 
 # Application definition
 
@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'relay_django',
+    'relay_django.apps.ContrastConfig',
 ]
 
 MIDDLEWARE = [
