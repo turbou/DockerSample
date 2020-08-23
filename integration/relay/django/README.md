@@ -12,15 +12,6 @@ local_settings.pyの内容
 ```python
 # これはDjango自体のシークレットキー
 SECRET_KEY = 'r&id5o(ix9(yazvnxqt$c0*334l)l5bqgfbv#mf9%lojd#(7dn'
-
-# TeamServerの設定
-TEAMSERVER_URL = 'http://xxx.xxx.xxx.xxx:8080/Contrast'
-# TeamServerのアカウントの認証情報
-AUTHORIZATION = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=='
-API_KEY = 'XXXXXXXXXXXXXXXX'
-
-# ここから下はBacklogの設定（BacklogのAPIキー自体はTeamServerのGeneric Webhookに記載します）
-BACKLOG_URL = 'https://xxxxxxx.backlog.com'
 ```
 
 ### Djangoコンテナの起動ポートの変更（確認）
@@ -49,10 +40,13 @@ services:
 ```bash
 # docker-compose.ymlのある場所で
 docker-compose up -d
+# 同一ホストで複数コンテナを起動しようとしてrecreateされてしまう場合は
+docker-compose -p taka up -d
 ```
 
 ### Djangoのマイグレートとスーパーユーザーの作成
 ```
+docker exec -i django python /project/django_project/manage.py makemigrations relay_django
 docker exec -i django python /project/django_project/manage.py migrate
 docker exec -i django python /project/django_project/manage.py batch_createsuperuser --username admin --email xxxxx@contrastsecurity.com --password xxxxx
 ```
