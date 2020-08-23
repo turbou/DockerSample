@@ -1,16 +1,16 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
-from django.conf import settings
+from .models import TeamServerConfig
 
 import json
 import requests
 import re
 
-def callAPI(url):
+def callAPI(url, authorization, api_key):
     headers = {
-        'Authorization': settings.AUTHORIZATION,
-        'API-Key': settings.API_KEY,
+        'Authorization': authorization,
+        'API-Key': api_key,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     }
@@ -61,6 +61,11 @@ def vote(request, key=None):
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
             print(json_data['description'])
+            config_id = json_data.get('config_id')
+            if config_id:
+                ts_config = TeamServerConfig.objects.get(config_id=config_id)
+            else:
+                ts_config = TeamServerConfig.objects.first()
             app_name = json_data['application_name']
             self_url = ''
             r = re.compile(".+\((.+)\) was found in")
@@ -75,9 +80,9 @@ def vote(request, key=None):
             org_id = m.group(1)
             app_id = m.group(2)
             vul_id = m.group(3)
-            teamserver_url = settings.TEAMSERVER_URL
+            teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            res = callAPI(url)
+            res = callAPI(url, ts_config.authorization, ts_config.api_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
@@ -92,11 +97,11 @@ def vote(request, key=None):
                     if '{traceUuid}' in howtofix_url:
                         howtofix_url = howtofix_url.replace('{traceUuid}', vul_id)
             # Story
-            get_story_res = callAPI(story_url)
+            get_story_res = callAPI(story_url, ts_config.authorization, ts_config.api_key)
             story_json = get_story_res.json()
             story = story_json['story']['risk']['formattedText']
             # How to fix
-            get_howtofix_res = callAPI(howtofix_url)
+            get_howtofix_res = callAPI(howtofix_url, ts_config.authorization, ts_config.api_key)
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
@@ -113,7 +118,7 @@ def vote(request, key=None):
             project_id = json_data['projectId']
             issue_type_id = json_data['issueTypeId']
             priority_id = json_data['priorityId']
-            url = '%s/api/v2/issues?apiKey=%s' % (settings.BACKLOG_URL, key)
+            url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, key)
             # projectId=97197&summary=$Title+$VulnerabilityRule&issueTypeId=456121&priorityId=3&description=$Message
             #payload = {'projectId': json_data['project'], 'summary': json_data['vulnerability_rule']}
             data = {
@@ -143,9 +148,9 @@ def vote(request, key=None):
             app_id = m.group(5)
             lib_lang = m.group(3)
             lib_id = m.group(4)
-            teamserver_url = settings.TEAMSERVER_URL
+            teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI(url)
+            res = callAPI(url, ts_config.authorization, ts_config.api_key)
             lib_json = res.json()
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
@@ -178,7 +183,7 @@ def vote(request, key=None):
             project_id = json_data['projectId']
             issue_type_id = json_data['issueTypeId']
             priority_id = json_data['priorityId']
-            url = '%s/api/v2/issues?apiKey=%s' % (settings.BACKLOG_URL, key)
+            url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, key)
             data = {
                 'projectId': project_id,
                 'summary': summary,
@@ -213,6 +218,11 @@ def vote2(request, key=None):
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
             print(json_data['description'])
+            config_id = json_data.get('config_id')
+            if config_id:
+                ts_config = TeamServerConfig.objects.get(config_id=config_id)
+            else:
+                ts_config = TeamServerConfig.objects.first()
             app_name = json_data['application_name']
             self_url = ''
             r = re.compile(".+\((.+)\) was found in")
@@ -227,9 +237,9 @@ def vote2(request, key=None):
             org_id = m.group(1)
             app_id = m.group(2)
             vul_id = m.group(3)
-            teamserver_url = settings.TEAMSERVER_URL
+            teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            res = callAPI(url)
+            res = callAPI(url, ts_config.authorization, ts_config.api_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
@@ -244,11 +254,11 @@ def vote2(request, key=None):
                     if '{traceUuid}' in howtofix_url:
                         howtofix_url = howtofix_url.replace('{traceUuid}', vul_id)
             # Story
-            get_story_res = callAPI(story_url)
+            get_story_res = callAPI(story_url, ts_config.authorization, ts_config.api_key)
             story_json = get_story_res.json()
             story = story_json['story']['risk']['formattedText']
             # How to fix
-            get_howtofix_res = callAPI(howtofix_url)
+            get_howtofix_res = callAPI(howtofix_url, ts_config.authorization, ts_config.api_key)
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
@@ -265,7 +275,7 @@ def vote2(request, key=None):
             project_id = json_data['projectId']
             labels = json_data['labels']
             priority_id = json_data['priorityId']
-            url = '%s/api/v4/projects/%s/issues' % (settings.GITLAB_URL, project_id)
+            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, project_id)
             data = {
                 'title': summary,
                 'labels': labels,
@@ -284,14 +294,19 @@ def vote2(request, key=None):
             m = r.search(json_data['description'])
             if m is None:
                 return HttpResponse(status=200)
+            config_id = json_data.get('config_id')
+            if config_id:
+                ts_config = TeamServerConfig.objects.get(config_id=config_id)
+            else:
+                ts_config = TeamServerConfig.objects.first()
             lib_name = m.group(1)
             org_id = m.group(2)
             app_id = m.group(5)
             lib_lang = m.group(3)
             lib_id = m.group(4)
-            teamserver_url = settings.TEAMSERVER_URL
+            teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI(url)
+            res = callAPI(url, ts_config.authorization, ts_config.api_key)
             lib_json = res.json()
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
@@ -324,7 +339,7 @@ def vote2(request, key=None):
             project_id = json_data['projectId']
             labels = json_data['labels']
             priority_id = json_data['priorityId']
-            url = '%s/api/v4/projects/%s/issues' % (settings.GITLAB_URL, project_id)
+            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, project_id)
             data = {
                 'title': summary,
                 'labels': labels,

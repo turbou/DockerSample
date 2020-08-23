@@ -11,5 +11,5 @@ services:
     volumes:
       - ./relay_django:/project/django_project
     ports:
-      - "8081:8081"
+      - "8087:8081"
 
