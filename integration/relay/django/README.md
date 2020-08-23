@@ -61,6 +61,7 @@ http://xxx.xxx.xxx.xxx:8085/admin/relay_django/
 
 ### チケット一括削除コマンド
 #### Backlog
+一度に100件まで削除できるので、チケットが0になるまで繰り返してください。  
 ```
 docker exec -i django python /project/django_project/manage.py bulk_remove_backlog_issues --name XXXXX
 ```
