@@ -52,11 +52,9 @@ def hook(request):
 
 @require_http_methods(["GET", "POST", "PUT"])
 @csrf_exempt
-def vote(request, key=None):
+def vote(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
-        print(key)
-        print(json_data)
         if json_data['event_type'] == 'TEST_CONNECTION':
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
@@ -115,17 +113,14 @@ def vote(request, key=None):
             description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
             description.append(self_url)
 
-            project_id = json_data['projectId']
-            issue_type_id = json_data['issueTypeId']
-            priority_id = json_data['priorityId']
-            url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, key)
+            url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
             # projectId=97197&summary=$Title+$VulnerabilityRule&issueTypeId=456121&priorityId=3&description=$Message
             #payload = {'projectId': json_data['project'], 'summary': json_data['vulnerability_rule']}
             data = {
-                'projectId': project_id,
+                'projectId': ts_config.backlog.project_id,
                 'summary': summary,
-                'issueTypeId': issue_type_id,
-                'priorityId': priority_id,
+                'issueTypeId': ts_config.backlog.issuetype_id,
+                'priorityId': ts_config.backlog.priority_id,
                 'description': ''.join(description),
             }   
             headers = {
@@ -183,12 +178,12 @@ def vote(request, key=None):
             project_id = json_data['projectId']
             issue_type_id = json_data['issueTypeId']
             priority_id = json_data['priorityId']
-            url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, key)
+            url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
             data = {
-                'projectId': project_id,
+                'projectId': ts_config.backlog.project_id,
                 'summary': summary,
-                'issueTypeId': issue_type_id,
-                'priorityId': priority_id,
+                'issueTypeId': ts_config.backlog.issuetype_id,
+                'priorityId': ts_config.backlog.priority_id,
                 'description': ''.join(description),
             }   
             headers = {

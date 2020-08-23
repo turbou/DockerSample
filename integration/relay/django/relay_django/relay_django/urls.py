@@ -22,7 +22,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hook/', views.hook, name='hook'),
-    path('vote/<key>/', views.vote, name='vote'),
+    path('vote/', views.vote, name='vote'),
     path('vote2/', views.vote2, name='vote2'),
 ] + static('static/', document_root=settings.STATIC_ROOT)
 

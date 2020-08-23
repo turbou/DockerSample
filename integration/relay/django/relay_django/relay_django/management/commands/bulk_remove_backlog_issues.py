@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from relay_django.models import Backlog
 
 import json
 import requests
@@ -9,26 +10,25 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--apikey', dest='apikey', default=None,
-            help='BacklogのAPI-Keyを指定してください。',
-        )
-        parser.add_argument(
-            '--projectid', dest='projectid', default=None,
-            help='BacklogのprojectIdを指定してください。',
+            '--name', dest='name', default=None,
+            help='Backlog設定の名前を指定してください。',
         )
 
     def handle(self, *args, **options):
-        apikey = options.get('apikey')
+        name = options.get('name')
         projectid = options.get('projectid')
-        if apikey is None or projectid is None:
-            raise CommandError('--apikey, --projectid オプションは必須です。')
-        url = '%s/api/v2/issues' % (settings.BACKLOG_URL)
-        params = {'apiKey': apikey, 'projectId[]': projectid, 'count': 100}
+        if name is None:
+            raise CommandError('--name オプションは必須です。')
+        backlog = Backlog.objects.get(name=name)
+        if backlog is None:
+            raise CommandError('%s のBacklog設定が見つかりません。' % name)
+        url = '%s/api/v2/issues' % (backlog.url)
+        params = {'apiKey': backlog.api_key, 'projectId[]': backlog.project_id, 'count': 100}
         res = requests.get(url, params=params)
         issues_json = res.json()
-        del_params = {'apiKey': apikey}
+        del_params = {'apiKey': backlog.api_key}
         for issue in issues_json:
-            del_url = '%s/api/v2/issues/%s' % (settings.BACKLOG_URL, issue['id'])
+            del_url = '%s/api/v2/issues/%s' % (backlog.url, issue['id'])
             res = requests.delete(del_url, params=del_params)
-            print(res.status_code)
+            print('%s -> %s' % (issue['id'], res.status_code))
 

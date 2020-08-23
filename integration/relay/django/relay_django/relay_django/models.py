@@ -9,6 +9,7 @@ class Backlog(models.Model):
     api_key = models.CharField('API_KEY', max_length=100)
     project_id = models.CharField('プロジェクトID', max_length=10)
     issuetype_id = models.CharField('種別ID', max_length=10)
+    priority_id = models.CharField('優先度ID', max_length=1)
 
     def __str__(self):
         return '%s(%s)' % (self.name, self.url)
