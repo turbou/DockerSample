@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
-from .models import TeamServerConfig
+from .models import TeamServer
 
 import json
 import requests
@@ -61,11 +61,11 @@ def vote(request, key=None):
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
             print(json_data['description'])
-            config_id = json_data.get('config_id')
-            if config_id:
-                ts_config = TeamServerConfig.objects.get(config_id=config_id)
+            config_name = json_data.get('config_name')
+            if config_name:
+                ts_config = TeamServer.objects.get(name=config_name)
             else:
-                ts_config = TeamServerConfig.objects.first()
+                ts_config = TeamServer.objects.first()
             app_name = json_data['application_name']
             self_url = ''
             r = re.compile(".+\((.+)\) was found in")
@@ -209,20 +209,18 @@ def vote(request, key=None):
 
 @require_http_methods(["GET", "POST", "PUT"])
 @csrf_exempt
-def vote2(request, key=None):
+def vote2(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
-        print(key)
-        print(json_data)
         if json_data['event_type'] == 'TEST_CONNECTION':
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
             print(json_data['description'])
-            config_id = json_data.get('config_id')
-            if config_id:
-                ts_config = TeamServerConfig.objects.get(config_id=config_id)
+            config_name = json_data.get('config_name')
+            if config_name:
+                ts_config = TeamServer.objects.get(name=config_name)
             else:
-                ts_config = TeamServerConfig.objects.first()
+                ts_config = TeamServer.objects.first()
             app_name = json_data['application_name']
             self_url = ''
             r = re.compile(".+\((.+)\) was found in")
@@ -272,18 +270,16 @@ def vote2(request, key=None):
             description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
             description.append(self_url)
 
-            project_id = json_data['projectId']
-            labels = json_data['labels']
             priority_id = json_data['priorityId']
-            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, project_id)
+            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
             data = {
                 'title': summary,
-                'labels': labels,
+                'labels': ts_config.gitlab.labels,
                 'description': ''.join(description),
             }   
             headers = {
                 'Content-Type': 'application/json',
-                'PRIVATE-TOKEN': key
+                'PRIVATE-TOKEN': ts_config.gitlab.access_token
             }
             res = requests.post(url, json=data, headers=headers)
             print(res.status_code)
@@ -294,11 +290,11 @@ def vote2(request, key=None):
             m = r.search(json_data['description'])
             if m is None:
                 return HttpResponse(status=200)
-            config_id = json_data.get('config_id')
-            if config_id:
-                ts_config = TeamServerConfig.objects.get(config_id=config_id)
+            config_name = json_data.get('config_name')
+            if config_name:
+                ts_config = TeamServer.objects.get(name=config_name)
             else:
-                ts_config = TeamServerConfig.objects.first()
+                ts_config = TeamServer.objects.first()
             lib_name = m.group(1)
             org_id = m.group(2)
             app_id = m.group(5)
@@ -336,18 +332,16 @@ def vote2(request, key=None):
             description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
             description.append(self_url)
 
-            project_id = json_data['projectId']
-            labels = json_data['labels']
             priority_id = json_data['priorityId']
-            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, project_id)
+            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
             data = {
                 'title': summary,
-                'labels': labels,
+                'labels': ts_config.gitlab.labels,
                 'description': ''.join(description),
             }   
             headers = {
                 'Content-Type': 'application/json',
-                'PRIVATE-TOKEN': key
+                'PRIVATE-TOKEN': ts_config.gitlab.access_token
             }
             res = requests.post(url, json=data, headers=headers)
             print(res.status_code)
