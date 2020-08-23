@@ -62,7 +62,7 @@ http://xxx.xxx.xxx.xxx:8085/admin/relay_django/
 ### チケット一括削除コマンド
 #### Backlog
 ```
-docker exec -i django python /project/django_project/manage.py bulk_remove_backlog_issues --projectid XXXXX --apikey XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+docker exec -i django python /project/django_project/manage.py bulk_remove_backlog_issues --name XXXXX
 ```
 #### Gitlab
 一度に20件まで削除できるので、チケットが0になるまで繰り返してください。
