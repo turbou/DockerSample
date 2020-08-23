@@ -59,7 +59,12 @@ admin/xxxxx
 http://xxx.xxx.xxx.xxx:8085/admin/relay_django/teamserverconfig/  
 に接続して、接続設定を行ってください。
 
-### Backlogのチケット一括削除コマンド
+### チケット一括削除コマンド
+#### Backlog
 ```
 docker exec -i django python /project/django_project/manage.py bulk_remove_backlog_issues --projectid XXXXX --apikey XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+#### Gitlab
+```
+docker exec -i django python /project/django_project/manage.py bulk_remove_gitlab_issues --name XXXXX
 ```
