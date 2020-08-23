@@ -56,8 +56,8 @@ http://xxx.xxx.xxx.xxx:8085/admin/
 admin/xxxxx
 
 ### 各種接続設定
-http://xxx.xxx.xxx.xxx:8085/admin/relay_django/teamserverconfig/  
-に接続して、接続設定を行ってください。
+http://xxx.xxx.xxx.xxx:8085/admin/relay_django/  
+に接続して、Backlog, Gitlab, TeamServer設定を行ってください。
 
 ### チケット一括削除コマンド
 #### Backlog
