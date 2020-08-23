@@ -138,6 +138,11 @@ def vote(request):
             m = r.search(json_data['description'])
             if m is None:
                 return HttpResponse(status=200)
+            config_name = json_data.get('config_name')
+            if config_name:
+                ts_config = TeamServer.objects.get(name=config_name)
+            else:
+                ts_config = TeamServer.objects.first()
             lib_name = m.group(1)
             org_id = m.group(2)
             app_id = m.group(5)
@@ -175,9 +180,6 @@ def vote(request):
             description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
             description.append(self_url)
 
-            project_id = json_data['projectId']
-            issue_type_id = json_data['issueTypeId']
-            priority_id = json_data['priorityId']
             url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
             data = {
                 'projectId': ts_config.backlog.project_id,
