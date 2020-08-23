@@ -65,6 +65,7 @@ http://xxx.xxx.xxx.xxx:8085/admin/relay_django/teamserverconfig/
 docker exec -i django python /project/django_project/manage.py bulk_remove_backlog_issues --projectid XXXXX --apikey XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 #### Gitlab
+一度に20件まで削除できるので、チケットが0になるまで繰り返してください。
 ```
 docker exec -i django python /project/django_project/manage.py bulk_remove_gitlab_issues --name XXXXX
 ```
