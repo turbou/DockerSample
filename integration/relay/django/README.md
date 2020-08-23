@@ -51,8 +51,13 @@ docker exec -i django python /project/django_project/manage.py migrate
 docker exec -i django python /project/django_project/manage.py batch_createsuperuser --username admin --email xxxxx@contrastsecurity.com --password xxxxx
 ```
 
-### Djangoへの接続（とくに必要はないですが）
+### Djangoへの接続
 http://xxx.xxx.xxx.xxx:8085/admin/
+admin/xxxxx
+
+### 各種接続設定
+http://xxx.xxx.xxx.xxx:8085/admin/relay_django/teamserverconfig/  
+に接続して、接続設定を行ってください。
 
 ### Backlogのチケット一括削除コマンド
 ```
