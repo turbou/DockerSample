@@ -9,7 +9,7 @@ cd relay_django/relay_django/
 vim local_settings.py
 ```
 local_settings.pyの内容
-シークレットキーは https://djecrety.ir/ で適当に生成してください。
+シークレットキーは https://djecrety.ir/ などのサイトで適当に生成してください。
 ```python
 # これはDjango自体のシークレットキー
 SECRET_KEY = 'r&id5o(ix9(yazvnxqt$c0*334l)l5bqgfbv#mf9%lojd#(7dn'
@@ -53,7 +53,7 @@ docker exec -i django python /project/django_project/manage.py batch_createsuper
 ```
 
 ### Djangoへの接続
-http://xxx.xxx.xxx.xxx:8085/admin/
+http://xxx.xxx.xxx.xxx:8085/admin/  
 admin/xxxxx
 
 ### 各種接続設定
