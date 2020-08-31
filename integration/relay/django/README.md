@@ -43,6 +43,8 @@ services:
 docker-compose up -d
 # 同一ホストで複数コンテナを起動しようとしてrecreateされてしまう場合は
 docker-compose -p taka up -d
+# または環境変数をセットして
+export COMPOSE_PROJECT_NAME=taka
 ```
 
 ### Djangoのマイグレートとスーパーユーザーの作成
