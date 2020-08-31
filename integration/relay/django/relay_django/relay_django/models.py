@@ -42,8 +42,8 @@ class TeamServer(models.Model):
     url = models.URLField('TeamServer URL', help_text='http://172.31.47.104:8080/Contrast')
     authorization = models.CharField('AUTHORIZATION', max_length=100, unique=True)
     api_key = models.CharField('API_KEY', max_length=50, unique=True)
-    backlog = models.ForeignKey(Backlog, verbose_name='Backlog', related_name='teamservers', related_query_name='teamserver', on_delete=models.SET_NULL, null=True)
-    gitlab = models.ForeignKey(Gitlab, verbose_name='Gitlab', related_name='teamservers', related_query_name='teamserver', on_delete=models.SET_NULL, null=True)
+    backlog = models.ForeignKey(Backlog, verbose_name='Backlog', related_name='teamservers', related_query_name='teamserver', on_delete=models.SET_NULL, blank=True, null=True)
+    gitlab = models.ForeignKey(Gitlab, verbose_name='Gitlab', related_name='teamservers', related_query_name='teamserver', on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return '%s' % (self.name)
