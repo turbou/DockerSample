@@ -56,11 +56,15 @@ docker exec -i django python /project/django_project/manage.py batch_createsuper
 http://xxx.xxx.xxx.xxx:8085/admin/  
 admin/xxxxx
 
-### 各種接続設定
+### 各サービスごとの接続設定
 http://xxx.xxx.xxx.xxx:8085/admin/relay_django/  
-に接続して、Backlog, Gitlab, TeamServer設定を行ってください。
+に接続して、Backlog, Gitlab, TeamServer設定を行ってください。  
+基本的にBacklogかGitlab（またはその両方）の接続設定を作ってから  
+TeamServerの接続設定にそれらを紐付ける感じです。  
 
 ### チケット一括削除コマンド
+BacklogもGitlab Issueも基本、画面上ではチケットの一括削除が出来ませんが、以下のコマンドで一括削除することができます。  
+`--name`に指定するのはBacklog, Gitlabの接続設定名です。
 #### Backlog
 一度に100件まで削除できるので、チケットが0になるまで繰り返してください。  
 ```
