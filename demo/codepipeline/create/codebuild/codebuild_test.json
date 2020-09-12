@@ -1,16 +1,18 @@
 {
-    "name": "PetClinicBuild",
-    "description": "Create Jar",
+    "name": "PetClinicTest",
+    "description": "FindOwner",
     "source": {
-        "type": "CODEPIPELINE",
-        "buildspec": "buildspec.yml",
+        "type": "GITHUB",
+        "location": "https://github.com/turbou/PetClinicDemo",
+        "gitCloneDepth": 1,
+        "gitSubmodulesConfig": {
+            "fetchSubmodules": false
+        },
+        "buildspec": "testspec.yml",
         "insecureSsl": false
     },
     "artifacts": {
-        "type": "CODEPIPELINE",
-        "name": "BuildResult",
-        "packaging": "NONE",
-        "encryptionDisabled": false
+        "type": "NO_ARTIFACTS"
     },
     "cache": {
         "type": "LOCAL",
@@ -33,7 +35,7 @@
         "cloudWatchLogs": {
             "status": "ENABLED",
             "groupName": "/demo/petclinic",
-            "streamName": "build"
+            "streamName": "test"
         },
         "s3Logs": {
             "status": "DISABLED",
