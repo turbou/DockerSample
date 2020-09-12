@@ -16,7 +16,7 @@
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:s3:::310199975805-petclinic-demo"
+                "arn:aws:s3:::310199975805-petclinic-demo*"
             ],
             "Action": [
                 "s3:PutObject",
