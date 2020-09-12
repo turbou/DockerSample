@@ -1,0 +1,43 @@
+{
+    "name": "PetClinicBuild",
+    "description": "",
+    "source": {
+        "type": "CODEPIPELINE",
+        "buildspec": "buildspec.yml",
+        "insecureSsl": false
+    },
+    "artifacts": {
+        "type": "CODEPIPELINE",
+        "name": "BuildResult",
+        "packaging": "NONE",
+        "encryptionDisabled": false
+    },
+    "cache": {
+        "type": "LOCAL",
+        "modes": [
+            "LOCAL_CUSTOM_CACHE"
+        ]
+    },
+    "environment": {
+        "type": "LINUX_CONTAINER",
+        "image": "aws/codebuild/amazonlinux2-x86_64-standard:3.0",
+        "computeType": "BUILD_GENERAL1_SMALL",
+        "environmentVariables": [],
+        "privilegedMode": false,
+        "imagePullCredentialsType": "CODEBUILD"
+    },
+    "serviceRole": "arn:aws:iam::310199975805:role/service-role/CodeBuildServiceRole-Demo",
+    "timeoutInMinutes": 60,
+    "queuedTimeoutInMinutes": 480,
+    "logsConfig": {
+        "cloudWatchLogs": {
+            "status": "ENABLED",
+            "groupName": "petclnicdemo",
+            "streamName": "build"
+        },
+        "s3Logs": {
+            "status": "DISABLED",
+            "encryptionDisabled": true
+        }
+    }
+}
