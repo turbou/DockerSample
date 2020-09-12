@@ -119,7 +119,7 @@
                         },
                         "runOrder": 1,
                         "configuration": {
-                            "ApplicationName": "PetClinicDemo2",
+                            "ApplicationName": "PetClinic2",
                             "DeploymentGroupName": "PetClinicDeployGroup2"
                         },
                         "outputArtifacts": [],
