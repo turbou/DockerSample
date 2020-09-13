@@ -4,12 +4,18 @@
         {
             "Effect": "Allow",
             "Action": [
+                "s3:CreateBucket",
                 "iam:CreateRole",
                 "iam:DeleteRole",
                 "iam:PutRolePolicy",
                 "iam:PassRole",
                 "iam:AttachRolePolicy",
-                "s3:CreateBucket"
+                "logs:CreateLogGroup",
+                "codebuild:CreateProject",
+                "codedeploy:CreateApplication",
+                "codedeploy:CreateDeploymentGroup",
+                "codepipeline:CreatePipeline",
+                "codepipeline:StartPipelineExecution"
             ],
             "Resource": "*"
         }
