@@ -1,6 +1,6 @@
 {
     "pipeline": {
-        "name": "PetClinicDemo3",
+        "name": "PetClinicDemo",
         "roleArn": "arn:aws:iam::310199975805:role/service-role/CodePipelineServiceRole-Demo",
         "artifactStore": {
             "type": "S3",
@@ -119,8 +119,8 @@
                         },
                         "runOrder": 1,
                         "configuration": {
-                            "ApplicationName": "PetClinic2",
-                            "DeploymentGroupName": "PetClinicDeployGroup2"
+                            "ApplicationName": "PetClinic",
+                            "DeploymentGroupName": "PetClinicDeployGroup"
                         },
                         "outputArtifacts": [],
                         "inputArtifacts": [
