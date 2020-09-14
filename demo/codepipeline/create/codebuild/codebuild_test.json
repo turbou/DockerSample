@@ -2,23 +2,18 @@
     "name": "PetClinicTest",
     "description": "FindOwner",
     "source": {
-        "type": "GITHUB",
-        "location": "https://github.com/turbou/PetClinicDemo",
-        "gitCloneDepth": 1,
-        "gitSubmodulesConfig": {
-            "fetchSubmodules": false
-        },
+        "type": "CODEPIPELINE",
         "buildspec": "testspec.yml",
         "insecureSsl": false
     },
     "artifacts": {
-        "type": "NO_ARTIFACTS"
+        "type": "CODEPIPELINE",
+        "name": "BuildResult",
+        "packaging": "NONE",
+        "encryptionDisabled": false
     },
     "cache": {
-        "type": "LOCAL",
-        "modes": [
-            "LOCAL_CUSTOM_CACHE"
-        ]
+        "type": "NO_CACHE"
     },
     "environment": {
         "type": "LINUX_CONTAINER",
