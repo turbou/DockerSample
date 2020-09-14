@@ -9,5 +9,9 @@
 ・AmazonS3ReadOnlyAccess
 ・AWSCodeDeployRole
 
+CodePipelineのソースのGithubのwebhook検知がうまく動かない場合は
+https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/pipelines-webhooks-delete.html
+を参考に余計なwebhookを削除してみる。
+
 以上
 
