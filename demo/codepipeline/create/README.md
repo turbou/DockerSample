@@ -21,21 +21,21 @@
 
 デプロイするEC2インスタンスに以下のAWS管理ポリシーを持つIAMロールを割り当ててください。
 
-- AWSCodeDeployRole
+- AWSCodeDeployRole  
   後述するCodeDeployエージェントが稼働するために必要なポリシーです。
-- AmazonS3ReadOnlyAccess
+- AmazonS3ReadOnlyAccess  
   EC2からS3上のアーティファクト（リリース物）を取得するのに必要なポリシーです。
 
 次にEC2インスタンスにCodeDeployエージェントをインストールしてください。
 https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-linux.html  
 上記のIAMロールでAWSCodeDeployRoleが割り当てられてないとエージェントのログにエラーが出続けます。
 
-- エージェントログの場所
+- エージェントログの場所  
   ```/var/log/aws/codedeploy-agent/codedeploy-agent.log```
 
 #### 4. その他
 
-- CodePipelineのソースのGithubのwebhook検知がうまく動かない場合は
+- CodePipelineのソースのGithubのwebhook検知がうまく動かない場合は  
   https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/pipelines-webhooks-delete.html  
   を参考に余計なwebhookを削除してみる。
 
