@@ -27,7 +27,7 @@
   EC2からS3上のアーティファクト（リリース物）を取得するのに必要なポリシーです。
 
 次にEC2インスタンスにCodeDeployエージェントをインストールしてください。
-https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-linux.html
+https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-linux.html  
 上記のIAMロールでAWSCodeDeployRoleが割り当てられてないとエージェントのログにエラーが出続けます。
 
 - エージェントログの場所
@@ -36,7 +36,7 @@ https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operati
 #### 4. その他
 
 - CodePipelineのソースのGithubのwebhook検知がうまく動かない場合は
-  https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/pipelines-webhooks-delete.html
+  https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/pipelines-webhooks-delete.html  
   を参考に余計なwebhookを削除してみる。
 
 
