@@ -1,4 +1,11 @@
-### PetClinicの脆弱性テストをCodePipelineでやってみる
+# PetClinicの脆弱性テストをCodePipelineでやってみる
+
+## サンプルアプリの準備
+
+#### 1. サンプルSpringBootアプリの準備
+https://github.com/turbou/PetClinicDemo を自身のGithubなどにフォークします。
+
+## AWS CodePipelineの構築
 
 #### 1. AWS CLIを実行するIAMユーザーに必要なポリシー
 
