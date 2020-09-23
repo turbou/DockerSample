@@ -10,6 +10,16 @@ Personal access tokensでアクセストークンを生成します。
 ```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
 生成したアクセストークンで置換してください。
 
+#### 3. サンプルアプリの中の簡単な説明
+- buildspec.yml  
+  CodeBuildのビルドアクションで使用されるbuildspecファイルです。
+- testspec.yml  
+  CodeBuildのテストアクションで使用されるbuildspecファイルです。  
+  内部で curlによってSQLInjectionが発生するリクエストを発行し、check_vul.shで、  
+  TeamServerより脆弱性(Critical指定)のカウントを取得しています。
+- appspec.yml  
+  CodeDeployで使用されるappspecファイルです。
+
 ## AWS CodePipelineの構築
 
 #### 1. AWS CLIを実行するIAMユーザーに必要なポリシー
