@@ -54,6 +54,29 @@ CodePipelineの作成が成功すると、すぐにCodePipelineが動き出し�
   https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/pipelines-webhooks-delete.html  
   を参考に余計なwebhookを削除してみる。
 
+## 脆弱性検知のテストについて
+サンプルのPetClinicDemoにはSQLInjectionの脆弱性を仕込んであります。  
+```
+./src/main/java/org/springframework/samples/petclinic/owner/OwnerRepositoryCustomImpl.java
+```
+の中の *unsafe*, *safe* のコードを切り替えることで、脆弱性検知によるビルド失敗または脆弱性検知なしによるビルド成功からのデプロイまでの  
+CodePipelineの動きを切り替えることができます。
+```java
+public Collection<Owner> findByLastName(String lastName) {
+    System.out.println("Vulnerable method 1");
+    // unsafe -- 検索機能を開発
+    String sqlQuery = "SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE '" + lastName + "%'"; 
+    TypedQuery<Owner> query = this.entityManager.createQuery(sqlQuery, Owner.class);
+    // unsafe -- end
+
+    // safe -- start
+    //String sqlQuery = "SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName";
+    //TypedQuery<Owner> query = this.entityManager.createQuery(sqlQuery, Owner.class);
+    //query.setParameter("lastName", lastName + "%");
+    // safe -- end
+    return query.getResultList();
+}
+```
 
 以上
 
