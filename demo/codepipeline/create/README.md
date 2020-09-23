@@ -5,6 +5,11 @@
 #### 1. サンプルSpringBootアプリの準備
 https://github.com/turbou/PetClinicDemo を自身のGithubなどにフォークします。
 
+#### 2. Githubのアクセストークンの準備
+Personal access tokensでアクセストークンを生成します。  
+```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
+生成したアクセストークンで置換してください。
+
 ## AWS CodePipelineの構築
 
 #### 1. AWS CLIを実行するIAMユーザーに必要なポリシー
