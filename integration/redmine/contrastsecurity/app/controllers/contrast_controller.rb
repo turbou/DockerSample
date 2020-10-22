@@ -223,7 +223,7 @@ class ContrastController < ApplicationController
         logger.error(l(:problem_with_priority))
         return head :not_found
       end
-      liburl_pattern = /.+ was found in .+\((.+)\),.+/
+      liburl_pattern = /.+\((.+#{lib_id})\)/
       is_liburl = t_issue['description'].match(liburl_pattern)
       self_url = ''
       if is_liburl
