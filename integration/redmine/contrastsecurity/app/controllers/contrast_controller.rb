@@ -53,22 +53,16 @@ class ContrastController < ApplicationController
         return render plain: 'Vul Skip'
       end
       app_name = t_issue['application_name']
+      org_id = t_issue['organization_id']
+      app_id = t_issue['application_id']
+      vul_id = t_issue['vulnerability_id']
+      lib_id = ''
       self_url = ""
-      vulurl_pattern = /.+\((.+)\) was found in/
+      vulurl_pattern = /.+\((.+#{vul_id})\)/
       is_vulurl = t_issue['description'].match(vulurl_pattern)
       if is_vulurl
         self_url = is_vulurl[1]
       end
-      vul_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) was found in/
-      is_vul = t_issue['description'].match(vul_pattern)
-      if not is_vul
-        logger.error(l(:problem_with_hook_description))
-        return head :not_found
-      end
-      org_id = is_vul[1]
-      app_id = is_vul[2]
-      vul_id = is_vul[3]
-      lib_id = ''
       # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application', teamserver_url, org_id, app_id, vul_id)
@@ -202,18 +196,18 @@ class ContrastController < ApplicationController
       if not Setting.plugin_contrastsecurity['lib_issues']
         return render plain: 'Lib Skip'
       end
-      lib_pattern = /.+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\)./
+      org_id = t_issue['organization_id']
+      app_id = t_issue['application_id']
+      lib_pattern = /index.html#\/#{org_id}\/libraries\/(.+)\/([a-z0-9]+)\)/
       is_lib = t_issue['description'].match(lib_pattern)
-      lib_name = is_lib[1]
-      org_id = is_lib[2]
-      app_id = is_lib[5]
       vul_id = ''
-      lib_lang = is_lib[3]
-      lib_id = is_lib[4]
+      lib_lang = is_lib[1]
+      lib_id = is_lib[2]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
       res = callAPI(url)
       lib_json = JSON.parse(res.body)
+      lib_name = lib_json['library']['file_name']
       file_version = lib_json['library']['file_version']
       latest_version = lib_json['library']['latest_version']
       classes_used = lib_json['library']['classes_used']
