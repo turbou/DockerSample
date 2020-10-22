@@ -157,37 +157,31 @@ class ContrastController < ApplicationController
       logger.info(l(:event_vulnerability_changestatus))
       project = t_issue['project']
       status = t_issue['status']
+      vul_id = t_issue['vulnerability_id']
       #logger.info(status)
-      vul_sts_chg_pattern = /index.html#\/(.+)\/applications\/(.+)\/vulns\/(.+)\) found in/
-      is_vul_sts_chg = t_issue['description'].match(vul_sts_chg_pattern)
-      if is_vul_sts_chg
-        #org_id = is_vul_sts_chg[1]
-        #app_id = is_vul_sts_chg[2]
-        vul_id = is_vul_sts_chg[3]
-        if vul_id.blank?
-          logger.error(l(:problem_with_customfield))
+      if vul_id.blank?
+        logger.error(l(:problem_with_customfield))
+        return head :ok
+      end
+      cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
+      cvs.each do |cv|
+        issue = cv.customized
+        if project != issue.project.identifier
+          next
+        end
+        status_obj = ContrastUtil.get_redmine_status(status)
+        if status_obj.nil?
+          logger.error(l(:problem_with_status))
           return head :ok
         end
-        cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
-        cvs.each do |cv|
-          issue = cv.customized
-          if project != issue.project.identifier
-            next
-          end
-          status_obj = ContrastUtil.get_redmine_status(status)
-          if status_obj.nil?
-            logger.error(l(:problem_with_status))
-            return head :ok
-          end
-          old_status_obj = issue.status
-          issue.status = status_obj
-          if issue.save
-            logger.info(l(:issue_status_change_success))
-            return head :ok
-          else
-            logger.error(l(:issue_status_change_failure))
-            return head :internal_server_error
-          end
+        old_status_obj = issue.status
+        issue.status = status_obj
+        if issue.save
+          logger.info(l(:issue_status_change_success))
+          return head :ok
+        else
+          logger.error(l(:issue_status_change_failure))
+          return head :internal_server_error
         end
       end
       return head :ok
