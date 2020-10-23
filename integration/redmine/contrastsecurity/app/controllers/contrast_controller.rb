@@ -124,10 +124,15 @@ class ContrastController < ApplicationController
       #logger.info(howtofix_url)
       #logger.info(self_url)
       # Story
+      chapters = ""
       story = ""
       if story_url.present?
         get_story_res = callAPI(story_url)
         story_json = JSON.parse(get_story_res.body)
+        story_json['story']['chapters'].each do |chapter|
+          chapters << chapter['introText'] + "\n"
+          chapters << "{{#xxxxBlock}}" + chapter['body'] + "{{/xxxxBlock}}\n"
+        end
         story = story_json['story']['risk']['formattedText']
       end
       # How to fix
@@ -147,6 +152,8 @@ class ContrastController < ApplicationController
         deco_mae = "## "
       end
       description = ""
+      description << deco_mae + l(:report_vul_happened) + deco_ato + "\n"
+      description << convertMustache(chapters) + "\n\n"
       description << deco_mae + l(:report_vul_overview) + deco_ato + "\n"
       description << convertMustache(story) + "\n\n"
       description << deco_mae + l(:report_vul_howtofix) + deco_ato + "\n"
