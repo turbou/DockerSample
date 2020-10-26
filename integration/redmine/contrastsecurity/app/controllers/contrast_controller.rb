@@ -131,7 +131,14 @@ class ContrastController < ApplicationController
         story_json = JSON.parse(get_story_res.body)
         story_json['story']['chapters'].each do |chapter|
           chapters << chapter['introText'] + "\n"
-          chapters << "{{#xxxxBlock}}" + chapter['body'] + "{{/xxxxBlock}}\n"
+          if chapter['type'] == "properties"
+            chapter['properties'].each do |key, value|
+              chapters << key + "\n"
+              chapters << "{{#xxxxBlock}}" + value['value'] + "{{/xxxxBlock}}\n"
+            end
+          elsif ["configuration", "location", "recreation"].include? chapter['type']
+            chapters << "{{#xxxxBlock}}" + chapter['body'] + "{{/xxxxBlock}}\n"
+          end
         end
         story = story_json['story']['risk']['formattedText']
       end
@@ -429,10 +436,14 @@ class ContrastController < ApplicationController
       # Link
       new_str = str.gsub(/\$\$LINK_DELIM\$\$/, ' ')
     end
+    # New line
+    new_str = new_str.gsub(/{{{nl}}}/, "\n")
     # Other
     new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '')
-    # <, >
-    new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>')
+    # <, >, nbsp
+    new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>').gsub(/&nbsp;/, ' ')
+    # Quot
+    new_str = new_str.gsub(/&quot;/, '"')
     return new_str
   end
 end
