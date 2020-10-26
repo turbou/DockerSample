@@ -86,7 +86,7 @@ while read -r LINE; do
     --arg ApplicationId "${APP_ID}" \
     --arg ServerName "" \
     --arg ServerId "" \
-    --arg OrganizationId "" \
+    --arg OrganizationId "${ORG_ID}" \
     --arg Severity "${SEVERITY}" \
     --arg Status "${STATUS}" \
     --arg TraceId "${LINE}" \
@@ -108,7 +108,7 @@ while read -r LINE; do
     --arg ApplicationId "" \
     --arg ServerName "" \
     --arg ServerId "" \
-    --arg OrganizationId "" \
+    --arg OrganizationId "${ORG_ID}" \
     --arg Severity "" \
     --arg Status "" \
     --arg TraceId "" \
@@ -145,7 +145,7 @@ for i in `seq 0 $(expr ${json_length} - 1)`; do
     --arg ApplicationId "${APP_ID}" \
     --arg ServerName "" \
     --arg ServerId "" \
-    --arg OrganizationId "" \
+    --arg OrganizationId "${ORG_ID}" \
     --arg Severity "" \
     --arg Status "" \
     --arg TraceId "" \
