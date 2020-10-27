@@ -92,7 +92,7 @@ while read -r LINE; do
     --arg Environment "" \
     --arg EventType "NEW_VULNERABILITY" \
     -f webhook.jq > ${LINE}.json
-  curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${LINE}.json
+  curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}/contrast/vote?key=${RM_API_KEY} -d @${LINE}.json
 
   # コメント同期のためのトリガ
   sleep 1
@@ -114,7 +114,7 @@ while read -r LINE; do
     --arg Environment "" \
     --arg EventType "NEW_VULNERABILITY_COMMENT_FROM_SCRIPT" \
     -f webhook.jq > ${LINE}_cmt.json
-  curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${LINE}_cmt.json
+  curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}/contrast/vote?key=${RM_API_KEY} -d @${LINE}_cmt.json
 done < <(cat ./traces_ids.json | jq -r '.traces[]')
 
 # 次に検知したライブラリ脆弱性のリストを取得
@@ -151,7 +151,7 @@ for i in `seq 0 $(expr ${json_length} - 1)`; do
     --arg Environment "" \
     --arg EventType "NEW_VULNERABLE_LIBRARY" \
     -f webhook.jq > ${HASH}.json
-  curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}contrast/vote?key=${RM_API_KEY} -d @${HASH}.json
+  curl -X POST -H "Content-Type: application/json" ${RM_BASEURL}/contrast/vote?key=${RM_API_KEY} -d @${HASH}.json
 done
 
 rm -f *.json
