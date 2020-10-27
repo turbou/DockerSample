@@ -416,7 +416,8 @@ class ContrastController < ApplicationController
   def convertMustache(str)
     if Setting.text_formatting == "textile"
       # Link
-      new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '"\2":\1 ')
+      new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
+      new_str = new_str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '"\2":\1 ')
       # CodeBlock
       new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>').gsub(/{{\/[A-Za-z]+Block}}/, '</pre>')
       # Header
@@ -425,7 +426,8 @@ class ContrastController < ApplicationController
       new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
     elsif Setting.text_formatting == "markdown"
       # Link
-      new_str = str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
+      new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
+      new_str = new_str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
       # CodeBlock
       new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, "~~~\n").gsub(/{{\/[A-Za-z]+Block}}/, "\n~~~")
       # Header
