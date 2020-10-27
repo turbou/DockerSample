@@ -440,10 +440,14 @@ class ContrastController < ApplicationController
     new_str = new_str.gsub(/{{{nl}}}/, "\n")
     # Other
     new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '')
+    # Comment
+    new_str = new_str.gsub(/{{!.+}}/, '')
     # <, >, nbsp
     new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>').gsub(/&nbsp;/, ' ')
     # Quot
     new_str = new_str.gsub(/&quot;/, '"')
+    # Tab
+    new_str = new_str.gsub(/\t/, '')
     return new_str
   end
 end
