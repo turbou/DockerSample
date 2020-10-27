@@ -33,7 +33,6 @@
     export CONTRAST_APP_NAME=PetClinic
     export REDMINE_BASEURL=http://host/redmine/
     export REDMINE_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    export REDMINE_PROJECT_ID=contrastsecurity
     ```
 1. Edit webhook.jq  
     project, trackerをRedmineの取り込み先に修正してください。
