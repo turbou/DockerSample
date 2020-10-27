@@ -429,7 +429,7 @@ class ContrastController < ApplicationController
       new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
       new_str = new_str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
       # CodeBlock
-      new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, "~~~\n").gsub(/{{\/[A-Za-z]+Block}}/, "\n~~~")
+      new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, "\n~~~\n").gsub(/{{\/[A-Za-z]+Block}}/, "\n~~~\n")
       # Header
       new_str = new_str.gsub(/{{#header}}/, '### ').gsub(/{{\/header}}/, '')
       # List
@@ -449,7 +449,7 @@ class ContrastController < ApplicationController
     # Quot
     new_str = new_str.gsub(/&quot;/, '"')
     # Tab
-    new_str = new_str.gsub(/\t/, '')
+    new_str = new_str.gsub(/\t/, '    ')
     return new_str
   end
 end
