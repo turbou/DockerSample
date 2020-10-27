@@ -9,7 +9,6 @@ if [ -z "$CONTRAST_BASEURL" -o -z "$CONTRAST_AUTHORIZATION" -o -z "$CONTRAST_API
   echo 'CONTRAST_APP_NAME      : PetClinic_8001'
   echo 'REDMINE_BASEURL        : https://XXXXXXXXXXX/redmine'
   echo 'REDMINE_API_KEY        : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-  echo 'REDMINE_PROJECT_ID     : contrastsecurity'
   exit 1
 fi
 
@@ -21,7 +20,6 @@ API_URL="${BASEURL}/api/ng/${ORG_ID}"
 APP_NAME=$CONTRAST_APP_NAME
 RM_BASEURL=$REDMINE_BASEURL
 RM_API_KEY=$REDMINE_API_KEY
-#RM_PROJ_ID=$REDMINE_PROJECT_ID
 
 rm -f ./applications.json
 curl -X GET -sS \
