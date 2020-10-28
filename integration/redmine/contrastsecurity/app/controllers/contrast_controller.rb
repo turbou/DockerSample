@@ -423,7 +423,7 @@ class ContrastController < ApplicationController
       # Header
       new_str = new_str.gsub(/{{#header}}/, 'h3. ').gsub(/{{\/header}}/, "\n")
       # List
-      new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
+      new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
     elsif Setting.text_formatting == "markdown"
       # Link
       new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
@@ -433,7 +433,7 @@ class ContrastController < ApplicationController
       # Header
       new_str = new_str.gsub(/{{#header}}/, '### ').gsub(/{{\/header}}/, '')
       # List
-      new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
+      new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
     else
       # Link
       new_str = str.gsub(/\$\$LINK_DELIM\$\$/, ' ')
