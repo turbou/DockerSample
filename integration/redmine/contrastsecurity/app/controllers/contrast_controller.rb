@@ -136,7 +136,7 @@ class ContrastController < ApplicationController
               chapters << key + "\n"
               chapters << "{{#xxxxBlock}}" + value['value'] + "{{/xxxxBlock}}\n"
             end
-          elsif ["configuration", "location", "recreation"].include? chapter['type']
+          elsif ["configuration", "location", "recreation", "dataflow", "source"].include? chapter['type']
             chapters << "{{#xxxxBlock}}" + chapter['body'] + "{{/xxxxBlock}}\n"
           end
         end
@@ -450,6 +450,8 @@ class ContrastController < ApplicationController
     new_str = new_str.gsub(/&quot;/, '"')
     # Tab
     new_str = new_str.gsub(/\t/, '    ')
+    # Character Reference
+    new_str = new_str.gsub(/&#[^;]+;/, '')
     return new_str
   end
 end
