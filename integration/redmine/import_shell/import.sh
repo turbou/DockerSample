@@ -9,6 +9,7 @@ if [ -z "$CONTRAST_BASEURL" -o -z "$CONTRAST_AUTHORIZATION" -o -z "$CONTRAST_API
   echo 'CONTRAST_APP_NAME      : PetClinic_8001'
   echo 'REDMINE_BASEURL        : https://XXXXXXXXXXX/redmine'
   echo 'REDMINE_API_KEY        : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+  echo 'CONTRAST_SEVERITIES    : CRITICAL,HIGH,MEDIUM,LOW,NOTE'
   exit 1
 fi
 
@@ -20,6 +21,7 @@ API_URL="${BASEURL}/api/ng/${ORG_ID}"
 APP_NAME=$CONTRAST_APP_NAME
 RM_BASEURL=$REDMINE_BASEURL
 RM_API_KEY=$REDMINE_API_KEY
+SEVERITIES=$CONTRAST_SEVERITIES
 
 rm -f ./applications.json
 curl -X GET -sS \
@@ -53,8 +55,13 @@ echo "${CORRECT_APP_NAME} -> ${APP_ID}"
 echo "脆弱性"
 # まずは検知した脆弱性のUUIDリストを取得
 rm -f ./traces_ids.json
+SEVERITIES_LENGTH=`echo ${SEVERITIES} | wc -c`
+SEVERITIES_QUERY=""
+if [ ${SEVERITIES_LENGTH} -gt 0 ]; then
+  SEVERITIES_QUERY="?severities=${SEVERITIES}"
+fi
 curl -X GET -sS \
-  ${API_URL}/traces/${APP_ID}/ids \
+  ${API_URL}/traces/${APP_ID}/ids${SEVERITIES_QUERY} \
   -H "Authorization: ${AUTHORIZATION}" \
   -H "API-Key: ${API_KEY}" \
   -H 'Accept: application/json' -J -o traces_ids.json
