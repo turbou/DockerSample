@@ -424,6 +424,9 @@ class ContrastController < ApplicationController
       new_str = new_str.gsub(/{{#header}}/, 'h3. ').gsub(/{{\/header}}/, "\n")
       # List
       new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
+      # Table
+      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
+      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
     elsif Setting.text_formatting == "markdown"
       # Link
       new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
@@ -434,6 +437,16 @@ class ContrastController < ApplicationController
       new_str = new_str.gsub(/{{#header}}/, '### ').gsub(/{{\/header}}/, '')
       # List
       new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
+      # Table
+      new_str = new_str.gsub(/({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{\/tableHeaderRow}})[\s]*{{\/tableRow}})/, '\1' + "\n{{#tableRowX}}" + '\2' + "{{/tableRowX}}")
+      if mo = new_str.match(/({{#tableRowX}}[\s]*.+[\s]*{{\/tableRowX}})/)
+        replace_str = mo[1].gsub(/tableHeaderRow/, 'tableHeaderRowX')
+        new_str = new_str.gsub(/{{#tableRowX}}[\s]*.+[\s]*{{\/tableRowX}}/, replace_str)
+        new_str = new_str.gsub(/({{#tableHeaderRowX}})(.+?)({{\/tableHeaderRowX}})/, '\1---\3')
+      end
+      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
+      new_str = new_str.gsub(/[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}/, '|').gsub(/{{\/tableHeaderRowX}}[\s]*/, '|')
+      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
     else
       # Link
       new_str = str.gsub(/\$\$LINK_DELIM\$\$/, ' ')
