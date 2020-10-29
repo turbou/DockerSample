@@ -80,7 +80,7 @@ while read -r LINE; do
   RULE_NAME=`cat ./trace.json | jq -r '.trace.rule_name'`
   SEVERITY=`cat ./trace.json | jq -r '.trace.severity'`
   STATUS=`cat ./trace.json | jq -r '.trace.status'`
-  DESCRIPTION="${BASEURL}static/ng/index.html#/${ORG_ID}/applications/${APP_ID}/vulns/${LINE}) was found in ${CORRECT_APP_NAME}"
+  DESCRIPTION=" (${BASEURL}static/ng/index.html#/${ORG_ID}/applications/${APP_ID}/vulns/${LINE}) was found in ${CORRECT_APP_NAME}"
 
   jq -n \
     --arg Title "Contrast Security" \
