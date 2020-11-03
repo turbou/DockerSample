@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'relay_django.apps.ContrastConfig',
+    'application.apps.ApplicationConfig',
+    'integration.apps.IntegrationConfig',
 ]
 
 MIDDLEWARE = [

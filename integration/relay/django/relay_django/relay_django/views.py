@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
-from .models import TeamServer
+from integration.models import Integration
 
 import json
 import requests
@@ -61,9 +61,9 @@ def vote(request):
             print(json_data['description'])
             config_name = json_data.get('config_name')
             if config_name:
-                ts_config = TeamServer.objects.get(name=config_name)
+                ts_config = Integration.objects.get(name=config_name)
             else:
-                ts_config = TeamServer.objects.first()
+                ts_config = Integration.objects.first()
             app_name = json_data['application_name']
             self_url = ''
             r = re.compile(".+\((.+)\) was found in")
@@ -140,9 +140,9 @@ def vote(request):
                 return HttpResponse(status=200)
             config_name = json_data.get('config_name')
             if config_name:
-                ts_config = TeamServer.objects.get(name=config_name)
+                ts_config = Integration.objects.get(name=config_name)
             else:
-                ts_config = TeamServer.objects.first()
+                ts_config = Integration.objects.first()
             lib_name = m.group(1)
             org_id = m.group(2)
             app_id = m.group(5)
@@ -215,9 +215,9 @@ def vote2(request):
             print(json_data['description'])
             config_name = json_data.get('config_name')
             if config_name:
-                ts_config = TeamServer.objects.get(name=config_name)
+                ts_config = Integration.objects.get(name=config_name)
             else:
-                ts_config = TeamServer.objects.first()
+                ts_config = Integration.objects.first()
             app_name = json_data['application_name']
             self_url = ''
             r = re.compile(".+\((.+)\) was found in")
@@ -289,9 +289,9 @@ def vote2(request):
                 return HttpResponse(status=200)
             config_name = json_data.get('config_name')
             if config_name:
-                ts_config = TeamServer.objects.get(name=config_name)
+                ts_config = Integration.objects.get(name=config_name)
             else:
-                ts_config = TeamServer.objects.first()
+                ts_config = Integration.objects.first()
             lib_name = m.group(1)
             org_id = m.group(2)
             app_id = m.group(5)
