@@ -24,5 +24,6 @@ urlpatterns = [
     path('hook/', views.hook, name='hook'),
     path('vote/', views.vote, name='vote'),
     path('vote2/', views.vote2, name='vote2'),
+    path('vote3/', views.vote3, name='vote3'),
 ] + static('static/', document_root=settings.STATIC_ROOT)
 

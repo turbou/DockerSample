@@ -353,3 +353,132 @@ def vote2(request):
         return HttpResponse(status=200)
     return HttpResponse(status=404)
 
+@require_http_methods(["GET", "POST", "PUT"])
+@csrf_exempt
+def vote3(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        if json_data['event_type'] == 'TEST_CONNECTION':
+            integration_name = json_data.get('integration_name')
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
+            else:
+                return HttpResponse(status=404)
+            return HttpResponse(status=200)
+        elif json_data['event_type'] == 'NEW_VULNERABILITY':
+            print(json_data['description'])
+            integration_name = json_data.get('integration_name')
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
+            else:
+                return HttpResponse(status=404)
+            ts_config = Integration.objects.get(name=integration_name)
+            app_name = json_data['application_name']
+            org_id = json_data['organization_id']
+            app_id = json_data['application_id']
+            vul_id = json_data['vulnerability_id']
+            self_url = ''
+            r = re.compile(".+\((.+" + vul_id + ")\)")
+            m = r.search(json_data['description'])
+            if m is not None:
+                self_url = m.group(1)
+
+            teamserver_url = ts_config.url
+            url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
+            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            vuln_json = res.json()
+            summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
+
+            deco_mae = "## "
+            deco_ato = ""
+            description = []
+            description.append('環境　　　　　　: %s\n' % (vuln_json['trace']['servers'][0]['environment']))
+            description.append('アプリケーション: <%s|%s>\n' % (self_url.replace('/vulns/' + vul_id, ''), app_name))
+            description.append('重大度　　　　　: %s\n' % (vuln_json['trace']['severity']))
+            description.append('脆弱性　　　　　: <%s|%s>\n' % (self_url, vuln_json['trace']['title']))
+
+            priority_id = json_data['priorityId']
+            url = '%s' % (ts_config.googlechat.webhook)
+            data = {
+                "text": ''.join(description),
+            }   
+            headers = {
+                'Content-Type': 'application/json',
+            }
+            res = requests.post(url, json=data, headers=headers)
+            print(res.status_code)
+            print(res.json())
+            return HttpResponse(status=200)
+        elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
+            r = re.compile(".+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\).")
+            m = r.search(json_data['description'])
+            if m is None:
+                return HttpResponse(status=200)
+            config_name = json_data.get('config_name')
+            if config_name:
+                ts_config = Integration.objects.get(name=config_name)
+            else:
+                ts_config = Integration.objects.first()
+            lib_name = m.group(1)
+            org_id = m.group(2)
+            app_id = m.group(5)
+            lib_lang = m.group(3)
+            lib_id = m.group(4)
+            teamserver_url = ts_config.url
+            url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
+            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            lib_json = res.json()
+            file_version = lib_json['library']['file_version']
+            latest_version = lib_json['library']['latest_version']
+            classes_used = lib_json['library']['classes_used']
+            class_count = lib_json['library']['class_count']
+            cve_list = []
+            for c_link in lib_json['library']['vulns']:
+                cve_list.append(c_link['name'])
+            r = re.compile(".+ was found in .+\((.+)\),.+")
+            m = r.search(json_data['description'])
+            self_url = ''
+            if m is not None:
+                self_url = m.group(1)
+            summary = lib_name
+            # description
+            deco_mae = "**"
+            deco_ato = "**"
+            description = []
+            description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
+            description.append('%s\n\n' % (file_version))
+            description.append('%s%s%s\n' % (deco_mae, '最新バージョン', deco_ato))
+            description.append('%s\n\n' % (latest_version))
+            description.append('%s%s%s\n' % (deco_mae, 'クラス(使用/全体)', deco_ato))
+            description.append('%d/%d\n\n' % (classes_used, class_count))
+            description.append('%s%s%s\n' % (deco_mae, '脆弱性', deco_ato))
+            description.append('%s\n\n' % ('\n'.join(cve_list)))
+            description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
+            description.append(self_url)
+
+            priority_id = json_data['priorityId']
+            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
+            data = {
+                'title': summary,
+                'labels': ts_config.gitlab.labels,
+                'description': ''.join(description),
+            }   
+            headers = {
+                'Content-Type': 'application/json',
+                'PRIVATE-TOKEN': ts_config.gitlab.access_token
+            }
+            res = requests.post(url, json=data, headers=headers)
+            print(res.status_code)
+            #print(res.json())
+            if res.status_code == 201:
+                return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
+            else:
+                return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+        else:
+            return HttpResponse(status=200)
+    elif request.method == 'PUT':
+        return HttpResponse(status=200)
+    return HttpResponse(status=404)
+
