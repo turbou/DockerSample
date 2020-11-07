@@ -17,13 +17,22 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
 from . import views
+
+admin.site.site_title = 'ContrastSecurity統合管理'
+admin.site.site_header = 'ContrastSecurity統合管理サイト'
+admin.site.index_title = 'メニュー'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/token/', obtain_jwt_token),
+    path('api/token/verify/', verify_jwt_token),
+    path('api/token/refresh/', refresh_jwt_token),
     path('hook/', views.hook, name='hook'),
     path('vote/', views.vote, name='vote'),
     path('vote2/', views.vote2, name='vote2'),
     path('vote3/', views.vote3, name='vote3'),
+    path('posts/', views.posts, name='posts'),
 ] + static('static/', document_root=settings.STATIC_ROOT)
 

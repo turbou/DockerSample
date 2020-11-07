@@ -2,6 +2,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
 from integration.models import Integration
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication, BaseJSONWebTokenAuthentication
 
 import json
 import requests
@@ -38,6 +41,17 @@ def convertMustache(old_str):
     #new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>')
     new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
     return new_str
+
+class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
+    def get_jwt_value(self, request):
+         return request.headers.get('X-Gitlab-Token')
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated, ))
+@authentication_classes((JSONWebTokenAuthenticationGitlab,))
+def posts(request):
+    print(request.body)
+    return HttpResponse(status=200)
 
 @require_http_methods(["GET", "POST", "PUT"])
 @csrf_exempt
@@ -210,28 +224,32 @@ def vote2(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
         if json_data['event_type'] == 'TEST_CONNECTION':
+            integration_name = json_data.get('integration_name')
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
+            else:
+                return HttpResponse(status=404)
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
             print(json_data['description'])
-            config_name = json_data.get('config_name')
-            if config_name:
-                ts_config = Integration.objects.get(name=config_name)
+            integration_name = json_data.get('integration_name')
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
             else:
-                ts_config = Integration.objects.first()
+                return HttpResponse(status=404)
+            ts_config = Integration.objects.get(name=integration_name)
             app_name = json_data['application_name']
+            org_id = json_data['organization_id']
+            app_id = json_data['application_id']
+            vul_id = json_data['vulnerability_id']
             self_url = ''
-            r = re.compile(".+\((.+)\) was found in")
+            r = re.compile(".+\((.+" + vul_id + ")\)")
             m = r.search(json_data['description'])
             if m is not None:
                 self_url = m.group(1)
 
-            r = re.compile("index.html#/(.+)/applications/(.+)/vulns/(.+)\) was found in")
-            m = r.search(json_data['description'])
-            if m is None:
-                return HttpResponse(status=200)
-            org_id = m.group(1)
-            app_id = m.group(2)
-            vul_id = m.group(3)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
             res = callAPI(url, ts_config.authorization, ts_config.api_key)
@@ -251,6 +269,15 @@ def vote2(request):
             # Story
             get_story_res = callAPI(story_url, ts_config.authorization, ts_config.api_key)
             story_json = get_story_res.json()
+            chapters = []
+            for chapter in story_json['story']['chapters']:
+                chapters.append('%s\n' % chapter['introText'])
+                if chapter['type'] == 'properties':
+                    for key, value in chapter['properties']:
+                        chapters.append('%s\n' % key)
+                        chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % value['value'])
+                elif chapter['type'] in ['configuration', 'location', 'recreation', 'dataflow', 'source']:
+                    chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % chapter['body'])
             story = story_json['story']['risk']['formattedText']
             # How to fix
             get_howtofix_res = callAPI(howtofix_url, ts_config.authorization, ts_config.api_key)
@@ -260,7 +287,9 @@ def vote2(request):
             deco_mae = "## "
             deco_ato = ""
             description = []
-            description.append('%s%s%s\n' % (deco_mae, '概要', deco_ato))
+            description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+            description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+            description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
             description.append('%s\n\n' %  (convertMustache(story)))
             description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
             description.append('%s\n\n' %  (convertMustache(howtofix)))
