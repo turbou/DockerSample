@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from relay_django.models import Gitlab
+from application.models import Gitlab
 
 import json
 import requests

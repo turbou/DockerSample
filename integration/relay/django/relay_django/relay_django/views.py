@@ -2,9 +2,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
 from integration.models import Integration
+from application.models import Gitlab, GitlabMapping
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication, BaseJSONWebTokenAuthentication
+from django.utils.translation import gettext_lazy as _
 
 import json
 import requests
@@ -50,7 +52,7 @@ class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
 @permission_classes((IsAuthenticated, ))
 @authentication_classes((JSONWebTokenAuthenticationGitlab,))
 def posts(request):
-    print(request.body)
+    #print(request.body)
     return HttpResponse(status=200)
 
 @require_http_methods(["GET", "POST", "PUT"])
@@ -232,7 +234,8 @@ def vote2(request):
                 return HttpResponse(status=404)
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY':
-            print(json_data['description'])
+            print(_('event_new_vulnerability'))
+            #print(json_data['description'])
             integration_name = json_data.get('integration_name')
             if integration_name:
                 if not Integration.objects.filter(name=integration_name).exists():
@@ -309,9 +312,21 @@ def vote2(request):
             }
             res = requests.post(url, json=data, headers=headers)
             print(res.status_code)
-            print(res.json())
+            if res.status_code == requests.codes.created:
+                mapping = GitlabMapping(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                mapping.gitlab_issue_id = res.json()['id']
+                mapping.save()
             return HttpResponse(status=200)
+        elif json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_OPEN' or json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_CLOSED':
+            print(_('event_vulnerability_changestatus'))
+            project = json_data['project']
+            status = json_data['status']
+            vul_id = json_data['vulnerability_id']
+            if vul_id is None:
+                print(_('problem_with_customfield'))
+                return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
+            print(_('event_new_vulnerable_library'))
             r = re.compile(".+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\).")
             m = r.search(json_data['description'])
             if m is None:
