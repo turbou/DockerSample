@@ -12,14 +12,19 @@ import json
 import requests
 import re
 
-def callAPI(url, authorization, api_key):
+def callAPI(url, method, authorization, api_key, data=None):
     headers = {
         'Authorization': authorization,
         'API-Key': api_key,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     }
-    res = requests.get(url, headers=headers)
+    if method == 'GET':
+        res = requests.get(url, headers=headers)
+    elif method == 'POST':
+        pass
+    elif method == 'PUT':
+        res = requests.put(url, data=data, headers=headers)
     return res
 
 def convertMustache(old_str):
@@ -53,6 +58,34 @@ class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
 @authentication_classes((JSONWebTokenAuthenticationGitlab,))
 def posts(request):
     #print(request.body)
+    json_data = json.loads(request.body)
+    print(json_data['event_type'])
+    if json_data['event_type'] != "issue":
+        return
+    if json_data['object_attributes']['action'] == 'open':
+        return
+    # object_attributes
+    print(json_data['object_attributes'].keys())
+    print(json_data['object_attributes']['id'])
+    print(json_data['object_attributes']['action'])
+    gitlab_mapping = GitlabMapping.objects.filter(gitlab_issue_id=json_data['object_attributes']['id']).first()
+    if gitlab_mapping is None:
+        return
+    print(gitlab_mapping.contrast_org_id)
+    if json_data['object_attributes']['action'] == 'close':
+        ts_config = gitlab_mapping.gitlab.integrations.first()
+        teamserver_url = ts_config.url
+        url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
+        data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated'}
+        res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
+        print(res)
+    elif json_data['object_attributes']['action'] == 'reopen':
+        ts_config = gitlab_mapping.gitlab.integrations.first()
+        teamserver_url = ts_config.url
+        url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
+        data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Reported'}
+        res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
+        print(res)
     return HttpResponse(status=200)
 
 @require_http_methods(["GET", "POST", "PUT"])
@@ -96,7 +129,7 @@ def vote(request):
             vul_id = m.group(3)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
@@ -111,11 +144,11 @@ def vote(request):
                     if '{traceUuid}' in howtofix_url:
                         howtofix_url = howtofix_url.replace('{traceUuid}', vul_id)
             # Story
-            get_story_res = callAPI(story_url, ts_config.authorization, ts_config.api_key)
+            get_story_res = callAPI(story_url, 'GET', ts_config.authorization, ts_config.api_key)
             story_json = get_story_res.json()
             story = story_json['story']['risk']['formattedText']
             # How to fix
-            get_howtofix_res = callAPI(howtofix_url, ts_config.authorization, ts_config.api_key)
+            get_howtofix_res = callAPI(howtofix_url, 'GET', ts_config.authorization, ts_config.api_key)
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
@@ -166,7 +199,7 @@ def vote(request):
             lib_id = m.group(4)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
             lib_json = res.json()
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
@@ -255,7 +288,7 @@ def vote2(request):
 
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
@@ -270,7 +303,7 @@ def vote2(request):
                     if '{traceUuid}' in howtofix_url:
                         howtofix_url = howtofix_url.replace('{traceUuid}', vul_id)
             # Story
-            get_story_res = callAPI(story_url, ts_config.authorization, ts_config.api_key)
+            get_story_res = callAPI(story_url, 'GET', ts_config.authorization, ts_config.api_key)
             story_json = get_story_res.json()
             chapters = []
             for chapter in story_json['story']['chapters']:
@@ -283,7 +316,7 @@ def vote2(request):
                     chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % chapter['body'])
             story = story_json['story']['risk']['formattedText']
             # How to fix
-            get_howtofix_res = callAPI(howtofix_url, ts_config.authorization, ts_config.api_key)
+            get_howtofix_res = callAPI(howtofix_url, 'GET', ts_config.authorization, ts_config.api_key)
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
@@ -343,7 +376,7 @@ def vote2(request):
             lib_id = m.group(4)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
             lib_json = res.json()
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
@@ -431,7 +464,7 @@ def vote3(request):
 
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
 
@@ -472,7 +505,7 @@ def vote3(request):
             lib_id = m.group(4)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI(url, ts_config.authorization, ts_config.api_key)
+            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
             lib_json = res.json()
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
