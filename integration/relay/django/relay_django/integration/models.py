@@ -8,7 +8,6 @@ class Integration(models.Model):
         help_text='この名前をTeamServerのPayloadに設定してください。'
     )
     url = models.URLField('TeamServer URL', help_text='e.g. https://app.contrastsecurity.com/Contrast')
-    authorization = models.CharField('AUTHORIZATION', max_length=100, unique=True)
     api_key = models.CharField('API Key', max_length=50, unique=True)
     username = models.CharField('Username', max_length=20, unique=True, help_text='Login ID (mail address)')
     service_key = models.CharField('Service Key', max_length=20, unique=True)
