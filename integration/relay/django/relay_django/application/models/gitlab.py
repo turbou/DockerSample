@@ -6,9 +6,12 @@ class Gitlab(models.Model):
         validators=[RegexValidator(regex='^[A-Za-z0-9_]{4,20}$', message='名前は半角英数字、アンスコ4文字〜20文字です。')]
     )   
     url = models.URLField('URL', help_text='http://gitlab.gitlab:8085')
-    access_token = models.CharField('アクセストークン', max_length=50)
-    project_id = models.CharField('プロジェクトID', max_length=5)
-    labels = models.CharField('ラベル', max_length=50)
+    owner_access_token = models.CharField('Owner\'s Access Token', max_length=50, help_text='For bulk process', blank=True, null=True)
+    report_username = models.CharField('Username', max_length=50, help_text='For report user')
+    access_token = models.CharField('Access Token', max_length=50, help_text='For report user')
+    project_id = models.CharField('Project ID', max_length=5, help_text='It\'s a number, not a name.')
+    vul_labels = models.CharField('Labels(Vul)', max_length=50, help_text='Comma-separated list of label names')
+    lib_labels = models.CharField('Labels(Lib)', max_length=50, help_text='Comma-separated list of label names')
 
     def __str__(self):
         return '%s' % (self.name)

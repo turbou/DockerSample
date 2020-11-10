@@ -21,10 +21,11 @@ class Command(BaseCommand):
         gitlab = Gitlab.objects.get(name=name)
         if gitlab is None:
             raise CommandError('%s のGitlab設定が見つかりません。' % name)
-        url = '%s/api/v4/projects/%s/issues?labels=%s' % (gitlab.url, gitlab.project_id, gitlab.labels)
+        #url = '%s/api/v4/projects/%s/issues?labels=%s' % (gitlab.url, gitlab.project_id, gitlab.labels)
+        url = '%s/api/v4/projects/%s/issues?labels=%s' % (gitlab.url, gitlab.project_id, 'Any')
         headers = { 
             'Content-Type': 'application/json',
-            'PRIVATE-TOKEN': gitlab.access_token
+            'PRIVATE-TOKEN': gitlab.owner_access_token
         }
         res = requests.get(url, headers=headers)
         issues_json = res.json()

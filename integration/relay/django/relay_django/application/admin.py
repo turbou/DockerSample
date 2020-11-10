@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django import forms
+from django.contrib import messages
 from .models import Backlog, Gitlab, GitlabMapping, GoogleChat
 
 class BacklogAdminForm(forms.ModelForm):
@@ -30,10 +31,33 @@ class GitlabMappingInline(admin.TabularInline):
 @admin.register(Gitlab)
 class GitlabAdmin(admin.ModelAdmin):
     search_fields = ('name', 'url',)
-    list_display = ('name', 'url',)
+    actions = ['clear_mappings',]
+    list_display = ('name', 'url', 'mapping_count')
     inlines = [
         GitlabMappingInline,
     ]
+    fieldsets = [ 
+        (None, {'fields': ['name', 'url', 'project_id', ('vul_labels', 'lib_labels')]}),
+        ('Report User', {'fields': [('report_username', 'access_token'),]}),
+        ('Option', {'fields': ['owner_access_token',]}),
+    ]
+
+    def mapping_count(self, obj):
+        return obj.mappings.count()
+    mapping_count.short_description = 'マッピング数'
+
+    def clear_mappings(self, request, queryset):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        gitlabs = Gitlab.objects.filter(pk__in=selected)
+        for gitlab in gitlabs:
+            gitlab.mappings.all().delete()
+        self.message_user(request, 'マッピングをクリアしました。', level=messages.INFO)
+    clear_mappings.short_description = 'マッピングのクリア'
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop('delete_selected')
+        return actions
 
 #@admin.register(GitlabMapping)
 #class GitlabMappingAdmin(admin.ModelAdmin):

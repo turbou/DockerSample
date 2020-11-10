@@ -5,18 +5,22 @@ from .models import Integration
 class TeamServerAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs = {'size':30}
         self.fields['authorization'].widget.attrs = {'size':120}
-        self.fields['api_key'].widget.attrs = {'size':30}
+        self.fields['api_key'].widget.attrs = {'size':80}
+        self.fields['username'].widget.attrs = {'size':80}
+        self.fields['service_key'].widget.attrs = {'size':80}
 
 @admin.register(Integration)
 class IntegrationAdmin(admin.ModelAdmin):
     save_on_top = True
     autocomplete_fields = ['backlog', 'gitlab', 'googlechat']
     form = TeamServerAdminForm
-    list_display = ('name', 'url',)
+    actions = None
+    list_display = ('name', 'url', 'username')
 
     fieldsets = [
-        (None, {'fields': ['name', 'url', 'authorization', 'api_key',]}),
+        (None, {'fields': ['name', 'url', 'authorization', 'api_key', 'username', 'service_key']}),
         ('Backlog', {'fields': ['backlog',]}),
         ('Gitlab', {'fields': ['gitlab',]}),
         ('GoogleChat', {'fields': ['googlechat',]}),

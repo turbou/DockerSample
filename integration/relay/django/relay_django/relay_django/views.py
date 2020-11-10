@@ -11,8 +11,26 @@ from django.utils.translation import gettext_lazy as _
 import json
 import requests
 import re
+import base64
 
 def callAPI(url, method, authorization, api_key, data=None):
+    headers = {
+        'Authorization': authorization,
+        'API-Key': api_key,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+    if method == 'GET':
+        res = requests.get(url, headers=headers)
+    elif method == 'POST':
+        pass
+    elif method == 'PUT':
+        res = requests.put(url, data=data, headers=headers)
+    return res
+
+def callAPI2(url, method, api_key, username, service_key, data=None):
+    authorization = base64.b64encode(('%s:%s' % (username, service_key)).encode('utf-8'))
+    print(authorization)
     headers = {
         'Authorization': authorization,
         'API-Key': api_key,
@@ -56,48 +74,43 @@ class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 @authentication_classes((JSONWebTokenAuthenticationGitlab,))
-def posts(request):
-    #print(request.body)
+def gitlab(request):
+    print('posts!!')
     json_data = json.loads(request.body)
+    if not 'event_type' in json_data:
+        return HttpResponse(status=200)
     print(json_data['event_type'])
+    if not 'action' in json_data['object_attributes']:
+        return HttpResponse(status=200)
     if json_data['event_type'] != "issue":
-        return
+        return HttpResponse(status=200)
     if json_data['object_attributes']['action'] == 'open':
-        return
-    # object_attributes
-    print(json_data['object_attributes'].keys())
+        return HttpResponse(status=200)
+    #print(json_data['object_attributes'].keys())
     print(json_data['object_attributes']['id'])
     print(json_data['object_attributes']['action'])
     gitlab_mapping = GitlabMapping.objects.filter(gitlab_issue_id=json_data['object_attributes']['id']).first()
     if gitlab_mapping is None:
-        return
-    print(gitlab_mapping.contrast_org_id)
+        return HttpResponse(status=200)
+    #print(gitlab_mapping.contrast_org_id)
+    if json_data['user']['username'] == gitlab_mapping.gitlab.report_username:
+        return HttpResponse(status=200)
+
     if json_data['object_attributes']['action'] == 'close':
         ts_config = gitlab_mapping.gitlab.integrations.first()
         teamserver_url = ts_config.url
         url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
-        data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated'}
+        data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
         res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
-        print(res)
+        print(res.text)
     elif json_data['object_attributes']['action'] == 'reopen':
         ts_config = gitlab_mapping.gitlab.integrations.first()
         teamserver_url = ts_config.url
         url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
         data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Reported'}
         res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
-        print(res)
+        print(res.text)
     return HttpResponse(status=200)
-
-@require_http_methods(["GET", "POST", "PUT"])
-@csrf_exempt
-def hook(request):
-    print('oyoyo')
-    print(request.body)
-    if request.method == 'POST':
-        return HttpResponse(status=200)
-    elif request.method == 'PUT':
-        return HttpResponse(status=200)
-    return HttpResponse(status=404)
 
 @require_http_methods(["GET", "POST", "PUT"])
 @csrf_exempt
@@ -255,11 +268,12 @@ def vote(request):
 
 @require_http_methods(["GET", "POST", "PUT"])
 @csrf_exempt
-def vote2(request):
+def hook(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
         if json_data['event_type'] == 'TEST_CONNECTION':
             integration_name = json_data.get('integration_name')
+            print(integration_name)
             if integration_name:
                 if not Integration.objects.filter(name=integration_name).exists():
                     return HttpResponse(status=404)
@@ -288,7 +302,8 @@ def vote2(request):
 
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
+            #res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
+            res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
@@ -303,7 +318,8 @@ def vote2(request):
                     if '{traceUuid}' in howtofix_url:
                         howtofix_url = howtofix_url.replace('{traceUuid}', vul_id)
             # Story
-            get_story_res = callAPI(story_url, 'GET', ts_config.authorization, ts_config.api_key)
+            #get_story_res = callAPI(story_url, 'GET', ts_config.authorization, ts_config.api_key)
+            get_story_res = callAPI2(story_url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             story_json = get_story_res.json()
             chapters = []
             for chapter in story_json['story']['chapters']:
@@ -316,7 +332,8 @@ def vote2(request):
                     chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % chapter['body'])
             story = story_json['story']['risk']['formattedText']
             # How to fix
-            get_howtofix_res = callAPI(howtofix_url, 'GET', ts_config.authorization, ts_config.api_key)
+            #get_howtofix_res = callAPI(howtofix_url, 'GET', ts_config.authorization, ts_config.api_key)
+            get_howtofix_res = callAPI2(howtofix_url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
@@ -336,7 +353,7 @@ def vote2(request):
             url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
             data = {
                 'title': summary,
-                'labels': ts_config.gitlab.labels,
+                'labels': ts_config.gitlab.vul_labels,
                 'description': ''.join(description),
             }   
             headers = {
@@ -351,33 +368,68 @@ def vote2(request):
                 mapping.save()
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_OPEN' or json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_CLOSED':
-            print(_('event_vulnerability_changestatus'))
-            project = json_data['project']
+            #print(_('event_vulnerability_changestatus'))
+            integration_name = json_data.get('integration_name')
+            print(integration_name)
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
+            else:
+                return HttpResponse(status=404)
+            ts_config = Integration.objects.get(name=integration_name)
             status = json_data['status']
             vul_id = json_data['vulnerability_id']
+            teamserver_url = ts_config.url
             if vul_id is None:
                 print(_('problem_with_customfield'))
                 return HttpResponse(status=200)
+            print(status)
+            if status in ['Reported', 'Suspicious', 'Confirmed']:
+                gitlab_mapping = GitlabMapping.objects.filter(contrast_vul_id=vul_id).first()
+                if gitlab_mapping is None:
+                    return HttpResponse(status=200)
+                url = '%s/api/v4/projects/%s/issues/%d?state_event=reopen' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+                headers = {
+                    'Content-Type': 'application/json',
+                    'PRIVATE-TOKEN': ts_config.gitlab.access_token
+                }
+                res = requests.put(url, headers=headers)
+                print(res.status_code)
+                return HttpResponse(status=200)
+            elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed']:
+                gitlab_mapping = GitlabMapping.objects.filter(contrast_vul_id=vul_id).first()
+                if gitlab_mapping is None:
+                    return HttpResponse(status=200)
+                url = '%s/api/v4/projects/%s/issues/%d?state_event=close' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+                headers = {
+                    'Content-Type': 'application/json',
+                    'PRIVATE-TOKEN': ts_config.gitlab.access_token
+                }
+                res = requests.put(url, headers=headers)
+                print(res.status_code)
+                return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))
-            r = re.compile(".+ was found in ([^(]+) \(.+index.html#\/(.+)\/.+\/(.+)\/([^)]+)\),.+\/applications\/([^)]+)\).")
-            m = r.search(json_data['description'])
-            if m is None:
-                return HttpResponse(status=200)
             config_name = json_data.get('config_name')
             if config_name:
                 ts_config = Integration.objects.get(name=config_name)
             else:
                 ts_config = Integration.objects.first()
-            lib_name = m.group(1)
-            org_id = m.group(2)
-            app_id = m.group(5)
-            lib_lang = m.group(3)
-            lib_id = m.group(4)
+            org_id = json_data['organization_id']
+            app_id = json_data['application_id']
+            r = re.compile("index.html#\/" + org_id + "\/libraries\/(.+)\/([a-z0-9]+)\)")
+            m = r.search(json_data['description'])
+            if m is None:
+                return HttpResponse(status=200)
+            lib_lang = m.group(1)
+            lib_id = m.group(2)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
+            res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             lib_json = res.json()
+            lib_name = lib_json['library']['file_name']
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
             classes_used = lib_json['library']['classes_used']
@@ -385,7 +437,7 @@ def vote2(request):
             cve_list = []
             for c_link in lib_json['library']['vulns']:
                 cve_list.append(c_link['name'])
-            r = re.compile(".+ was found in .+\((.+)\),.+")
+            r = re.compile(".+\((.+" + lib_id + ")\)")
             m = r.search(json_data['description'])
             self_url = ''
             if m is not None:
@@ -410,7 +462,7 @@ def vote2(request):
             url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
             data = {
                 'title': summary,
-                'labels': ts_config.gitlab.labels,
+                'labels': ts_config.gitlab.lib_labels,
                 'description': ''.join(description),
             }   
             headers = {
