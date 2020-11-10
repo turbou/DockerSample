@@ -1,0 +1,6 @@
+docker exec -i django python /project/django_project/manage.py dumpdata application --format=json --indent=4 > ./application.json
+docker exec -i django python /project/django_project/manage.py loaddata /project/django_project/application.json
+
+docker exec -i django python /project/django_project/manage.py dumpdata integration --format=json --indent=4 > ./integration.json
+docker exec -i django python /project/django_project/manage.py loaddata /project/django_project/integration.json
+
