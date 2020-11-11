@@ -28,8 +28,8 @@ class IntegrationAdmin(admin.ModelAdmin):
 
     def hook_url(self, obj):
         msg_buffer = []
-        msg_buffer.append('TeamServer Generic Webhook => http://djangohost/hook/')
-        msg_buffer.append('Gitlab Project Webhook => http://djangohost/gitlab/')
+        msg_buffer.append('TeamServer Generic Webhook => http://XXXXXXXXXX/hook/')
+        msg_buffer.append('Gitlab Project Webhook => http://XXXXXXXXXX/gitlab/')
         return mark_safe('<br />'.join(msg_buffer))
     hook_url.short_description = 'HOOK URL'
 
