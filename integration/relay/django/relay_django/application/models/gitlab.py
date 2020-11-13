@@ -37,10 +37,10 @@ class GitlabVul(models.Model):
         verbose_name_plural = 'Gitlab脆弱性一覧'
 
 class GitlabNote(models.Model):
-    gitlab = models.ForeignKey(GitlabVul, verbose_name='Gitlab脆弱性', related_name='notes', related_query_name='note', on_delete=models.CASCADE)
+    vul = models.ForeignKey(GitlabVul, verbose_name='Gitlab脆弱性', related_name='notes', related_query_name='note', on_delete=models.CASCADE)
     note = models.TextField('コメント')
     creator = models.CharField('投稿者', max_length=200)
-    created_at = models.DateTimeField('投稿日時')
+    created_at = models.DateTimeField('投稿日時', blank=True, null=True)
     updated_at = models.DateTimeField('更新日時', blank=True, null=True)
     contrast_note_id = models.CharField('ContrastNoteID', max_length=36, unique=True)
     gitlab_note_id = models.PositiveSmallIntegerField('GitlabNoteID')

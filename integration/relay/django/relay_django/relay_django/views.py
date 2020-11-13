@@ -55,46 +55,23 @@ def convertMustache(old_str):
 
 def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
     print('syncCommentFromContrast!!')
+    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
+    if gitlab_mapping is None:
+        return HttpResponse(status=200)
     # まずはTeamServer側のコメントすべて取得
     teamserver_url = ts_config.url
     url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
     res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
     notes_json = res.json()
     #print(notes_json)
-    note_ids = []
-    for note in notes_json['notes']:
-        note_ids.append(note['id'])
-        if GitlabNote.objects.filter(contrast_note_id=note['id']).exists():
-            continue
-        #print(note['creator'], note['creation'], html.unescape(note['note']))
-
-    # 次にGitlab側のコメントをすべて取得
-    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
-    if gitlab_mapping is None:
-        return HttpResponse(status=200)
-    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+    r = re.compile("\(by .+\)")
     headers = {
         'Content-Type': 'application/json',
         'PRIVATE-TOKEN': ts_config.gitlab.access_token
     }
-    res = requests.get(url, headers=headers)
-    issue_notes_json = res.json()
-    #print(issue_notes_json)
-    issue_note_ids = []
-    for issue_note in issue_notes_json:
-        issue_note_ids.append(issue_note['id'])
-        #print(issue_note['author']['name'], issue_note['created_at'], issue_note['body'])
-
-    print(note_ids)
-    print(issue_note_ids)
-
-    for issue_note in issue_notes_json:
-        url = '%s/api/v4/projects/%s/issues/%d/notes/%d' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id, issue_note['id'])
-        res = requests.delete(url, headers=headers)
-        print(res.status_code)
-
-    r = re.compile("\(by .+\)")
     for c_note in notes_json['notes']:
+        if GitlabNote.objects.filter(contrast_note_id=c_note['id']).exists():
+            continue
         creator = '(by ' + c_note['creator'] + ')'
         m = r.search(html.unescape(c_note['note']))
         if m is not None:
@@ -127,6 +104,9 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
         }
         res = requests.post(url, json=data, headers=headers)
         print('oyoyo!! ', res.text)
+        gitlab_note = GitlabNote(vul=gitlab_mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
+        gitlab_note.gitlab_note_id = res.json()['id']
+        gitlab_note.save()
 
 def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
     print('syncComment!!')
