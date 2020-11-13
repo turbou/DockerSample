@@ -30,6 +30,7 @@ class GitlabMappingInline(admin.TabularInline):
 
 @admin.register(Gitlab)
 class GitlabAdmin(admin.ModelAdmin):
+    save_on_top = True
     search_fields = ('name', 'url',)
     actions = ['clear_mappings',]
     list_display = ('name', 'url', 'mapping_count')
