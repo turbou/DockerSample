@@ -7,7 +7,7 @@ class Gitlab(models.Model):
     )   
     url = models.URLField('URL', help_text='http://gitlab.gitlab:8085')
     owner_access_token = models.CharField('Owner\'s Access Token', max_length=50, help_text='For bulk process', blank=True, null=True)
-    report_username = models.CharField('Username', max_length=50, help_text='For report user')
+    report_username = models.CharField('Username', max_length=50, help_text='For report user(Project Maintainer is required)')
     access_token = models.CharField('Access Token', max_length=50, help_text='For report user')
     project_id = models.CharField('Project ID', max_length=5, help_text='It\'s a number, not a name.')
     vul_labels = models.CharField('Labels(Vul)', max_length=50, help_text='Comma-separated list of label names')
