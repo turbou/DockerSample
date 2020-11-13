@@ -8,10 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication, BaseJSONWebTokenAuthentication
 from django.utils.translation import gettext_lazy as _
 
+from datetime import datetime as dt
 import json
 import requests
 import re
 import base64
+import html
 
 def callAPI2(url, method, api_key, username, service_key, data=None):
     authorization = base64.b64encode(('%s:%s' % (username, service_key)).encode('utf-8'))
@@ -51,6 +53,62 @@ def convertMustache(old_str):
     #new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>')
     new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
     return new_str
+
+def syncComment(ts_config, org_id, app_id, vul_id):
+    teamserver_url = ts_config.url
+    url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
+    res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+    notes_json = res.json()
+    gitlab_mapping = GitlabMapping.objects.filter(contrast_vul_id=vul_id).first()
+    if gitlab_mapping is None:
+        return HttpResponse(status=200)
+    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+    headers = {
+        'Content-Type': 'application/json',
+        'PRIVATE-TOKEN': ts_config.gitlab.access_token
+    }
+    res = requests.get(url, headers=headers)
+    print(res.status_code)
+    issue_notes_json = res.json()
+    for issue_note in issue_notes_json:
+        url = '%s/api/v4/projects/%s/issues/%d/notes/%d' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id, issue_note['id'])
+        res = requests.delete(url, headers=headers)
+        print(res.status_code)
+    
+    r = re.compile("\(by .+\)")
+    for c_note in notes_json['notes']:
+        creator = '(by ' + c_note['creator'] + ')'
+        m = r.search(html.unescape(c_note['note']))
+        if m is not None:
+            creator = ''
+        old_status_str = ''
+        new_status_str = ''
+        status_change_reason_str = ''
+        if 'properties' in c_note:
+            for c_prop in c_note['properties']:
+              if c_prop['name'] == 'status.change.previous.status':
+                pass
+                #status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+                #unless status_obj.nil?
+                #  old_status_str = status_obj.name
+                #end
+              elif c_prop['name'] == 'status.change.status':
+                pass
+                #status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+                #unless status_obj.nil?
+                #  new_status_str = status_obj.name
+                #end
+              elif c_prop['name'] == 'status.change.substatus' and len(c_prop['value']) > 0:
+                status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
+        note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
+        url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
+        data = {
+            'body': note_str,
+            'created_at': created_at # required Administrator(project or group owner) only.
+        }
+        res = requests.post(url, json=data, headers=headers)
+        print(res.status_code)
 
 class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
     def get_jwt_value(self, request):
@@ -401,6 +459,23 @@ def hook(request):
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=200)
+        elif json_data['event_type'] == 'NEW_VULNERABILITY_COMMENT':
+            print(_('event_new_vulnerability_comment'))
+            print(json_data['description'])
+            print(json_data['vulnerability_id'])
+            integration_name = json_data.get('integration_name')
+            print(integration_name)
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
+            else:
+                return HttpResponse(status=404)
+            ts_config = Integration.objects.get(name=integration_name)
+            org_id = json_data['organization_id']
+            app_id = json_data['application_id']
+            vul_id = json_data['vulnerability_id']
+            syncComment(ts_config, org_id, app_id, vul_id)
+            return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))
             config_name = json_data.get('config_name')
