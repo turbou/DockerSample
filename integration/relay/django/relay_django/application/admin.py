@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django import forms
 from django.contrib import messages
-from .models import Backlog, Gitlab, GitlabMapping, GoogleChat
+from nested_admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
+from .models import Backlog, Gitlab, GitlabVul, GitlabNote, GitlabLib, GoogleChat
 
 class BacklogAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -14,28 +15,57 @@ class BacklogAdmin(admin.ModelAdmin):
     search_fields = ('name', 'url',)
     list_display = ('name', 'url',)
 
-class GitlabMappingInlineForm(forms.ModelForm):
+class GitlabNoteInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'contrast_vul_id' in self.fields:
             self.fields['contrast_vul_id'].widget.attrs = {'size':23}
+
+class GitlabNoteInline(NestedStackedInline):
+    model = GitlabNote
+    form = GitlabNoteInlineForm
+    extra = 0
+    readonly_fields = ('note', 'creator', 'created_at', 'updated_at', 'contrast_note_id', 'gitlab_note_id')
+    fieldsets = [ 
+        (None, {'fields': ['note', ('creator', 'created_at', 'updated_at'), ('contrast_note_id', 'gitlab_note_id')]}),
+    ]
+
+class GitlabVulInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'contrast_vul_id' in self.fields:
+            self.fields['contrast_vul_id'].widget.attrs = {'size':23}
+
+class GitlabVulInline(NestedTabularInline):
+    model = GitlabVul
+    form = GitlabVulInlineForm
+    extra = 0
+    inlines = [
+        GitlabNoteInline,
+    ]
+    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'gitlab_issue_id')
+
+class GitlabLibInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         if 'contrast_lib_lg' in self.fields:
             self.fields['contrast_lib_lg'].widget.attrs = {'size':16}
 
-class GitlabMappingInline(admin.TabularInline):
-    model = GitlabMapping
-    form = GitlabMappingInlineForm
+class GitlabLibInline(NestedTabularInline):
+    model = GitlabLib
+    form = GitlabLibInlineForm
     extra = 0
-    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'contrast_lib_lg', 'contrast_lib_id', 'gitlab_issue_id')
+    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_lib_lg', 'contrast_lib_id', 'gitlab_issue_id')
 
 @admin.register(Gitlab)
-class GitlabAdmin(admin.ModelAdmin):
+class GitlabAdmin(NestedModelAdmin):
     save_on_top = True
     search_fields = ('name', 'url',)
     actions = ['clear_mappings',]
-    list_display = ('name', 'url', 'mapping_count')
+    list_display = ('name', 'url', 'vul_count', 'lib_count')
     inlines = [
-        GitlabMappingInline,
+        GitlabVulInline,
+        GitlabLibInline,
     ]
     fieldsets = [ 
         (None, {'fields': ['name', 'url', 'project_id', ('vul_labels', 'lib_labels')]}),
@@ -43,15 +73,20 @@ class GitlabAdmin(admin.ModelAdmin):
         ('Option', {'fields': ['owner_access_token',]}),
     ]
 
-    def mapping_count(self, obj):
-        return obj.mappings.count()
-    mapping_count.short_description = 'マッピング数'
+    def vul_count(self, obj):
+        return obj.vuls.count()
+    vul_count.short_description = '脆弱性数'
+
+    def lib_count(self, obj):
+        return obj.libs.count()
+    lib_count.short_description = 'ライブラリ数'
 
     def clear_mappings(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
         gitlabs = Gitlab.objects.filter(pk__in=selected)
         for gitlab in gitlabs:
-            gitlab.mappings.all().delete()
+            gitlab.vuls.all().delete()
+            gitlab.libs.all().delete()
         self.message_user(request, 'マッピングをクリアしました。', level=messages.INFO)
     clear_mappings.short_description = 'マッピングのクリア'
 
@@ -60,8 +95,8 @@ class GitlabAdmin(admin.ModelAdmin):
         actions.pop('delete_selected')
         return actions
 
-#@admin.register(GitlabMapping)
-#class GitlabMappingAdmin(admin.ModelAdmin):
+#@admin.register(GitlabVul)
+#class GitlabVulAdmin(admin.ModelAdmin):
 #    list_display = ('id',)
 
 @admin.register(GoogleChat)

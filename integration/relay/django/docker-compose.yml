@@ -2,7 +2,7 @@ version: '3'
 
 services:
   django:
-    image: django:1.0.1
+    image: django:1.0.2
     build:
       context: ./django
     container_name: django

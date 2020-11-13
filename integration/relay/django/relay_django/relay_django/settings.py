@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'nested_admin',
     'relay_django.apps.ContrastConfig',
     'application.apps.ApplicationConfig',
     'integration.apps.IntegrationConfig',

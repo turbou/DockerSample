@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
 from integration.models import Integration
-from application.models import Gitlab, GitlabMapping
+from application.models import Gitlab, GitlabVul, GitlabNote, GitlabLib
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication, BaseJSONWebTokenAuthentication
@@ -17,7 +17,6 @@ import html
 
 def callAPI2(url, method, api_key, username, service_key, data=None):
     authorization = base64.b64encode(('%s:%s' % (username, service_key)).encode('utf-8'))
-    print(authorization)
     headers = {
         'Authorization': authorization,
         'API-Key': api_key,
@@ -54,12 +53,23 @@ def convertMustache(old_str):
     new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
     return new_str
 
-def syncComment(ts_config, org_id, app_id, vul_id):
+def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
+    print('syncCommentFromContrast!!')
+    # まずはTeamServer側のコメントすべて取得
     teamserver_url = ts_config.url
     url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
     res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
     notes_json = res.json()
-    gitlab_mapping = GitlabMapping.objects.filter(contrast_vul_id=vul_id).first()
+    #print(notes_json)
+    note_ids = []
+    for note in notes_json['notes']:
+        note_ids.append(note['id'])
+        if GitlabNote.objects.filter(contrast_note_id=note['id']).exists():
+            continue
+        #print(note['creator'], note['creation'], html.unescape(note['note']))
+
+    # 次にGitlab側のコメントをすべて取得
+    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
     if gitlab_mapping is None:
         return HttpResponse(status=200)
     url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
@@ -68,13 +78,21 @@ def syncComment(ts_config, org_id, app_id, vul_id):
         'PRIVATE-TOKEN': ts_config.gitlab.access_token
     }
     res = requests.get(url, headers=headers)
-    print(res.status_code)
     issue_notes_json = res.json()
+    #print(issue_notes_json)
+    issue_note_ids = []
+    for issue_note in issue_notes_json:
+        issue_note_ids.append(issue_note['id'])
+        #print(issue_note['author']['name'], issue_note['created_at'], issue_note['body'])
+
+    print(note_ids)
+    print(issue_note_ids)
+
     for issue_note in issue_notes_json:
         url = '%s/api/v4/projects/%s/issues/%d/notes/%d' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id, issue_note['id'])
         res = requests.delete(url, headers=headers)
         print(res.status_code)
-    
+
     r = re.compile("\(by .+\)")
     for c_note in notes_json['notes']:
         creator = '(by ' + c_note['creator'] + ')'
@@ -108,7 +126,80 @@ def syncComment(ts_config, org_id, app_id, vul_id):
             'created_at': created_at # required Administrator(project or group owner) only.
         }
         res = requests.post(url, json=data, headers=headers)
+        print('oyoyo!! ', res.text)
+
+def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
+    print('syncComment!!')
+    # まずはTeamServer側のコメントすべて取得
+    teamserver_url = ts_config.url
+    url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
+    res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+    notes_json = res.json()
+    #print(notes_json)
+    note_ids = []
+    for note in notes_json['notes']:
+        note_ids.append(note['id'])
+        #print(note['creator'], note['creation'], html.unescape(note['note']))
+
+    # 次にGitlab側のコメントをすべて取得
+    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
+    if gitlab_mapping is None:
+        return HttpResponse(status=200)
+    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+    headers = {
+        'Content-Type': 'application/json',
+        'PRIVATE-TOKEN': ts_config.gitlab.access_token
+    }
+    res = requests.get(url, headers=headers)
+    issue_notes_json = res.json()
+    #print(issue_notes_json)
+    issue_note_ids = []
+    for issue_note in issue_notes_json:
+        issue_note_ids.append(issue_note['id'])
+        #print(issue_note['author']['name'], issue_note['created_at'], issue_note['body'])
+
+    print(note_ids)
+    print(issue_note_ids)
+
+    for issue_note in issue_notes_json:
+        url = '%s/api/v4/projects/%s/issues/%d/notes/%d' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id, issue_note['id'])
+        res = requests.delete(url, headers=headers)
         print(res.status_code)
+
+    r = re.compile("\(by .+\)")
+    for c_note in notes_json['notes']:
+        creator = '(by ' + c_note['creator'] + ')'
+        m = r.search(html.unescape(c_note['note']))
+        if m is not None:
+            creator = ''
+        old_status_str = ''
+        new_status_str = ''
+        status_change_reason_str = ''
+        if 'properties' in c_note:
+            for c_prop in c_note['properties']:
+              if c_prop['name'] == 'status.change.previous.status':
+                pass
+                #status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+                #unless status_obj.nil?
+                #  old_status_str = status_obj.name
+                #end
+              elif c_prop['name'] == 'status.change.status':
+                pass
+                #status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+                #unless status_obj.nil?
+                #  new_status_str = status_obj.name
+                #end
+              elif c_prop['name'] == 'status.change.substatus' and len(c_prop['value']) > 0:
+                status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
+        note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
+        url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
+        data = {
+            'body': note_str,
+            'created_at': created_at # required Administrator(project or group owner) only.
+        }
+        res = requests.post(url, json=data, headers=headers)
+        print('oyoyo!! ', res.text)
 
 class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
     def get_jwt_value(self, request):
@@ -118,43 +209,60 @@ class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
 @permission_classes((IsAuthenticated, ))
 @authentication_classes((JSONWebTokenAuthenticationGitlab,))
 def gitlab(request):
-    print('posts!!')
+    print('gitlab!!')
     json_data = json.loads(request.body)
+    #print(json_data)
     if not 'event_type' in json_data:
         return HttpResponse(status=200)
+    if not json_data['event_type'] in ['issue', 'note']:
+        return HttpResponse(status=200)
     print(json_data['event_type'])
-    if not 'action' in json_data['object_attributes']:
-        return HttpResponse(status=200)
-    if json_data['event_type'] != "issue":
-        return HttpResponse(status=200)
-    if json_data['object_attributes']['action'] == 'open':
-        return HttpResponse(status=200)
-    #print(json_data['object_attributes'].keys())
-    print(json_data['object_attributes']['id'])
-    print(json_data['object_attributes']['action'])
-    gitlab_mapping = GitlabMapping.objects.filter(gitlab_issue_id=json_data['object_attributes']['id']).first()
-    if gitlab_mapping is None:
-        return HttpResponse(status=200)
-    #print(gitlab_mapping.contrast_org_id)
-    if json_data['user']['username'] == gitlab_mapping.gitlab.report_username:
-        return HttpResponse(status=200)
 
-    if json_data['object_attributes']['action'] == 'close':
+    if json_data['event_type'] == 'note':
+        print(json_data['issue']['iid'])
+        gitlab_mapping = GitlabVul.objects.filter(gitlab_issue_id=json_data['issue']['iid']).first()
+        if gitlab_mapping is None:
+            return HttpResponse(status=200)
+        if json_data['user']['username'] == gitlab_mapping.gitlab.report_username: # 無限ループ止め
+            return HttpResponse(status=200)
         ts_config = gitlab_mapping.gitlab.integrations.first()
-        teamserver_url = ts_config.url
-        url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
-        data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
-        #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
-        res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-        print(res.text)
-    elif json_data['object_attributes']['action'] == 'reopen':
-        ts_config = gitlab_mapping.gitlab.integrations.first()
-        teamserver_url = ts_config.url
-        url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
-        data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Reported'}
-        #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
-        res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-        print(res.text)
+        syncComment(ts_config, gitlab_mapping.contrast_org_id, gitlab_mapping.contrast_app_id, gitlab_mapping.contrast_vul_id, 2)
+        return HttpResponse(status=200)
+    elif json_data['event_type'] == 'issue':
+        if not 'action' in json_data['object_attributes']:
+            return HttpResponse(status=200)
+        print(json_data)
+        print(json_data['object_attributes']['action'])
+        if json_data['object_attributes']['action'] == 'open':
+            return HttpResponse(status=200)
+        #print(json_data['object_attributes'].keys())
+        print(json_data['object_attributes']['iid'])
+        print(json_data['object_attributes']['action'])
+        gitlab_mapping = GitlabVul.objects.filter(gitlab_issue_id=json_data['object_attributes']['iid']).first()
+        if gitlab_mapping is None:
+            return HttpResponse(status=200)
+        #print(gitlab_mapping.contrast_org_id)
+        if json_data['user']['username'] == gitlab_mapping.gitlab.report_username: # 無限ループ止め
+            return HttpResponse(status=200)
+    
+        if json_data['object_attributes']['action'] == 'close':
+            ts_config = gitlab_mapping.gitlab.integrations.first()
+            teamserver_url = ts_config.url
+            url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
+            data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
+            #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
+            res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+            print(res.text)
+        elif json_data['object_attributes']['action'] == 'reopen':
+            ts_config = gitlab_mapping.gitlab.integrations.first()
+            teamserver_url = ts_config.url
+            url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
+            data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Reported'}
+            #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
+            res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+            print(res.text)
+    else:
+        return HttpResponse(status=200)
     return HttpResponse(status=200)
 
 @require_http_methods(["GET", "POST", "PUT"])
@@ -412,7 +520,7 @@ def hook(request):
             res = requests.post(url, json=data, headers=headers)
             print(res.status_code)
             if res.status_code == requests.codes.created:
-                mapping = GitlabMapping(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                mapping = GitlabVul(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
                 mapping.gitlab_issue_id = res.json()['id']
                 mapping.save()
             return HttpResponse(status=200)
@@ -434,7 +542,7 @@ def hook(request):
                 return HttpResponse(status=200)
             print(status)
             if status in ['Reported', 'Suspicious', 'Confirmed']:
-                gitlab_mapping = GitlabMapping.objects.filter(contrast_vul_id=vul_id).first()
+                gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
                 if gitlab_mapping is None:
                     return HttpResponse(status=200)
                 url = '%s/api/v4/projects/%s/issues/%d?state_event=reopen' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
@@ -446,7 +554,7 @@ def hook(request):
                 print(res.status_code)
                 return HttpResponse(status=200)
             elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed']:
-                gitlab_mapping = GitlabMapping.objects.filter(contrast_vul_id=vul_id).first()
+                gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
                 if gitlab_mapping is None:
                     return HttpResponse(status=200)
                 url = '%s/api/v4/projects/%s/issues/%d?state_event=close' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
@@ -474,7 +582,7 @@ def hook(request):
             org_id = json_data['organization_id']
             app_id = json_data['application_id']
             vul_id = json_data['vulnerability_id']
-            syncComment(ts_config, org_id, app_id, vul_id)
+            syncCommentFromContrast(ts_config, org_id, app_id, vul_id)
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))
@@ -538,7 +646,10 @@ def hook(request):
             res = requests.post(url, json=data, headers=headers)
             print(res.status_code)
             #print(res.json())
-            if res.status_code == 201:
+            if res.status_code == requests.codes.created:
+                mapping = GitlabLib(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
+                mapping.gitlab_issue_id = res.json()['id']
+                mapping.save()
                 return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
             else:
                 return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
