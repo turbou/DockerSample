@@ -26,7 +26,7 @@ def callAPI2(url, method, api_key, username, service_key, data=None):
     if method == 'GET':
         res = requests.get(url, headers=headers)
     elif method == 'POST':
-        pass
+        res = requests.post(url, data=data, headers=headers)
     elif method == 'PUT':
         res = requests.put(url, data=data, headers=headers)
     return res
@@ -58,7 +58,7 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
     if gitlab_mapping is None:
         return HttpResponse(status=200)
-    # まずはTeamServer側のコメントすべて取得
+    # TeamServer側のコメントすべて取得
     teamserver_url = ts_config.url
     url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
     res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
@@ -70,6 +70,8 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
         'PRIVATE-TOKEN': ts_config.gitlab.access_token
     }
     for c_note in notes_json['notes']:
+        if c_note['creator_uid'] == ts_config.username:
+            continue
         if GitlabNote.objects.filter(contrast_note_id=c_note['id']).exists():
             continue
         creator = '(by ' + c_note['creator'] + ')'
@@ -97,16 +99,53 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
                 status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
         note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
         url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
-        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
+        created_at = dt.fromtimestamp(c_note['creation'] / 1000)
         data = {
             'body': note_str,
-            'created_at': created_at # required Administrator(project or group owner) only.
+            'created_at': created_at.isoformat() # required Administrator(project or group owner) only.
         }
         res = requests.post(url, json=data, headers=headers)
+        print(res.status_code)
         print('oyoyo!! ', res.text)
-        gitlab_note = GitlabNote(vul=gitlab_mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
-        gitlab_note.gitlab_note_id = res.json()['id']
-        gitlab_note.save()
+        if res.status_code == requests.codes.created:
+            gitlab_note = GitlabNote(vul=gitlab_mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
+            gitlab_note.gitlab_note_id = res.json()['id']
+            gitlab_note.created_at = created_at
+            gitlab_note.save()
+
+def syncCommentFromGitlab(ts_config, org_id, app_id, vul_id):
+    print('syncCommentGitlab!!')
+    # Gitlab側のコメントをすべて取得
+    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
+    if gitlab_mapping is None:
+        return HttpResponse(status=200)
+    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+    headers = {
+        'Content-Type': 'application/json',
+        'PRIVATE-TOKEN': ts_config.gitlab.access_token
+    }
+    res = requests.get(url, headers=headers)
+    issue_notes_json = res.json()
+    #print(issue_notes_json)
+    teamserver_url = ts_config.url
+    url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
+    for issue_note in issue_notes_json:
+        if GitlabNote.objects.filter(gitlab_note_id=issue_note['id']).exists():
+            continue
+        #print(issue_note['author']['name'], issue_note['created_at'], issue_note['body'])
+        data_dict = {'note': issue_note['body']}
+        res = callAPI2(url, 'POST', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+        print(res.status_code)
+        print('buhihi!! ', res.text)
+        print(res.json())
+        if res.status_code == requests.codes.ok:
+            res_json = res.json()
+            print(res_json['note']['creation'])
+            gitlab_note = GitlabNote(vul=gitlab_mapping, note=issue_note['body'], creator=issue_note['author']['name'], contrast_note_id=res_json['note']['id'])
+            gitlab_note.gitlab_note_id = issue_note['id']
+            created_at = dt.fromtimestamp(res_json['note']['creation'] / 1000)
+            gitlab_note.created_at = created_at
+            gitlab_note.save()
 
 def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
     print('syncComment!!')
@@ -206,7 +245,7 @@ def gitlab(request):
         if json_data['user']['username'] == gitlab_mapping.gitlab.report_username: # 無限ループ止め
             return HttpResponse(status=200)
         ts_config = gitlab_mapping.gitlab.integrations.first()
-        syncComment(ts_config, gitlab_mapping.contrast_org_id, gitlab_mapping.contrast_app_id, gitlab_mapping.contrast_vul_id, 2)
+        syncCommentFromGitlab(ts_config, gitlab_mapping.contrast_org_id, gitlab_mapping.contrast_app_id, gitlab_mapping.contrast_vul_id)
         return HttpResponse(status=200)
     elif json_data['event_type'] == 'issue':
         if not 'action' in json_data['object_attributes']:

@@ -25,10 +25,17 @@ class GitlabNoteInline(NestedStackedInline):
     model = GitlabNote
     form = GitlabNoteInlineForm
     extra = 0
+    ordering = ('-created_at',)
     readonly_fields = ('note', 'creator', 'created_at', 'updated_at', 'contrast_note_id', 'gitlab_note_id')
     fieldsets = [ 
         (None, {'fields': ['note', ('creator', 'created_at', 'updated_at'), ('contrast_note_id', 'gitlab_note_id')]}),
     ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class GitlabVulInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -45,6 +52,12 @@ class GitlabVulInline(NestedTabularInline):
     ]
     readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'gitlab_issue_id')
 
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 class GitlabLibInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,6 +69,12 @@ class GitlabLibInline(NestedTabularInline):
     form = GitlabLibInlineForm
     extra = 0
     readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_lib_lg', 'contrast_lib_id', 'gitlab_issue_id')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Gitlab)
 class GitlabAdmin(NestedModelAdmin):
