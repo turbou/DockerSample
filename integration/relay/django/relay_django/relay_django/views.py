@@ -527,7 +527,6 @@ def hook(request):
                 description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
                 description.append(self_url)
     
-                priority_id = json_data['priorityId']
                 url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
                 data = {
                     'title': summary,
@@ -555,7 +554,6 @@ def hook(request):
                 description.append('重大度　　　　　: %s\n' % (vuln_json['trace']['severity']))
                 description.append('脆弱性　　　　　: <%s|%s>\n' % (self_url, vuln_json['trace']['title']))
     
-                priority_id = json_data['priorityId']
                 url = '%s' % (ts_config.googlechat.webhook)
                 data = {
                     "text": ''.join(description),
@@ -686,7 +684,6 @@ def hook(request):
                 description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
                 description.append(self_url)
     
-                priority_id = json_data['priorityId']
                 url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
                 data = {
                     'title': summary,
@@ -760,7 +757,6 @@ def vote3(request):
             description.append('重大度　　　　　: %s\n' % (vuln_json['trace']['severity']))
             description.append('脆弱性　　　　　: <%s|%s>\n' % (self_url, vuln_json['trace']['title']))
 
-            priority_id = json_data['priorityId']
             url = '%s' % (ts_config.googlechat.webhook)
             data = {
                 "text": ''.join(description),
@@ -820,7 +816,6 @@ def vote3(request):
             description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
             description.append(self_url)
 
-            priority_id = json_data['priorityId']
             url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
             data = {
                 'title': summary,

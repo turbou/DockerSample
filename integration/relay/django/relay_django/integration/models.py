@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from application.models import Backlog, Gitlab, GoogleChat
 
 class Integration(models.Model):
-    name = models.CharField('名前', max_length=20, unique=True,
+    name = models.CharField('Name', max_length=20, unique=True,
         validators=[RegexValidator(regex='^[A-Za-z0-9_]{4,20}$', message='名前は半角英数字、アンスコ4文字〜10文字です。')],
         help_text='この名前をTeamServerのPayloadに設定してください。'
     )
