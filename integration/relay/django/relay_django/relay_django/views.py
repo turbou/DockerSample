@@ -513,35 +513,61 @@ def hook(request):
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
-            deco_mae = "## "
-            deco_ato = ""
-            description = []
-            description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-            description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
-            description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-            description.append('%s\n\n' %  (convertMustache(story)))
-            description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-            description.append('%s\n\n' %  (convertMustache(howtofix)))
-            description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
-            description.append(self_url)
+            # ---------- Gitlab ---------- #
+            if ts_config.gitlab:
+                deco_mae = "## "
+                deco_ato = ""
+                description = []
+                description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+                description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(story)))
+                description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(howtofix)))
+                description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
+                description.append(self_url)
+    
+                priority_id = json_data['priorityId']
+                url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
+                data = {
+                    'title': summary,
+                    'labels': ts_config.gitlab.vul_labels,
+                    'description': ''.join(description),
+                }   
+                headers = {
+                    'Content-Type': 'application/json',
+                    'PRIVATE-TOKEN': ts_config.gitlab.access_token
+                }
+                res = requests.post(url, json=data, headers=headers)
+                print(res.status_code)
+                if res.status_code == requests.codes.created:
+                    mapping = GitlabVul(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                    mapping.gitlab_issue_id = res.json()['id']
+                    mapping.save()
 
-            priority_id = json_data['priorityId']
-            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
-            data = {
-                'title': summary,
-                'labels': ts_config.gitlab.vul_labels,
-                'description': ''.join(description),
-            }   
-            headers = {
-                'Content-Type': 'application/json',
-                'PRIVATE-TOKEN': ts_config.gitlab.access_token
-            }
-            res = requests.post(url, json=data, headers=headers)
-            print(res.status_code)
-            if res.status_code == requests.codes.created:
-                mapping = GitlabVul(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
-                mapping.gitlab_issue_id = res.json()['id']
-                mapping.save()
+            # ---------- Google Chat ---------- #
+            if ts_config.googlechat:
+                deco_mae = "## " 
+                deco_ato = ""
+                description = []
+                description.append('環境　　　　　　: %s\n' % (vuln_json['trace']['servers'][0]['environment']))
+                description.append('アプリケーション: <%s|%s>\n' % (self_url.replace('/vulns/' + vul_id, ''), app_name))
+                description.append('重大度　　　　　: %s\n' % (vuln_json['trace']['severity']))
+                description.append('脆弱性　　　　　: <%s|%s>\n' % (self_url, vuln_json['trace']['title']))
+    
+                priority_id = json_data['priorityId']
+                url = '%s' % (ts_config.googlechat.webhook)
+                data = {
+                    "text": ''.join(description),
+                }       
+                headers = {
+                    'Content-Type': 'application/json',
+                }       
+                res = requests.post(url, json=data, headers=headers)
+                print(res.status_code)
+                print(res.json())
+                return HttpResponse(status=200)
+    
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_OPEN' or json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_CLOSED':
             #print(_('event_vulnerability_changestatus'))
@@ -560,32 +586,35 @@ def hook(request):
                 print(_('problem_with_customfield'))
                 return HttpResponse(status=200)
             print(status)
-            if status in ['Reported', 'Suspicious', 'Confirmed']:
-                gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
-                if gitlab_mapping is None:
+            # ---------- Gitlab ---------- #
+            if ts_config.gitlab:
+                if status in ['Reported', 'Suspicious', 'Confirmed']:
+                    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
+                    if gitlab_mapping is None:
+                        return HttpResponse(status=200)
+                    url = '%s/api/v4/projects/%s/issues/%d?state_event=reopen' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'PRIVATE-TOKEN': ts_config.gitlab.access_token
+                    }
+                    res = requests.put(url, headers=headers)
+                    print(res.status_code)
                     return HttpResponse(status=200)
-                url = '%s/api/v4/projects/%s/issues/%d?state_event=reopen' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
-                headers = {
-                    'Content-Type': 'application/json',
-                    'PRIVATE-TOKEN': ts_config.gitlab.access_token
-                }
-                res = requests.put(url, headers=headers)
-                print(res.status_code)
-                return HttpResponse(status=200)
-            elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed']:
-                gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
-                if gitlab_mapping is None:
+                elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed']:
+                    gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
+                    if gitlab_mapping is None:
+                        return HttpResponse(status=200)
+                    url = '%s/api/v4/projects/%s/issues/%d?state_event=close' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'PRIVATE-TOKEN': ts_config.gitlab.access_token
+                    }
+                    res = requests.put(url, headers=headers)
+                    print(res.status_code)
                     return HttpResponse(status=200)
-                url = '%s/api/v4/projects/%s/issues/%d?state_event=close' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
-                headers = {
-                    'Content-Type': 'application/json',
-                    'PRIVATE-TOKEN': ts_config.gitlab.access_token
-                }
-                res = requests.put(url, headers=headers)
-                print(res.status_code)
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=200)
+                else:
+                    return HttpResponse(status=200)
+            return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY_COMMENT':
             print(_('event_new_vulnerability_comment'))
             print(json_data['description'])
@@ -601,7 +630,10 @@ def hook(request):
             org_id = json_data['organization_id']
             app_id = json_data['application_id']
             vul_id = json_data['vulnerability_id']
-            syncCommentFromContrast(ts_config, org_id, app_id, vul_id)
+
+            # ---------- Gitlab ---------- #
+            if ts_config.gitlab:
+                syncCommentFromContrast(ts_config, org_id, app_id, vul_id)
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))
@@ -635,43 +667,46 @@ def hook(request):
             self_url = ''
             if m is not None:
                 self_url = m.group(1)
-            summary = lib_name
-            # description
-            deco_mae = "**"
-            deco_ato = "**"
-            description = []
-            description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
-            description.append('%s\n\n' % (file_version))
-            description.append('%s%s%s\n' % (deco_mae, '最新バージョン', deco_ato))
-            description.append('%s\n\n' % (latest_version))
-            description.append('%s%s%s\n' % (deco_mae, 'クラス(使用/全体)', deco_ato))
-            description.append('%d/%d\n\n' % (classes_used, class_count))
-            description.append('%s%s%s\n' % (deco_mae, '脆弱性', deco_ato))
-            description.append('%s\n\n' % ('\n'.join(cve_list)))
-            description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
-            description.append(self_url)
 
-            priority_id = json_data['priorityId']
-            url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
-            data = {
-                'title': summary,
-                'labels': ts_config.gitlab.lib_labels,
-                'description': ''.join(description),
-            }   
-            headers = {
-                'Content-Type': 'application/json',
-                'PRIVATE-TOKEN': ts_config.gitlab.access_token
-            }
-            res = requests.post(url, json=data, headers=headers)
-            print(res.status_code)
-            #print(res.json())
-            if res.status_code == requests.codes.created:
-                mapping = GitlabLib(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
-                mapping.gitlab_issue_id = res.json()['id']
-                mapping.save()
-                return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
-            else:
-                return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+            # ---------- Gitlab ---------- #
+            if ts_config.gitlab:
+                summary = lib_name
+                # description
+                deco_mae = "**"
+                deco_ato = "**"
+                description = []
+                description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
+                description.append('%s\n\n' % (file_version))
+                description.append('%s%s%s\n' % (deco_mae, '最新バージョン', deco_ato))
+                description.append('%s\n\n' % (latest_version))
+                description.append('%s%s%s\n' % (deco_mae, 'クラス(使用/全体)', deco_ato))
+                description.append('%d/%d\n\n' % (classes_used, class_count))
+                description.append('%s%s%s\n' % (deco_mae, '脆弱性', deco_ato))
+                description.append('%s\n\n' % ('\n'.join(cve_list)))
+                description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
+                description.append(self_url)
+    
+                priority_id = json_data['priorityId']
+                url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
+                data = {
+                    'title': summary,
+                    'labels': ts_config.gitlab.lib_labels,
+                    'description': ''.join(description),
+                }   
+                headers = {
+                    'Content-Type': 'application/json',
+                    'PRIVATE-TOKEN': ts_config.gitlab.access_token
+                }
+                res = requests.post(url, json=data, headers=headers)
+                print(res.status_code)
+                #print(res.json())
+                if res.status_code == requests.codes.created:
+                    mapping = GitlabLib(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
+                    mapping.gitlab_issue_id = res.json()['id']
+                    mapping.save()
+                    return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
+                else:
+                    return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
         else:
             return HttpResponse(status=200)
     elif request.method == 'PUT':

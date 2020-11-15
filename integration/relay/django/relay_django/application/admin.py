@@ -106,8 +106,8 @@ class GitlabAdmin(NestedModelAdmin):
         for gitlab in gitlabs:
             gitlab.vuls.all().delete()
             gitlab.libs.all().delete()
-        self.message_user(request, 'マッピングをクリアしました。', level=messages.INFO)
-    clear_mappings.short_description = 'マッピングのクリア'
+        self.message_user(request, '脆弱性、ライブラリの情報をクリアしました。', level=messages.INFO)
+    clear_mappings.short_description = '脆弱性、ライブラリ情報のクリア'
 
     def get_actions(self, request):
         actions = super().get_actions(request)
