@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import datetime
 
+SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -54,6 +56,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+MY_ADMIN_REORDER = ( 
+    ("application", ( "Backlog", "Gitlab", "GoogleChat")),
+    ("integration", ("Integration",)),
+)
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -68,7 +75,7 @@ ROOT_URLCONF = 'relay_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(SITE_ROOT, 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
