@@ -19,6 +19,6 @@ class Integration(models.Model):
         return '%s' % (self.name)
 
     class Meta:
-        verbose_name = 'Integration設定'
-        verbose_name_plural = 'Integration設定一覧'
+        verbose_name = 'Integration'
+        verbose_name_plural = 'Integration List'
 

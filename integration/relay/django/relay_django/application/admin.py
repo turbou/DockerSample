@@ -94,11 +94,11 @@ class GitlabAdmin(NestedModelAdmin):
 
     def vul_count(self, obj):
         return obj.vuls.count()
-    vul_count.short_description = '脆弱性数'
+    vul_count.short_description = 'Vulnerability Count'
 
     def lib_count(self, obj):
         return obj.libs.count()
-    lib_count.short_description = 'ライブラリ数'
+    lib_count.short_description = 'Library Count'
 
     def clear_mappings(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -107,7 +107,7 @@ class GitlabAdmin(NestedModelAdmin):
             gitlab.vuls.all().delete()
             gitlab.libs.all().delete()
         self.message_user(request, '脆弱性、ライブラリの情報をクリアしました。', level=messages.INFO)
-    clear_mappings.short_description = '脆弱性、ライブラリ情報のクリア'
+    clear_mappings.short_description = 'Clear Vulnerability and Library Mapping'
 
     def get_actions(self, request):
         actions = super().get_actions(request)

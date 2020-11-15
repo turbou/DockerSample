@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 class Gitlab(models.Model):
-    name = models.CharField('名前', max_length=20, unique=True,
+    name = models.CharField('Name', max_length=20, unique=True,
         validators=[RegexValidator(regex='^[A-Za-z0-9_]{4,20}$', message='名前は半角英数字、アンスコ4文字〜20文字です。')]
     )   
     url = models.URLField('URL', help_text='http://gitlab.gitlab:8085')
@@ -17,15 +17,15 @@ class Gitlab(models.Model):
         return '%s' % (self.name)
 
     class Meta:
-        verbose_name = 'Gitlab設定'
-        verbose_name_plural = 'Gitlab設定一覧'
+        verbose_name = 'Gitlab'
+        verbose_name_plural = 'Gitlab List'
 
 class GitlabVul(models.Model):
     gitlab = models.ForeignKey(Gitlab, verbose_name='Gitlab', related_name='vuls', related_query_name='vul', on_delete=models.PROTECT)
-    contrast_org_id = models.CharField('組織ID', max_length=36)
-    contrast_app_id = models.CharField('アプリID', max_length=36)
-    contrast_vul_id = models.CharField('脆弱性ID', max_length=19, blank=True, null=True)
-    gitlab_issue_id = models.PositiveSmallIntegerField('Issue ID')
+    contrast_org_id = models.CharField('Organization ID', max_length=36)
+    contrast_app_id = models.CharField('Application ID', max_length=36)
+    contrast_vul_id = models.CharField('Vulnerability ID', max_length=19, blank=True, null=True)
+    gitlab_issue_id = models.PositiveSmallIntegerField('Issue IID')
 
     def __str__(self):
         if self.id:
@@ -33,17 +33,17 @@ class GitlabVul(models.Model):
         return ''
 
     class Meta:
-        verbose_name = 'Gitlab脆弱性'
-        verbose_name_plural = 'Gitlab脆弱性一覧'
+        verbose_name = 'Gitlab Vulnerability'
+        verbose_name_plural = 'Gitlab Vulnerabilities'
 
 class GitlabNote(models.Model):
-    vul = models.ForeignKey(GitlabVul, verbose_name='Gitlab脆弱性', related_name='notes', related_query_name='note', on_delete=models.CASCADE)
-    note = models.TextField('コメント')
-    creator = models.CharField('投稿者', max_length=200)
-    created_at = models.DateTimeField('投稿日時', blank=True, null=True)
-    updated_at = models.DateTimeField('更新日時', blank=True, null=True)
-    contrast_note_id = models.CharField('ContrastNoteID', max_length=36, unique=True)
-    gitlab_note_id = models.PositiveSmallIntegerField('GitlabNoteID')
+    vul = models.ForeignKey(GitlabVul, verbose_name='Gitlab Vulnerability', related_name='notes', related_query_name='note', on_delete=models.CASCADE)
+    note = models.TextField('Note')
+    creator = models.CharField('Creator', max_length=200)
+    created_at = models.DateTimeField('Created', blank=True, null=True)
+    updated_at = models.DateTimeField('Updated', blank=True, null=True)
+    contrast_note_id = models.CharField('Contrast Note ID', max_length=36, unique=True)
+    gitlab_note_id = models.PositiveSmallIntegerField('Gitlab Note ID')
 
     def __str__(self):
         if self.id:
@@ -51,16 +51,16 @@ class GitlabNote(models.Model):
         return ''
 
     class Meta:
-        verbose_name = 'Gitlab脆弱性コメント'
-        verbose_name_plural = 'Gitlab脆弱性コメント一覧'
+        verbose_name = 'Gitlab Vulnerability Note'
+        verbose_name_plural = 'Gitlab Vulnerability Notes'
 
 class GitlabLib(models.Model):
     gitlab = models.ForeignKey(Gitlab, verbose_name='Gitlab', related_name='libs', related_query_name='lib', on_delete=models.PROTECT)
-    contrast_org_id = models.CharField('組織ID', max_length=36)
-    contrast_app_id = models.CharField('アプリID', max_length=36)
-    contrast_lib_lg = models.CharField('ライブラリ言語', max_length=20, blank=True, null=True)
-    contrast_lib_id = models.CharField('ライブラリID', max_length=40, blank=True, null=True)
-    gitlab_issue_id = models.PositiveSmallIntegerField('Issue ID')
+    contrast_org_id = models.CharField('Organization ID', max_length=36)
+    contrast_app_id = models.CharField('Application ID', max_length=36)
+    contrast_lib_lg = models.CharField('Library Language', max_length=20, blank=True, null=True)
+    contrast_lib_id = models.CharField('Library ID', max_length=40, blank=True, null=True)
+    gitlab_issue_id = models.PositiveSmallIntegerField('Issue IID')
 
     def __str__(self):
         if self.id:
@@ -68,6 +68,6 @@ class GitlabLib(models.Model):
         return ''
 
     class Meta:
-        verbose_name = 'Gitlabライブラリ'
-        verbose_name_plural = 'Gitlabライブラリ一覧'
+        verbose_name = 'Gitlab Library'
+        verbose_name_plural = 'Gitlab Libraries'
 

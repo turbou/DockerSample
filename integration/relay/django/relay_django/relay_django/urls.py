@@ -20,9 +20,12 @@ from django.conf.urls.static import static
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
 from . import views
 
-admin.site.site_title = 'ContrastSecurity統合管理'
-admin.site.site_header = 'ContrastSecurity統合管理サイト'
-admin.site.index_title = 'メニュー'
+#admin.site.site_title = 'ContrastSecurity統合管理'
+#admin.site.site_header = 'ContrastSecurity統合管理サイト'
+#admin.site.index_title = 'メニュー'
+admin.site.site_title = 'ContrastSecurity Integration Management'
+admin.site.site_header = 'ContrastSecurity Integration Management Site'
+admin.site.index_title = 'Menu'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
