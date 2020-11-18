@@ -19,6 +19,7 @@ ORG_ID=$CONTRAST_ORG_ID
 API_URL="${BASEURL}/api/ng/${ORG_ID}"
 
 while read -r RULE_NAME; do
+    echo ""
     echo "${RULE_NAME}"
     IMPACT=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .impact'`
     LIKELIHOOD=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .likelihood'`
@@ -34,6 +35,7 @@ while read -r RULE_NAME; do
         -H "Content-Type: application/json" \
         -H 'Accept: application/json' \
         -d '{"confidence_level": "'$CONFIDENCE'", "impact": "'$IMPACT'", "likelihood": "'$LIKELIHOOD'"}'
+    sleep 1
 done < <(cat ./rules.json | jq -r '.rules[].name')
 
 exit 0
