@@ -109,6 +109,8 @@ class IssueHook < Redmine::Hook::Listener
       t_data_dict = {"traces" => [vul_id], "status" => status}
       if note.present? && private_note == "0"
         t_data_dict["note"] = note + " (by " + issue.last_updated_by.name + ")"
+      else
+        t_data_dict["note"] = "status changed by " + issue.last_updated_by.name
       end
       callAPI(url, "PUT", t_data_dict.to_json)
     else
