@@ -47,8 +47,12 @@ class ContrastController < ApplicationController
       tracker.save
     end
     add_custom_fields = []
-    if 'NEW_VULNERABILITY' == event_type
-      logger.info(l(:event_new_vulnerability))
+    if 'NEW_VULNERABILITY' == event_type || 'VULNERABILITY_DUPLICATE' == event_type
+      if 'NEW_VULNERABILITY' == event_type
+        logger.info(l(:event_new_vulnerability))
+      else
+        logger.info(l(:event_dup_vulnerability))
+      end
       if not Setting.plugin_contrastsecurity['vul_issues']
         return render plain: 'Vul Skip'
       end
@@ -134,7 +138,11 @@ class ContrastController < ApplicationController
           if chapter['type'] == "properties"
             chapter['properties'].each do |key, value|
               chapters << key + "\n"
-              chapters << "{{#xxxxBlock}}" + value['value'] + "{{/xxxxBlock}}\n"
+              if value['value'].start_with?("{{#table}}") 
+                chapters << "\n" + value['value'] + "\n"
+              else
+                chapters << "{{#xxxxBlock}}" + value['value'] + "{{/xxxxBlock}}\n"
+              end
             end
           elsif ["configuration", "location", "recreation", "dataflow", "source"].include? chapter['type']
             chapters << "{{#xxxxBlock}}" + chapter['body'] + "{{/xxxxBlock}}\n"
@@ -285,6 +293,7 @@ class ContrastController < ApplicationController
       end
       return head :ok
     end
+    # ここに来るのは NEW_VULNERABILITY か VULNERABILITY_DUPLICATE の通知のみです。
     custom_field_hash = {}
     CUSTOM_FIELDS.each do |custom_field_name|
       custom_field = IssueCustomField.find_by_name(custom_field_name)
@@ -322,23 +331,44 @@ class ContrastController < ApplicationController
       custom_fields << {'id': custom_field_hash[add_custom_field[:id_str]], 'value': add_custom_field[:value]}
     end
     #logger.info(custom_fields)
-    issue = Issue.new(
-      project: project,
-      subject: summary,
-      tracker: tracker,
-      priority: priority,
-      description: description,
-      custom_fields: custom_fields,
-      author: User.current
-    )
+    issue = nil
+    cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
+    cvs.each do |cv|
+      issue = cv.customized
+      #if project != issue.project.identifier
+      #  next
+      #end
+    end
+    if issue.nil?
+      issue = Issue.new(
+        project: project,
+        subject: summary,
+        tracker: tracker,
+        priority: priority,
+        description: description,
+        custom_fields: custom_fields,
+        author: User.current
+      )
+    else
+      issue.description = description
+      issue.custom_fields = custom_fields
+    end
     unless status_obj.nil?
       issue.status = status_obj
     end
     if issue.save
-      logger.info(l(:issue_create_success))
+      if 'NEW_VULNERABILITY' == event_type
+        logger.info(l(:issue_create_success))
+      else
+        logger.info(l(:issue_update_success))
+      end
       return head :ok
     else
-      logger.error(l(:issue_create_failure))
+      if 'NEW_VULNERABILITY' == event_type
+        logger.error(l(:issue_create_failure))
+      else
+        logger.error(l(:issue_update_failure))
+      end
       return head :internal_server_error
     end
   end
@@ -427,6 +457,8 @@ class ContrastController < ApplicationController
       # Table
       new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
       new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
+      new_str = new_str.gsub(/[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}/, "\n|").gsub(/{{\/tableCell}}[\s]*/, '|')
+      new_str = new_str.gsub(/{{{nl}}}/, "<br>")
     elsif Setting.text_formatting == "markdown"
       # Link
       new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
@@ -438,15 +470,29 @@ class ContrastController < ApplicationController
       # List
       new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
       # Table
-      new_str = new_str.gsub(/({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{\/tableHeaderRow}})[\s]*{{\/tableRow}})/, '\1' + "\n{{#tableRowX}}" + '\2' + "{{/tableRowX}}")
-      if mo = new_str.match(/({{#tableRowX}}[\s]*.+[\s]*{{\/tableRowX}})/)
-        replace_str = mo[1].gsub(/tableHeaderRow/, 'tableHeaderRowX')
-        new_str = new_str.gsub(/{{#tableRowX}}[\s]*.+[\s]*{{\/tableRowX}}/, replace_str)
-        new_str = new_str.gsub(/({{#tableHeaderRowX}})(.+?)({{\/tableHeaderRowX}})/, '\1---\3')
+      while true do
+        tbl_bgn_idx = new_str.index('{{#table}}')
+        tbl_end_idx = new_str.index('{{/table}}')
+        if tbl_bgn_idx.nil? || tbl_end_idx.nil?
+          break
+        else
+          #logger.info(sprintf('%s - %s', tbl_bgn_idx, tbl_end_idx))
+          tbl_str = new_str.slice(tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10) # 10は{{/table}}の文字数
+          tbl_str = tbl_str.gsub(/({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{\/tableHeaderRow}})[\s]*{{\/tableRow}})/, '\1' + "\n{{#tableRowX}}" + '\2' + "{{/tableRowX}}")
+          if mo = tbl_str.match(/({{#tableRowX}}[\s]*.+[\s]*{{\/tableRowX}})/)
+            replace_str = mo[1].gsub(/tableHeaderRow/, 'tableHeaderRowX')
+            tbl_str = tbl_str.gsub(/{{#tableRowX}}[\s]*.+[\s]*{{\/tableRowX}}/, replace_str)
+            tbl_str = tbl_str.gsub(/({{#tableHeaderRowX}})(.+?)({{\/tableHeaderRowX}})/, '\1---\3')
+          end
+          tbl_str = tbl_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}/, '|').gsub(/{{\/tableHeaderRowX}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}/, "\n|").gsub(/{{\/tableCell}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/{{{nl}}}/, "<br>")
+          tbl_str = tbl_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '') # ここで残ったmustacheを全削除
+          new_str[tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10] = tbl_str # 10は{{/table}}の文字数
+        end
       end
-      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
-      new_str = new_str.gsub(/[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}/, '|').gsub(/{{\/tableHeaderRowX}}[\s]*/, '|')
-      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
     else
       # Link
       new_str = str.gsub(/\$\$LINK_DELIM\$\$/, ' ')
