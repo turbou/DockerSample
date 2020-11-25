@@ -455,10 +455,22 @@ class ContrastController < ApplicationController
       # List
       new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
       # Table
-      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
-      new_str = new_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
-      new_str = new_str.gsub(/[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}/, "\n|").gsub(/{{\/tableCell}}[\s]*/, '|')
-      new_str = new_str.gsub(/{{{nl}}}/, "<br>")
+      while true do
+        tbl_bgn_idx = new_str.index('{{#table}}')
+        tbl_end_idx = new_str.index('{{/table}}')
+        if tbl_bgn_idx.nil? || tbl_end_idx.nil?
+          break
+        else
+          #logger.info(sprintf('%s - %s', tbl_bgn_idx, tbl_end_idx))
+          tbl_str = new_str.slice(tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10) # 10は{{/table}}の文字数
+          tbl_str = tbl_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(/{{\/tableHeaderRow}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(/{{\/tableCell}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}/, "\n|").gsub(/{{\/tableCell}}[\s]*/, '|')
+          tbl_str = tbl_str.gsub(/{{{nl}}}/, "<br>")
+          tbl_str = tbl_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '') # ここで残ったmustacheを全削除
+          new_str[tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10] = tbl_str # 10は{{/table}}の文字数
+        end
+      end
     elsif Setting.text_formatting == "markdown"
       # Link
       new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
