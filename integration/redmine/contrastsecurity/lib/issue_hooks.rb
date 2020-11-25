@@ -48,7 +48,7 @@ class IssueHook < Redmine::Hook::Listener
       # Put Status(and Comment) from TeamServer
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
       t_data_dict = {"traces" => [vul_id], "status" => status}
-      t_data_dict["note"] = "status changed by " + issue.last_updated_by.name
+      t_data_dict["note"] = "status changed by " + User.current.name
       callAPI(url, "PUT", t_data_dict.to_json)
     end
   end
