@@ -62,10 +62,10 @@ class ContrastController < ApplicationController
       vul_id = t_issue['vulnerability_id']
       lib_id = ''
       self_url = ""
-      vulurl_pattern = /.+\((.+#{vul_id})\)/
+      vulurl_pattern = /.+\((.+\/vulns\/[A-Z0-9\-]{19})\)/
       is_vulurl = t_issue['description'].match(vulurl_pattern)
       if is_vulurl
-        self_url = is_vulurl[1]
+        self_url = is_vulurl[1].gsub(/[A-Z0-9\-]{19}$/, vul_id)
       end
       # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
