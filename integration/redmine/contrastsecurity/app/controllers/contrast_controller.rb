@@ -137,7 +137,7 @@ class ContrastController < ApplicationController
           chapters << chapter['introText'] + "\n"
           if chapter['type'] == "properties"
             chapter['properties'].each do |key, value|
-              chapters << key + "\n"
+              chapters << "\n" + key + "\n"
               if value['value'].start_with?("{{#table}}") 
                 chapters << "\n" + value['value'] + "\n"
               else
