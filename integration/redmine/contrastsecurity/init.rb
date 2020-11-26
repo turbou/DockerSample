@@ -35,7 +35,7 @@ Redmine::Plugin.register :contrastsecurity do
     'sts_confirmed' => '確認済',
     'sts_notaproblem' => '問題無し',
     'sts_remediated' => '修復済',
-    'sts_fixed' => '修復完了',
+    'sts_fixed' => '修正完了',
     'pri_critical' => '最高',
     'pri_high' => '高',
     'pri_medium' => '中',

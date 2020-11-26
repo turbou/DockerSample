@@ -36,8 +36,8 @@ class PluginSettings < ActiveRecord::Migration
     '【Contrast】アプリID',
     '【Contrast】組織ID'
   ]
-  STATUS_NAMES = ['報告済', '疑わしい', '確認済', '問題無し', '修復済', '修復完了']
-  PRIORITY_NAMES = ['最高', '高', '中', '低', '最低']
+  STATUS_NAMES = ['報告済', '疑わしい', '確認済', '問題無し', '修復済', '修正完了']
+  PRIORITY_NAMES = ['最低', '低', '中', '高', '最高']
 
   def self.up
     puts "Status create..."
