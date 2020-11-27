@@ -39,17 +39,17 @@ module ContrastUtil
 
   def self.get_redmine_status(contrast_status)
     case contrast_status
-    when "Reported"
+    when "Reported", "報告済"
       rm_status = Setting.plugin_contrastsecurity['sts_reported']
-    when "Suspicious"
+    when "Suspicious", "疑わしい"
       rm_status = Setting.plugin_contrastsecurity['sts_suspicious']
-    when "Confirmed"
+    when "Confirmed", "確認済"
       rm_status = Setting.plugin_contrastsecurity['sts_confirmed']
-    when "NotAProblem", "Not a Problem"
+    when "NotAProblem", "Not a Problem", "問題無し"
       rm_status = Setting.plugin_contrastsecurity['sts_notaproblem']
-    when "Remediated"
+    when "Remediated", "修復済"
       rm_status = Setting.plugin_contrastsecurity['sts_remediated']
-    when "Fixed"
+    when "Fixed", "修正完了"
       rm_status = Setting.plugin_contrastsecurity['sts_fixed']
     end 
     status = IssueStatus.find_by_name(rm_status)
