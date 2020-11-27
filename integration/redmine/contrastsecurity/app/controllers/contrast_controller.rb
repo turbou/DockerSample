@@ -293,7 +293,7 @@ class ContrastController < ApplicationController
       end
       return head :ok
     end
-    # ここに来るのは NEW_VULNERABILITY か VULNERABILITY_DUPLICATE の通知のみです。
+    # ここに来るのは NEW_VULNERABILITY か VULNERABILITY_DUPLICATE か NEW_VULNERABLE_LIBRARYの通知のみです。
     custom_field_hash = {}
     CUSTOM_FIELDS.each do |custom_field_name|
       custom_field = IssueCustomField.find_by_name(custom_field_name)
@@ -332,12 +332,11 @@ class ContrastController < ApplicationController
     end
     #logger.info(custom_fields)
     issue = nil
-    cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
-    cvs.each do |cv|
-      issue = cv.customized
-      #if project != issue.project.identifier
-      #  next
-      #end
+    if 'NEW_VULNERABLE_LIBRARY' != event_type # 脆弱性ライブラリはDUPLICATE通知はない前提
+      cvs = CustomValue.where(customized_type: 'Issue', value: vul_id).joins(:custom_field).where(custom_fields: {name: l('contrast_custom_fields.vul_id')})
+      cvs.each do |cv|
+        issue = cv.customized
+      end
     end
     if issue.nil?
       issue = Issue.new(
@@ -357,17 +356,17 @@ class ContrastController < ApplicationController
       issue.status = status_obj
     end
     if issue.save
-      if 'NEW_VULNERABILITY' == event_type
-        logger.info(l(:issue_create_success))
-      else
+      if 'VULNERABILITY_DUPLICATE' == event_type
         logger.info(l(:issue_update_success))
+      else
+        logger.info(l(:issue_create_success))
       end
       return head :ok
     else
-      if 'NEW_VULNERABILITY' == event_type
-        logger.error(l(:issue_create_failure))
-      else
+      if 'VULNERABILITY_DUPLICATE' == event_type
         logger.error(l(:issue_update_failure))
+      else
+        logger.error(l(:issue_create_failure))
       end
       return head :internal_server_error
     end
