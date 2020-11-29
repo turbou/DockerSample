@@ -47,20 +47,8 @@ module SettingsControllerPatch
           flash[:error] = l(:test_connect_fail)
           redirect_to plugin_settings_path(@plugin) and return
         end
-        auth_header = Base64.strict_encode64(username + ":" + service_key)
         url = sprintf('%s/api/ng/%s/applications/', teamserver_url, org_id)
-        uri = URI.parse(url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = false
-        if uri.scheme === "https"
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        end
-        req = Net::HTTP::Get.new(uri.request_uri)
-        req["Authorization"] = auth_header
-        req["API-Key"] = api_key
-        req['Content-Type'] = req['Accept'] = 'application/json'
-        res = http.request(req)
+        res = ContrastUtil.callAPI(url)
         if res.code != "200"
           flash[:error] = l(:test_connect_fail)
           redirect_to plugin_settings_path(@plugin) and return

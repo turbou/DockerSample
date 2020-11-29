@@ -71,7 +71,7 @@ class ContrastController < ApplicationController
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application', teamserver_url, org_id, app_id, vul_id)
       #logger.info(url)
-      res = callAPI(url)
+      res = ContrastUtil.callAPI(url)
       vuln_json = JSON.parse(res.body)
       #logger.info(vuln_json)
       summary = '[' + app_name + '] ' + vuln_json['trace']['title']
@@ -131,7 +131,7 @@ class ContrastController < ApplicationController
       chapters = ""
       story = ""
       if story_url.present?
-        get_story_res = callAPI(story_url)
+        get_story_res = ContrastUtil.callAPI(story_url)
         story_json = JSON.parse(get_story_res.body)
         story_json['story']['chapters'].each do |chapter|
           chapters << chapter['introText'] + "\n"
@@ -153,7 +153,7 @@ class ContrastController < ApplicationController
       # How to fix
       howtofix = ""
       if howtofix_url.present?
-        get_howtofix_res = callAPI(howtofix_url)
+        get_howtofix_res = ContrastUtil.callAPI(howtofix_url)
         howtofix_json = JSON.parse(get_howtofix_res.body)
         howtofix = howtofix_json['recommendation']['formattedText']
       end
@@ -221,7 +221,7 @@ class ContrastController < ApplicationController
       lib_id = is_lib[2]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
-      res = callAPI(url)
+      res = ContrastUtil.callAPI(url)
       lib_json = JSON.parse(res.body)
       lib_name = lib_json['library']['file_name']
       file_version = lib_json['library']['file_version']
@@ -280,7 +280,7 @@ class ContrastController < ApplicationController
         cvs.each do |cv|
           issue = cv.customized
           if project == issue.project.identifier
-            syncComment(org_id, app_id, vul_id, issue)
+            ContrastUtil.syncComment(org_id, app_id, vul_id, issue)
           end
         end
       end
@@ -370,79 +370,6 @@ class ContrastController < ApplicationController
       end
       return head :internal_server_error
     end
-  end
-
-  def syncComment(org_id, app_id, vul_id, issue)
-    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
-    url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = callAPI(url)
-    if res.code != "200"
-      return false
-    end
-    notes_json = JSON.parse(res.body)
-    issue.journals.each do |c_journal|
-      c_journal.destroy
-    end
-    exist_creator_pattern = /\(by .+\)/
-    notes_json['notes'].reverse.each do |c_note|
-      journal = Journal.new
-      creator = " (by " + c_note['last_updater'] + ")"
-      is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
-      if is_exist_creator
-        creator = ""
-      end
-      old_status_str = ""
-      new_status_str = ""
-      status_change_reason_str = ""
-      if c_note.has_key?("properties")
-        c_note['properties'].each do |c_prop|
-          if c_prop['name'] == "status.change.previous.status"
-            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
-            unless status_obj.nil?
-              old_status_str = status_obj.name
-            end
-          elsif c_prop['name'] == "status.change.status"
-            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
-            unless status_obj.nil?
-              new_status_str = status_obj.name
-            end
-          elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?
-            status_change_reason_str = l(:notaproblem_reason, :reason => c_prop['value']) + "\n"
-          end
-        end
-      end
-      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
-      if old_status_str.present? && new_status_str.present?
-        cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
-        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
-      end
-      journal.journalized = issue
-      journal.user = User.current
-      journal.notes = note_str
-      journal.created_on = Time.at(c_note['last_modification']/1000.0)
-      journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
-      journal.save()
-    end
-    return true
-  end
-
-  def callAPI(url)
-    uri = URI.parse(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = false
-    if uri.scheme === "https"
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    end
-    req = Net::HTTP::Get.new(uri.request_uri)
-    username = Setting.plugin_contrastsecurity['username']
-    service_key = Setting.plugin_contrastsecurity['service_key']
-    auth_header = Base64.strict_encode64(username + ":" + service_key)
-    req["Authorization"] = auth_header
-    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-    req['Content-Type'] = req['Accept'] = 'application/json'
-    res = http.request(req)
-    return res
   end
 
   def convertMustache(str)

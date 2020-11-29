@@ -79,5 +79,103 @@ module ContrastUtil
     end
     return status
   end
+
+  def callAPI(url, method="GET", data=nil)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = false
+    if uri.scheme === "https"
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end 
+    case method
+    when "GET"
+      req = Net::HTTP::Get.new(uri.request_uri)
+    when "POST"
+      req = Net::HTTP::Post.new(uri.request_uri)
+      req.body = data
+    when "PUT"
+      req = Net::HTTP::Put.new(uri.request_uri)
+      req.body = data
+    when "DELETE"
+      req = Net::HTTP::Delete.new(uri.request_uri)
+    else
+      return
+    end 
+    username = Setting.plugin_contrastsecurity['username']
+    service_key = Setting.plugin_contrastsecurity['service_key']
+    auth_header = Base64.strict_encode64(username + ":" + service_key)
+    req["Authorization"] = auth_header
+    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
+    req['Content-Type'] = req['Accept'] = 'application/json'
+    res = http.request(req)
+    return res 
+  end
+  module_function :callAPI
+
+  def syncComment(org_id, app_id, vul_id, issue)
+    teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+    url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
+    res = callAPI(url)
+    if res.code != "200"
+      return false
+    end
+    notes_json = JSON.parse(res.body)
+    issue.journals.each do |c_journal|
+      if not c_journal.private_notes
+        c_journal.destroy
+      end
+    end
+    exist_creator_pattern = /\(by .+\)/
+    notes_json['notes'].reverse.each do |c_note|
+      journal = Journal.new
+      creator = " (by " + c_note['last_updater'] + ")"
+      if Setting.plugin_contrastsecurity['is_apiuser']
+        last_updater_uid = c_note['last_updater_uid']
+        username = Setting.plugin_contrastsecurity['username']
+        if last_updater_uid == username
+          creator = ""
+        end
+      else
+        is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
+        if is_exist_creator
+          creator = ""
+        end
+      end
+      old_status_str = ""
+      new_status_str = ""
+      status_change_reason_str = ""
+      if c_note.has_key?("properties")
+        c_note['properties'].each do |c_prop|
+          if c_prop['name'] == "status.change.previous.status"
+            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+            unless status_obj.nil?
+              old_status_str = status_obj.name
+            end
+          elsif c_prop['name'] == "status.change.status"
+            status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+            unless status_obj.nil?
+              new_status_str = status_obj.name
+            end
+          elsif c_prop['name'] == "status.change.substatus" && c_prop['value'].present?
+            status_change_reason_str = l(:notaproblem_reason, :reason => c_prop['value']) + "\n"
+          end
+        end
+      end
+      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
+      if old_status_str.present? && new_status_str.present?
+        cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
+        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
+      end
+      journal.journalized = issue
+      journal.user = User.current
+      journal.notes = note_str
+      journal.created_on = Time.at(c_note['last_modification']/1000.0)
+      journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
+      journal.save()
+    end
+    return true
+  end
+  module_function :syncComment
 end
 

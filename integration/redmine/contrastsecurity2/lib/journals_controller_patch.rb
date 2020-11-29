@@ -56,21 +56,7 @@ module JournalsControllerPatch
         end
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id, note_id)
-        uri = URI.parse(url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = false
-        if uri.scheme === "https"
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        end
-        req = Net::HTTP::Delete.new(uri.request_uri)
-        username = Setting.plugin_contrastsecurity['username']
-        service_key = Setting.plugin_contrastsecurity['service_key']
-        auth_header = Base64.strict_encode64(username + ":" + service_key)
-        req["Authorization"] = auth_header
-        req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-        req['Content-Type'] = req['Accept'] = 'application/json'
-        res = http.request(req)
+        res = ContrastUtil.callAPI(url, "DELETE")
         if res.code == "200"
           @journal.details = []
         end

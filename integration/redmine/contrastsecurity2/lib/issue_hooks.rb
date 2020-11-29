@@ -38,7 +38,7 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = callAPI(url, "GET", nil)
+    res = ContrastUtil.callAPI(url)
     vuln_json = JSON.parse(res.body)
     sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
@@ -49,7 +49,7 @@ class IssueHook < Redmine::Hook::Listener
       url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
       t_data_dict = {"traces" => [vul_id], "status" => status}
       t_data_dict["note"] = "status changed (by " + User.current.name + ")"
-      callAPI(url, "PUT", t_data_dict.to_json)
+      ContrastUtil.callAPI(url, "PUT", t_data_dict.to_json)
     end
   end
 
@@ -80,7 +80,7 @@ class IssueHook < Redmine::Hook::Listener
         details = journal.details.to_a.delete_if{|detail| detail.prop_key == "note_id"}
         journal.details = details
         journal.save
-        callAPI(url, "DELETE", nil)
+        ContrastUtil.callAPI(url, "DELETE")
       end
     end
 
@@ -93,7 +93,7 @@ class IssueHook < Redmine::Hook::Listener
     note = note.sub(/#{reason_ptn}/, "")
     t_data = {"note" => note}.to_json
     if note_id.blank? && !private_note # note idがなく、でもプライベート注記じゃない（またプライベート注記じゃなくなった）場合
-      res = callAPI(url, "POST", t_data)
+      res = ContrastUtil.callAPI(url, "POST", t_data)
       # note idを取得してredmine側のコメントに反映する。
       note_json = JSON.parse(res.body)
       if note_json['success']
@@ -102,7 +102,7 @@ class IssueHook < Redmine::Hook::Listener
         journal.save()
       end
     else
-      callAPI(url, "PUT", t_data)
+      ContrastUtil.callAPI(url, "PUT", t_data)
     end
   end
 
@@ -126,7 +126,7 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = callAPI(url, "GET", nil)
+    res = ContrastUtil.callAPI(url)
     vuln_json = JSON.parse(res.body)
     note = params['issue']['notes']
     private_note = params['issue']['private_notes']
@@ -145,12 +145,12 @@ class IssueHook < Redmine::Hook::Listener
       else
         t_data_dict["note"] = "status changed (by " + issue.last_updated_by.name + ")"
       end
-      callAPI(url, "PUT", t_data_dict.to_json)
+      ContrastUtil.callAPI(url, "PUT", t_data_dict.to_json)
     else
       if note.present? && private_note == "0"
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
         t_data = {"note" => note + " (by " + issue.last_updated_by.name + ")"}.to_json
-        res = callAPI(url, "POST", t_data)
+        res = ContrastUtil.callAPI(url, "POST", t_data)
         # note idを取得してredmine側のコメントに反映する。
         note_json = JSON.parse(res.body)
         if note_json['success']
@@ -160,38 +160,6 @@ class IssueHook < Redmine::Hook::Listener
         end
       end
     end
-  end
-
-  def callAPI(url, method, data)
-    uri = URI.parse(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = false
-    if uri.scheme === "https"
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    end
-    case method
-    when "GET"
-      req = Net::HTTP::Get.new(uri.request_uri)
-    when "POST"
-      req = Net::HTTP::Post.new(uri.request_uri)
-      req.body = data
-    when "PUT"
-      req = Net::HTTP::Put.new(uri.request_uri)
-      req.body = data
-    when "DELETE"
-      req = Net::HTTP::Delete.new(uri.request_uri)
-    else
-      return
-    end
-    username = Setting.plugin_contrastsecurity['username']
-    service_key = Setting.plugin_contrastsecurity['service_key']
-    auth_header = Base64.strict_encode64(username + ":" + service_key)
-    req["Authorization"] = auth_header
-    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
-    req['Content-Type'] = req['Accept'] = 'application/json'
-    res = http.request(req)
-    return res
   end
 end
 
