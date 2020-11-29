@@ -142,9 +142,17 @@ module IssuesControllerPatch
     notes_json['notes'].reverse.each do |c_note|
       journal = Journal.new
       creator = " (by " + c_note['last_updater'] + ")"
-      is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
-      if is_exist_creator
-        creator = ""
+      if Setting.plugin_contrastsecurity['is_apiuser']
+        last_updater_uid = c_note['last_updater_uid']
+        username = Setting.plugin_contrastsecurity['username']
+        if last_updater_uid == username
+          creator = ""
+        end
+      else
+        is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
+        if is_exist_creator
+          creator = ""
+        end
       end
       old_status_str = ""
       new_status_str = ""
