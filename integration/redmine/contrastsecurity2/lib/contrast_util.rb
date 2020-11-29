@@ -20,6 +20,7 @@
 # SOFTWARE.
 
 module ContrastUtil
+  include Redmine::I18n
   def self.get_priority_by_severity(severity)
     case severity
     when "Critical"
