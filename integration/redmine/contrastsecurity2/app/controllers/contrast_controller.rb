@@ -386,7 +386,7 @@ class ContrastController < ApplicationController
     exist_creator_pattern = /\(by .+\)/
     notes_json['notes'].reverse.each do |c_note|
       journal = Journal.new
-      creator = "(by " + c_note['creator'] + ")"
+      creator = " (by " + c_note['last_updater'] + ")"
       is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
       if is_exist_creator
         creator = ""
@@ -419,7 +419,7 @@ class ContrastController < ApplicationController
       journal.journalized = issue
       journal.user = User.current
       journal.notes = note_str
-      journal.created_on = Time.at(c_note['creation']/1000.0)
+      journal.created_on = Time.at(c_note['last_modification']/1000.0)
       journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
       journal.save()
     end
