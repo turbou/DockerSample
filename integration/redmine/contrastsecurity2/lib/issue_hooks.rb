@@ -184,7 +184,10 @@ class IssueHook < Redmine::Hook::Listener
     else
       return
     end
-    req["Authorization"] = Setting.plugin_contrastsecurity['auth_header']
+    username = Setting.plugin_contrastsecurity['username']
+    service_key = Setting.plugin_contrastsecurity['service_key']
+    auth_header = Base64.strict_encode64(username + ":" + service_key)
+    req["Authorization"] = auth_header
     req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
