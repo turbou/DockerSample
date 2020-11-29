@@ -4,22 +4,27 @@
     <tr>
       <th align="left"><%= l(:teamserver_url) %></th>
       <td><%= text_field_tag('settings[teamserver_url]', @settings['teamserver_url'], {size:"50", placeholder:"https://teamserver-host/Contrast"})%></td>
+      <td></td>
     </tr>
     <tr>
       <th align="left"><%= l(:org_id) %></th>
       <td><%= text_field_tag('settings[org_id]', @settings['org_id'], {size:"50"})%></td>
+      <td></td>
     </tr>
     <tr>
       <th align="left"><%= l(:api_key) %></th>
       <td><%= text_field_tag('settings[api_key]', @settings['api_key'], {size:"50"})%></td>
+      <td></td>
     </tr>
     <tr>
       <th align="left"><%= l(:username) %></th>
       <td><%= text_field_tag('settings[username]', @settings['username'], {size:"50", placeholder:"Login ID(mail address)"})%></td>
+      <td><%= l(:is_apiuser) %><%= check_box_tag 'settings[is_apiuser]', true, @settings['is_apiuser'] %></td>
     </tr>
     <tr>
       <th align="left"><%= l(:service_key) %></th>
       <td><%= text_field_tag('settings[service_key]', @settings['service_key'], {size:"50"})%></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
