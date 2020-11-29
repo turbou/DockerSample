@@ -141,7 +141,7 @@ module IssuesControllerPatch
     exist_creator_pattern = /\(by .+\)/
     notes_json['notes'].reverse.each do |c_note|
       journal = Journal.new
-      creator = "(by " + c_note['creator'] + ")"
+      creator = " (by " + c_note['creator'] + ")"
       is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
       if is_exist_creator
         creator = ""
