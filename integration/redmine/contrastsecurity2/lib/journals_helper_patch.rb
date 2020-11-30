@@ -31,7 +31,6 @@ module JournalsHelperPatch
   module InstanceMethods
     def render_notes_with_modify(issue, journal, options={})
       render_notes = render_notes_without_modify(issue, journal, options)
-      puts render_notes
       last_updater = nil 
       journal.details.each do |detail|
         if detail.prop_key == "last_updater"
