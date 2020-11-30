@@ -57,5 +57,8 @@ Rails.configuration.to_prepare do
   unless SettingsController.included_modules.include?(SettingsControllerPatch)
     SettingsController.send :include, SettingsControllerPatch
   end
+  unless JournalsHelper.included_modules.include?(JournalsHelperPatch)
+    JournalsHelper.send :include, JournalsHelperPatch
+  end
 end
 

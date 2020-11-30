@@ -173,6 +173,7 @@ module ContrastUtil
       journal.notes = note_str
       journal.created_on = Time.at(c_note['last_modification']/1000.0)
       journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
+      journal.details << JournalDetail.new(property: "relation", prop_key: "last_updater", value: c_note['last_updater_uid'])
       journal.save()
     end
     return true
