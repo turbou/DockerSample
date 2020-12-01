@@ -163,17 +163,18 @@ module ContrastUtil
           end
         end
       end
-      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
+      note_str = CGI.unescapeHTML(status_change_reason_str + c_note['note'])
       if old_status_str.present? && new_status_str.present?
         cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
-        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note']) + creator
+        note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note'])
       end
       journal.journalized = issue
       journal.user = User.current
       journal.notes = note_str
       journal.created_on = Time.at(c_note['last_modification']/1000.0)
       journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
-      journal.details << JournalDetail.new(property: "relation", prop_key: "last_updater", value: c_note['last_updater_uid'])
+      journal.details << JournalDetail.new(property: "relation", prop_key: "last_updater_uid", value: c_note['last_updater_uid'])
+      journal.details << JournalDetail.new(property: "relation", prop_key: "last_updater", value: c_note['last_updater'])
       journal.save()
     end
     return true
