@@ -172,9 +172,9 @@ module ContrastUtil
       journal.user = User.current
       journal.notes = note_str
       journal.created_on = Time.at(c_note['last_modification']/1000.0)
-      journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: c_note['id'])
-      journal.details << JournalDetail.new(property: "relation", prop_key: "last_updater_uid", value: c_note['last_updater_uid'])
-      journal.details << JournalDetail.new(property: "relation", prop_key: "last_updater", value: c_note['last_updater'])
+      journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_note_id", value: c_note['id'])
+      journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_last_updater_uid", value: c_note['last_updater_uid'])
+      journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_last_updater", value: c_note['last_updater'])
       journal.save()
     end
     return true

@@ -68,7 +68,7 @@ class IssueHook < Redmine::Hook::Listener
     end
     note_id = nil
     journal.details.each do |detail|
-      if detail.prop_key == "note_id"
+      if detail.prop_key == "contrast_note_id"
         note_id = detail.value
       end
     end
@@ -77,7 +77,7 @@ class IssueHook < Redmine::Hook::Listener
     if note_id.present?
       if private_note
         # プライベート注記に変更された場合
-        details = journal.details.to_a.delete_if{|detail| detail.prop_key == "note_id"}
+        details = journal.details.to_a.delete_if{|detail| detail.prop_key == "contrast_note_id"}
         journal.details = details
         journal.save
         ContrastUtil.callAPI(url, "DELETE")
@@ -98,7 +98,9 @@ class IssueHook < Redmine::Hook::Listener
       note_json = JSON.parse(res.body)
       if note_json['success']
         journal.notes = CGI.unescapeHTML(note_json['note']['note'])
-        journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: note_json['note']['id'])
+        journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_note_id", value: note_json['note']['id'])
+        journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_last_updater_uid", value: note_json['note']['last_updater_uid'])
+        journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_last_updater", value: note_json['note']['last_updater'])
         journal.save()
       end
     else
@@ -155,7 +157,9 @@ class IssueHook < Redmine::Hook::Listener
         note_json = JSON.parse(res.body)
         if note_json['success']
           journal.notes = CGI.unescapeHTML(note_json['note']['note'])
-          journal.details << JournalDetail.new(property: "relation", prop_key: "note_id", value: note_json['note']['id'])
+          journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_note_id", value: note_json['note']['id'])
+          journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_last_updater_uid", value: note_json['note']['last_updater_uid'])
+          journal.details << JournalDetail.new(property: "cf", prop_key: "contrast_last_updater", value: note_json['note']['last_updater'])
           journal.save()
         end
       end

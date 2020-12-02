@@ -34,9 +34,9 @@ module JournalsHelperPatch
       last_updater_uid = nil 
       last_updater = nil 
       journal.details.each do |detail|
-        if detail.prop_key == "last_updater_uid"
+        if detail.prop_key == "contrast_last_updater_uid"
           last_updater_uid = detail.value
-        elsif detail.prop_key == "last_updater"
+        elsif detail.prop_key == "contrast_last_updater"
           last_updater = detail.value
         end 
       end 

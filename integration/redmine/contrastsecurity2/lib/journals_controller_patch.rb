@@ -46,7 +46,7 @@ module JournalsControllerPatch
         end
         note_id = nil
         @journal.details.each do |detail|
-          if detail.prop_key == "note_id"
+          if detail.prop_key == "contrast_note_id"
             note_id = detail.value
           end
         end
