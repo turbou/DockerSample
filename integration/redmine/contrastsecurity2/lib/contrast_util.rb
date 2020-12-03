@@ -130,22 +130,7 @@ module ContrastUtil
         c_journal.destroy
       end
     end
-    exist_creator_pattern = /\(by .+\)/
     notes_json['notes'].reverse.each do |c_note|
-      journal = Journal.new
-      creator = " (by " + c_note['last_updater'] + ")"
-      if Setting.plugin_contrastsecurity['is_apiuser']
-        last_updater_uid = c_note['last_updater_uid']
-        username = Setting.plugin_contrastsecurity['username']
-        if last_updater_uid == username
-          creator = ""
-        end
-      else
-        is_exist_creator = CGI.unescapeHTML(c_note['note']).match(exist_creator_pattern)
-        if is_exist_creator
-          creator = ""
-        end
-      end
       old_status_str = ""
       new_status_str = ""
       status_change_reason_str = ""
@@ -171,6 +156,7 @@ module ContrastUtil
         cmt_chg_msg = l(:status_changed_comment, :old => old_status_str, :new => new_status_str)
         note_str = "(" + cmt_chg_msg + ")\n" + CGI.unescapeHTML(status_change_reason_str + c_note['note'])
       end
+      journal = Journal.new
       journal.journalized = issue
       journal.user = User.current
       journal.notes = note_str

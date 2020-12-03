@@ -24,7 +24,7 @@ ja:
   org_id: "組織ID"
   api_key: "APIキー"
   username: "ユーザー名"
-  is_apiuser: "API専用ユーザー: "
+  username_hint: "TeamServerのUIから操作を行わないAPI専用のユーザーを指定してください。"
   service_key: "サービスキー"
   auth_header: "認証ヘッダー"
   vul_issues: "脆弱性"

@@ -27,7 +27,6 @@ Redmine::Plugin.register :contrastsecurity do
   url 'https://github.com/turbou/ContrastSecurity/tree/master/integration/redmine/contrast'
   author_url 'https://github.com/turbou'
   settings :default => {
-    'is_apiuser' => false,
     'vul_issues' => true,
     'lib_issues' => true,
     'vul_seen_dt_format' => '%Y/%m/%d %H:%M',

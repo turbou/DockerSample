@@ -24,7 +24,7 @@ en:
   org_id: "Organization ID"
   api_key: "API Key"
   username: "Username"
-  is_apiuser: "API Only User: "
+  username_hint: "Please specify a user who only uses the API."
   service_key: "Service Key"
   auth_header: "Authorization Header"
   vul_issues: "Vulnerabilities"
