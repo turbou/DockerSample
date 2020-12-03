@@ -43,12 +43,12 @@ module SettingsControllerPatch
         api_key = setting['api_key']
         username = setting['username']
         service_key = setting['service_key']
-        if teamserver_url.empty? || org_id.empty? || org_id.empty? || username.empty? || service_key.empty?
+        if teamserver_url.empty? || org_id.empty? || api_key.empty? || username.empty? || service_key.empty?
           flash[:error] = l(:test_connect_fail)
           redirect_to plugin_settings_path(@plugin) and return
         end
         url = sprintf('%s/api/ng/%s/applications/', teamserver_url, org_id)
-        res = ContrastUtil.callAPI(url: url)
+        res = ContrastUtil.callAPI(url: url, api_key: api_key, username: username, service_key: service_key)
         if res.code != "200"
           flash[:error] = l(:test_connect_fail)
           redirect_to plugin_settings_path(@plugin) and return

@@ -81,7 +81,7 @@ module ContrastUtil
     return status
   end
 
-  def callAPI(url: , method: "GET", data: nil, username: nil, service_key: nil)
+  def callAPI(url: , method: "GET", data: nil, api_key: nil, username: nil, service_key: nil)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = false
@@ -102,16 +102,20 @@ module ContrastUtil
       req = Net::HTTP::Delete.new(uri.request_uri)
     else
       return
-    end 
-    if username.nil? # TeamServer接続設定じのみparamから渡されたものを使う
+    end
+    # TeamServer接続設定じのみparamから渡されたものを使う
+    if api_key.nil?
+      api_key = Setting.plugin_contrastsecurity['api_key']
+    end
+    if username.nil?
       username = Setting.plugin_contrastsecurity['username']
     end
-    if service_key.nil? # TeamServer接続設定じのみparamから渡されたものを使う
+    if service_key.nil?
       service_key = Setting.plugin_contrastsecurity['service_key']
     end
     auth_header = Base64.strict_encode64(username + ":" + service_key)
     req["Authorization"] = auth_header
-    req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
+    req["API-Key"] = api_key
     req['Content-Type'] = req['Accept'] = 'application/json'
     res = http.request(req)
     return res 
