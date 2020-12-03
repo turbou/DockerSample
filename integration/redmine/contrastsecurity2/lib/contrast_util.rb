@@ -81,7 +81,7 @@ module ContrastUtil
     return status
   end
 
-  def callAPI(url, method="GET", data=nil)
+  def callAPI(url: , method: "GET", data: nil, username: nil, service_key: nil)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = false
@@ -103,8 +103,10 @@ module ContrastUtil
     else
       return
     end 
-    username = Setting.plugin_contrastsecurity['username']
-    service_key = Setting.plugin_contrastsecurity['service_key']
+    if username.nil? # TeamServer接続設定じのみparamから渡されたものを使う
+      username = Setting.plugin_contrastsecurity['username']
+    if service_key.nil? # TeamServer接続設定じのみparamから渡されたものを使う
+      service_key = Setting.plugin_contrastsecurity['service_key']
     auth_header = Base64.strict_encode64(username + ":" + service_key)
     req["Authorization"] = auth_header
     req["API-Key"] = Setting.plugin_contrastsecurity['api_key']
@@ -117,7 +119,7 @@ module ContrastUtil
   def syncComment(org_id, app_id, vul_id, issue)
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = callAPI(url)
+    res = callAPI(url: url)
     if res.code != "200"
       return false
     end

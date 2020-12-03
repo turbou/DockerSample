@@ -71,7 +71,7 @@ class ContrastController < ApplicationController
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application', teamserver_url, org_id, app_id, vul_id)
       #logger.info(url)
-      res = ContrastUtil.callAPI(url)
+      res = ContrastUtil.callAPI(url: url)
       vuln_json = JSON.parse(res.body)
       #logger.info(vuln_json)
       summary = '[' + app_name + '] ' + vuln_json['trace']['title']
@@ -131,7 +131,7 @@ class ContrastController < ApplicationController
       chapters = ""
       story = ""
       if story_url.present?
-        get_story_res = ContrastUtil.callAPI(story_url)
+        get_story_res = ContrastUtil.callAPI(url: story_url)
         story_json = JSON.parse(get_story_res.body)
         story_json['story']['chapters'].each do |chapter|
           chapters << chapter['introText'] + "\n"
@@ -153,7 +153,7 @@ class ContrastController < ApplicationController
       # How to fix
       howtofix = ""
       if howtofix_url.present?
-        get_howtofix_res = ContrastUtil.callAPI(howtofix_url)
+        get_howtofix_res = ContrastUtil.callAPI(url: howtofix_url)
         howtofix_json = JSON.parse(get_howtofix_res.body)
         howtofix = howtofix_json['recommendation']['formattedText']
       end
@@ -221,7 +221,7 @@ class ContrastController < ApplicationController
       lib_id = is_lib[2]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
       url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
-      res = ContrastUtil.callAPI(url)
+      res = ContrastUtil.callAPI(url: url)
       lib_json = JSON.parse(res.body)
       lib_name = lib_json['library']['file_name']
       file_version = lib_json['library']['file_version']

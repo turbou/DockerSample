@@ -48,7 +48,7 @@ module SettingsControllerPatch
           redirect_to plugin_settings_path(@plugin) and return
         end
         url = sprintf('%s/api/ng/%s/applications/', teamserver_url, org_id)
-        res = ContrastUtil.callAPI(url)
+        res = ContrastUtil.callAPI(url: url)
         if res.code != "200"
           flash[:error] = l(:test_connect_fail)
           redirect_to plugin_settings_path(@plugin) and return

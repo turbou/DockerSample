@@ -56,7 +56,7 @@ module JournalsControllerPatch
         end
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id, note_id)
-        res = ContrastUtil.callAPI(url, "DELETE")
+        res = ContrastUtil.callAPI(url: url, method: "DELETE")
         if res.code == "200"
           @journal.details = []
         end
