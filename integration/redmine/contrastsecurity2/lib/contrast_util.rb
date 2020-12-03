@@ -103,16 +103,11 @@ module ContrastUtil
     else
       return
     end
-    # TeamServer接続設定じのみparamから渡されたものを使う
-    if api_key.nil?
-      api_key = Setting.plugin_contrastsecurity['api_key']
-    end
-    if username.nil?
-      username = Setting.plugin_contrastsecurity['username']
-    end
-    if service_key.nil?
-      service_key = Setting.plugin_contrastsecurity['service_key']
-    end
+    # TeamServer接続設定のみparamから渡されたものを使う。なければ設定から取得
+    api_key ||= Setting.plugin_contrastsecurity['api_key']
+    username ||= Setting.plugin_contrastsecurity['username']
+    service_key ||= Setting.plugin_contrastsecurity['service_key']
+
     auth_header = Base64.strict_encode64(username + ":" + service_key)
     req["Authorization"] = auth_header
     req["API-Key"] = api_key
