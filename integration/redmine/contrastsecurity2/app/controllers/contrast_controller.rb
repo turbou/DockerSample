@@ -366,11 +366,19 @@ class ContrastController < ApplicationController
       url = "#{TEAM_SERVER_URL}/api/ng/#{parsed_payload.org_id}/traces/#{parsed_payload.app_id}/filter/#{parsed_payload.vul_id}"
       res = ContrastUtil.callAPI(url: url)
       parsed_response = JSON.parse(res.body)
+      logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{parsed_response['trace']['uuid']}")
       cvs = CustomValue.where(
         customized_type: 'Issue', value: parsed_response['trace']['uuid']
       ).joins(:custom_field).where(
         custom_fields: { name: l('contrast_custom_fields.vul_id') }
       )
+      if cvs.nil?
+        cvs = CustomValue.where(
+          customized_type: 'Issue', value: parsed_payload.vul_id
+        ).joins(:custom_field).where(
+          custom_fields: { name: l('contrast_custom_fields.vul_id') }
+        )
+      end
       logger.info("[+]Custome Values: #{cvs}")
       cvs.each do |cv|
         logger.info(cv)
