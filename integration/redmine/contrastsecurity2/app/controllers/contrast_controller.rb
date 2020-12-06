@@ -77,6 +77,8 @@ class ContrastController < ApplicationController
 
       self_url = parsed_payload.get_self_url
 
+      logger.info(parsed_payload)
+
       url = format(TRACE_API_ENDPOINT,
                    TEAM_SERVER_URL,
                    parsed_payload.org_id,
@@ -86,7 +88,9 @@ class ContrastController < ApplicationController
       res = ContrastUtil.callAPI(url: url)
       vuln_json = JSON.parse(res.body)
       # logger.info(vuln_json)
-      summary = '[' + parsed_payload.app_name + '] ' + vuln_json['trace']['title']
+      unless parsed_payload.event_type == 'VULNERABILITY_DUPLICATE'
+        summary = '[' + parsed_payload.app_name + '] ' + vuln_json['trace']['title']
+      end
       first_time_seen = vuln_json['trace']['first_time_seen']
       last_time_seen = vuln_json['trace']['last_time_seen']
       category = vuln_json['trace']['category']
