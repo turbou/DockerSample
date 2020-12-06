@@ -74,8 +74,7 @@ class ContrastController < ApplicationController
       if not Setting.plugin_contrastsecurity['vul_issues']
         return render plain: 'Vul Skip'
       end
-      
-      lib_id = ''
+
       self_url = parsed_payload.get_self_url
 
       url = format(TRACE_API_ENDPOINT,
@@ -191,9 +190,7 @@ class ContrastController < ApplicationController
     elsif event_type == 'VULNERABILITY_CHANGESTATUS_OPEN' ||
       event_type == 'VULNERABILITY_CHANGESTATUS_CLOSED'
       logger.info(l(:event_vulnerability_changestatus))
-      # project = parsed_payload.project_id
-      # status = parsed_payload.status
-      # vul_id = parsed_payload.vul_id
+
       # logger.info(status)
       if parsed_payload.vul_id.blank?
         logger.error(l(:problem_with_customfield))
@@ -208,11 +205,11 @@ class ContrastController < ApplicationController
       )
       cvs.each do |cv|
         issue = cv.customized
-        if project != issue.project.identifier
+        if parsed_payload.project_id != issue.project.identifier
           next
         end
 
-        status_obj = ContrastUtil.get_redmine_status(status)
+        status_obj = ContrastUtil.get_redmine_status(parsed_payload.status)
         if status_obj.nil?
           logger.error(l(:problem_with_status))
           return head :ok
@@ -234,7 +231,6 @@ class ContrastController < ApplicationController
         return render plain: 'Lib Skip'
       end
 
-      app_id = parsed_payload.app_id
       lib_info = parsed_payload.get_lib_info
       url = format(LIBRARY_DETAIL_API_ENDPOINT,
                    TEAM_SERVER_URL, parsed_payload.org_id,
@@ -258,7 +254,7 @@ class ContrastController < ApplicationController
         return head :not_found
       end
 
-      self_url = get_lib_url
+      self_url = parsed_payload.get_lib_url
       summary = lib_name
       # description
       deco_mae = ""
