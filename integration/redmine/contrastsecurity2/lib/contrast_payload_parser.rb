@@ -21,8 +21,7 @@
 
 # Contrast webhook's payload parser class
 class ContrastPayloadParser
-  UUID_V4_PATTERN = /[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{12}/
-                    .freeze
+  UUID_V4_PATTERN = /[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{12}/.freeze
   VUL_ID_PATTERN = /[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}/.freeze
   VUL_ID_PATTERN2 = /[A-Z0-9\-]{19}$/.freeze
   VUL_URL_PATTERN = %r{.+\((.+/vulns/[A-Z0-9\-]{19})\)}.freeze
@@ -42,39 +41,42 @@ class ContrastPayloadParser
   def initialize(payload)
     @event_type = payload['event_type']
     @app_name = payload['application_name']
-    @org_id = set_org_id(payload['organization_id'], payload['description'])
-    @app_id = set_app_id(payload['application_id'], payload['description'])
-    @vul_id = set_vul_id(payload['vulnerability_id'], payload['description'])
+    @org_id = ContrastPayloadParser.parse_org_id(payload['organization_id'],
+                                                 payload['description'])
+    @app_id = ContrastPayloadParser.parse_app_id(payload['application_id'],
+                                                 payload['description'])
+    @vul_id = ContrastPayloadParser.parse_vul_id(payload['vulnerability_id'],
+                                                 payload['description'])
     @description = payload['description']
     @status = payload['status']
     @lib_id = ''
     @vulnerability_tags = payload['vulnerability_tags']
-    @project_identifier = payload['project']
+    @project_id = payload['project']
     @tracker = payload['tracker']
   end
 
-  def self.set_org_id(org_id, description)
-    unless org_id
-      @org_id = description.scan(UUID_V4_PATTERN)[0]
-      return
+  def self.parse_org_id(org_id, description)
+    if org_id.empty?
+      description.scan(UUID_V4_PATTERN)[0]
+    else
+      org_id
     end
-    @org_id = org_id
   end
 
-  def self.set_app_id(app_id, description)
-    unless app_id
-      @app_id = description.scan(UUID_V4_PATTERN)[1]
-      return
+  def self.parse_app_id(app_id, description)
+    if app_id.empty?
+      description.scan(UUID_V4_PATTERN)[1]
+    else
+      app_id
     end
-    @app_id = app_id
   end
 
-  def self.set_vul_id(vul_id, description)
-    unless vul_id
-      @vul_id = description.scan(VUL_ID_PATTERN)[0]
-      return
+  def self.parse_vul_id(vul_id, description)
+    if vul_id.empty?
+      description.scan(VUL_ID_PATTERN)[0]
+    else
+      vul_id
     end
-    @vul_id = vul_id
   end
 
   def get_self_url
@@ -85,12 +87,18 @@ class ContrastPayloadParser
   def get_lib_info
     lib_pattern = %r{index.html#/#{@org_id}/libraries/(.+)/([a-z0-9]+)\)}
     matched = @description.match(lib_pattern)
-    { 'lang': matched[1], 'id': matched[2] }
+
+    if matched
+      @lib_id = matched[2]
+      return { 'lang': matched[1], 'id': matched[2] }
+    else
+      return { 'lang': '', 'id': '' }
+    end
   end
 
   def get_lib_url
-    lib_id = get_lib_info['id']
-    lib_url_pattern = /.+\((.+#{lib_id})\)/
+    lib_info = get_lib_info
+    lib_url_pattern = /.+\((.+#{lib_info['id']})\)/
     @description.match(lib_url_pattern)[1]
   end
 
@@ -98,9 +106,9 @@ class ContrastPayloadParser
     vul_id_pattern = %r{.+ commented on a .+[^(]+ \(.+index.html#/(.+)/applications/(.+)/vulns/([^)]+)\)}
     matched = @description.match(vul_id_pattern)
     if matched
-      set_org_id(matched[1], @description)
-      set_app_id(matched[2], @description)
-      set_vul_id(matched[3], @description)
+      ContrastPayloadParser.set_org_id(matched[1], @description)
+      ContrastPayloadParser.set_app_id(matched[2], @description)
+      ContrastPayloadParser.set_vul_id(matched[3], @description)
     else
       false
     end
