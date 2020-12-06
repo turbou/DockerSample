@@ -69,6 +69,13 @@ class ContrastController < ApplicationController
       end
       # /Contrast/api/ng/[ORG_ID]/traces/[APP_ID]/trace/[VUL_ID]
       teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
+      # VULNERABILITY_DUPLICATEのときはほしい値がpayloadに載ってこないのでパスから取得する
+      if 'VULNERABILITY_DUPLICATE' == event_type
+        matched = t_issue['description'].scan(%r{[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{12}})
+        org_id = matched[0]
+        app_id = matched[1]
+        vul_id = t_issue['description'].scan(%r{[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}})[0]
+      end
       url = sprintf('%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application', teamserver_url, org_id, app_id, vul_id)
       #logger.info(url)
       res = ContrastUtil.callAPI(url: url)
