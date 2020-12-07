@@ -106,9 +106,9 @@ class ContrastPayloadParser
     vul_id_pattern = %r{.+ commented on a .+[^(]+ \(.+index.html#/(.+)/applications/(.+)/vulns/([^)]+)\)}
     matched = @description.match(vul_id_pattern)
     if matched
-      ContrastPayloadParser.set_org_id(matched[1], @description)
-      ContrastPayloadParser.set_app_id(matched[2], @description)
-      ContrastPayloadParser.set_vul_id(matched[3], @description)
+      ContrastPayloadParser.parse_org_id(matched[1], @description)
+      ContrastPayloadParser.parse_app_id(matched[2], @description)
+      ContrastPayloadParser.parse_vul_id(matched[3], @description)
     else
       false
     end

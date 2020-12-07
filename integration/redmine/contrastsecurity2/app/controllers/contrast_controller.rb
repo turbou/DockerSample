@@ -293,7 +293,7 @@ class ContrastController < ApplicationController
     elsif parsed_payload.event_type == 'NEW_VULNERABILITY_COMMENT_FROM_SCRIPT'
       logger.info(l(:event_new_vulnerability_comment))
 
-      if set_vul_info_from_comment
+      if parsed_payload.set_vul_info_from_comment
         cvs = CustomValue.where(
           customized_type: 'Issue', value: parsed_payload.vul_id
         ).joins(:custom_field).where(
