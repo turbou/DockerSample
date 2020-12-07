@@ -343,6 +343,15 @@ class ContrastController < ApplicationController
       end
       custom_field_hash[custom_field_name] = custom_field.id
     end
+    # DUPLICATEの場合は脆弱性IDが違うもので飛んでくる場合があるので、取得し直す
+    # LIBRARYの場合はvuln_idを取得し直さない
+    vul_id = ''
+    if parsed_payload.event_type != 'NEW_VULNERABLE_LIBRARY'
+      url = "#{TEAM_SERVER_URL}/api/ng/#{parsed_payload.org_id}/traces/#{parsed_payload.app_id}/filter/#{parsed_payload.vul_id}"
+      res = ContrastUtil.callAPI(url: url)
+      parsed_response = JSON.parse(res.body)
+      vul_id = parsed_response['trace']['uuid']
+    end
     lib_info = parsed_payload.get_lib_info
     custom_fields = [
       { 'id': custom_field_hash[l('contrast_custom_fields.org_id')],
@@ -350,7 +359,7 @@ class ContrastController < ApplicationController
       { 'id': custom_field_hash[l('contrast_custom_fields.app_id')],
         'value': parsed_payload.app_id },
       { 'id': custom_field_hash[l('contrast_custom_fields.vul_id')],
-        'value': parsed_payload.vul_id },
+        'value': vul_id },
       { 'id': custom_field_hash[l('contrast_custom_fields.lib_id')],
         'value': lib_info['id'] },
       { 'id': custom_field_hash[l('contrast_custom_fields.lib_lang')],
@@ -362,15 +371,25 @@ class ContrastController < ApplicationController
     # logger.info(custom_fields)
     issue = nil
     if parsed_payload.event_type != 'NEW_VULNERABLE_LIBRARY' # 脆弱性ライブラリはDUPLICATE通知はない前提
-      # DUPLICATEの場合は脆弱性IDが違うもので飛んでくる場合があるので、取得し直す
-      url = "#{TEAM_SERVER_URL}/api/ng/#{parsed_payload.org_id}/traces/#{parsed_payload.app_id}/filter/#{parsed_payload.vul_id}"
-      res = ContrastUtil.callAPI(url: url)
-      parsed_response = JSON.parse(res.body)
-      logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{parsed_response['trace']['uuid']}")
+      logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
       cvs = CustomValue.where(
-        customized_type: 'Issue', value: parsed_payload.vul_id
+        customized_type: 'Issue', value: vul_id
       ).joins(:custom_field).where(
         custom_fields: { name: l('contrast_custom_fields.vul_id') }
+      )
+      logger.info("[+]Custome Values: #{cvs}")
+      cvs.each do |cv|
+        logger.info(cv)
+        issue = cv.customized
+      end
+    end
+    if parsed_payload.event_type == 'NEW_VULNERABLE_LIBRARY' # 脆弱性ライブラリはDUPLICATE通知はない前提
+      # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
+
+      cvs = CustomValue.where(
+        customized_type: 'Issue', value: lib_info['id']
+      ).joins(:custom_field).where(
+        custom_fields: { name: l('contrast_custom_fields.lib_id') }
       )
       logger.info("[+]Custome Values: #{cvs}")
       cvs.each do |cv|
