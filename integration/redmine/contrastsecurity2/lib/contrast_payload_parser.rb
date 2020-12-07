@@ -90,9 +90,9 @@ class ContrastPayloadParser
 
     if matched
       @lib_id = matched[2]
-      return { 'lang': matched[1], 'id': matched[2] }
+      return { 'lang' => matched[1], 'id' => matched[2] }
     else
-      return { 'lang': '', 'id': '' }
+      return { 'lang' => '', 'id' => '' }
     end
   end
 

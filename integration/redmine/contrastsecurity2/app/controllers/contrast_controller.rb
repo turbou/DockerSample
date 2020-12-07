@@ -242,7 +242,7 @@ class ContrastController < ApplicationController
       end
 
       lib_info = parsed_payload.get_lib_info
-      logger.info("[+]lib_info: #{lib_info}")
+      logger.info("[+]lib_info: #{lib_info}, #{lib_info['lang']}, #{lib_info['id'] }")
       url = format(LIBRARY_DETAIL_API_ENDPOINT,
                    TEAM_SERVER_URL, parsed_payload.org_id,
                    lib_info['lang'], lib_info['id'])
