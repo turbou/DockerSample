@@ -38,6 +38,7 @@ module SettingsControllerPatch
 
       if request.post?
         setting = params[:settings] ? params[:settings].permit!.to_h : {}
+        Setting.send "plugin_#{@plugin.id}=", setting
         teamserver_url = setting['teamserver_url']
         org_id = setting['org_id']
         api_key = setting['api_key']
