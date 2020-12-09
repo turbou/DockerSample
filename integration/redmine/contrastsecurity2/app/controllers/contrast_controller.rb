@@ -242,13 +242,13 @@ class ContrastController < ApplicationController
       end
 
       lib_info = parsed_payload.get_lib_info
-      logger.info("[+]lib_info: #{lib_info}, #{lib_info['lang']}, #{lib_info['id'] }")
+      # logger.info("[+]lib_info: #{lib_info}, #{lib_info['lang']}, #{lib_info['id'] }")
       url = format(LIBRARY_DETAIL_API_ENDPOINT,
                    TEAM_SERVER_URL, parsed_payload.org_id,
                    lib_info['lang'], lib_info['id'])
-      logger.info("LIBRARY_URL: #{url}")
+      # logger.info("LIBRARY_URL: #{url}")
       res = ContrastUtil.callAPI(url: url)
-      logger.info(JSON.parse(res.body))
+      # logger.info(JSON.parse(res.body))
       lib_json = JSON.parse(res.body)
       lib_name = lib_json['library']['file_name']
       file_version = lib_json['library']['file_version']
@@ -371,13 +371,13 @@ class ContrastController < ApplicationController
     # logger.info(custom_fields)
     issue = nil
     if parsed_payload.event_type != 'NEW_VULNERABLE_LIBRARY' # 脆弱性ライブラリはDUPLICATE通知はない前提
-      logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
+      # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
       cvs = CustomValue.where(
         customized_type: 'Issue', value: vul_id
       ).joins(:custom_field).where(
         custom_fields: { name: l('contrast_custom_fields.vul_id') }
       )
-      logger.info("[+]Custome Values: #{cvs}")
+      # logger.info("[+]Custome Values: #{cvs}")
       cvs.each do |cv|
         logger.info(cv)
         issue = cv.customized
@@ -398,8 +398,8 @@ class ContrastController < ApplicationController
       end
     end
     if issue.nil?
-      logger.info("[+]event_type: #{parsed_payload.event_type}")
-      logger.info("[+] issue: #{issue}")
+      # logger.info("[+]event_type: #{parsed_payload.event_type}")
+      # logger.info("[+] issue: #{issue}")
       issue = Issue.new(
         project: project,
         subject: summary,
