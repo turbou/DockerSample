@@ -409,7 +409,7 @@ class ContrastController < ApplicationController
           custom_fields: custom_fields,
           author: User.current
         )
-      else
+      elsif parsed_payload.event_type == 'VULNERABILITY_DUPLICATE'
         logger.info('[+]update issue')
         issue.description = description
         issue.custom_fields = custom_fields
