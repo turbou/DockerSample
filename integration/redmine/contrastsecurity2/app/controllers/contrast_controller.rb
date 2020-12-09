@@ -397,21 +397,6 @@ class ContrastController < ApplicationController
           issue = cv.customized
         end
       end
-      # 脆弱性ライブラリはDUPLICATE通知はない前提
-      if parsed_payload.event_type == 'NEW_VULNERABLE_LIBRARY'
-        # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
-
-        cvs = CustomValue.where(
-          customized_type: 'Issue', value: lib_info['id']
-        ).joins(:custom_field).where(
-          custom_fields: { name: l('contrast_custom_fields.lib_id') }
-        )
-        logger.info("[+]Custome Values: #{cvs}")
-        cvs.each do |cv|
-          logger.info(cv)
-          issue = cv.customized
-        end
-      end
       if issue.nil?
         # logger.info("[+]event_type: #{parsed_payload.event_type}")
         # logger.info("[+] issue: #{issue}")
