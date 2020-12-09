@@ -24,6 +24,8 @@ class ContrastController < ApplicationController
   skip_before_filter :verify_authenticity_token
   accept_api_auth :vote
 
+  @@mutex = Thread::Mutex.new
+
   CUSTOM_FIELDS = [
     l('contrast_custom_fields.rule'),
     l('contrast_custom_fields.category'),
@@ -43,6 +45,7 @@ class ContrastController < ApplicationController
   TRACE_API_ENDPOINT = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application'.freeze
   LIBRARY_DETAIL_API_ENDPOINT = '%s/api/ng/%s/libraries/%s/%s?expand=vulns'.freeze
   TEAM_SERVER_URL = Setting.plugin_contrastsecurity['teamserver_url']
+  APP_INFO_API_ENDPOINT = '%s/api/ng/%s/applications/%s?expand=skip_links'.freeze
 
   def vote
     # logger.info(request.body.read)
@@ -84,8 +87,16 @@ class ContrastController < ApplicationController
       res = ContrastUtil.callAPI(url: url)
       vuln_json = JSON.parse(res.body)
       # logger.info(vuln_json)
+      url = format(
+        APP_INFO_API_ENDPOINT,
+        TEAM_SERVER_URL,
+        parsed_payload.org_id,
+        parsed_payload.app_id
+      )
+      res = ContrastUtil.callAPI(url: url)
+      app_info_json = JSON.parse(res.body)
 
-      summary = '[' + parsed_payload.app_name + '] ' + vuln_json['trace']['title']
+      summary = '[' + app_info_json['application']['name'] + '] ' + vuln_json['trace']['title']
 
       first_time_seen = vuln_json['trace']['first_time_seen']
       last_time_seen = vuln_json['trace']['last_time_seen']
@@ -370,49 +381,56 @@ class ContrastController < ApplicationController
     end
     # logger.info(custom_fields)
     issue = nil
-    if parsed_payload.event_type != 'NEW_VULNERABLE_LIBRARY' # 脆弱性ライブラリはDUPLICATE通知はない前提
-      # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
-      cvs = CustomValue.where(
-        customized_type: 'Issue', value: vul_id
-      ).joins(:custom_field).where(
-        custom_fields: { name: l('contrast_custom_fields.vul_id') }
-      )
-      # logger.info("[+]Custome Values: #{cvs}")
-      cvs.each do |cv|
-        logger.info(cv)
-        issue = cv.customized
+    @@mutex.lock
+    begin
+      # 脆弱性ライブラリはDUPLICATE通知はない前提
+      if parsed_payload.event_type != 'NEW_VULNERABLE_LIBRARY'
+        # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
+        cvs = CustomValue.where(
+          customized_type: 'Issue', value: vul_id
+        ).joins(:custom_field).where(
+          custom_fields: { name: l('contrast_custom_fields.vul_id') }
+        )
+        # logger.info("[+]Custome Values: #{cvs}")
+        cvs.each do |cv|
+          logger.info(cv)
+          issue = cv.customized
+        end
       end
-    end
-    if parsed_payload.event_type == 'NEW_VULNERABLE_LIBRARY' # 脆弱性ライブラリはDUPLICATE通知はない前提
-      # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
+      # 脆弱性ライブラリはDUPLICATE通知はない前提
+      if parsed_payload.event_type == 'NEW_VULNERABLE_LIBRARY'
+        # logger.info("[+]webhook vul_id: #{parsed_payload.vul_id}, api vul_id: #{vul_id}")
 
-      cvs = CustomValue.where(
-        customized_type: 'Issue', value: lib_info['id']
-      ).joins(:custom_field).where(
-        custom_fields: { name: l('contrast_custom_fields.lib_id') }
-      )
-      logger.info("[+]Custome Values: #{cvs}")
-      cvs.each do |cv|
-        logger.info(cv)
-        issue = cv.customized
+        cvs = CustomValue.where(
+          customized_type: 'Issue', value: lib_info['id']
+        ).joins(:custom_field).where(
+          custom_fields: { name: l('contrast_custom_fields.lib_id') }
+        )
+        logger.info("[+]Custome Values: #{cvs}")
+        cvs.each do |cv|
+          logger.info(cv)
+          issue = cv.customized
+        end
       end
-    end
-    if issue.nil?
-      # logger.info("[+]event_type: #{parsed_payload.event_type}")
-      # logger.info("[+] issue: #{issue}")
-      issue = Issue.new(
-        project: project,
-        subject: summary,
-        tracker: tracker,
-        priority: priority,
-        description: description,
-        custom_fields: custom_fields,
-        author: User.current
-      )
-    else
-      logger.info('[+]update issue')
-      issue.description = description
-      issue.custom_fields = custom_fields
+      if issue.nil?
+        # logger.info("[+]event_type: #{parsed_payload.event_type}")
+        # logger.info("[+] issue: #{issue}")
+        issue = Issue.new(
+          project: project,
+          subject: summary,
+          tracker: tracker,
+          priority: priority,
+          description: description,
+          custom_fields: custom_fields,
+          author: User.current
+        )
+      else
+        logger.info('[+]update issue')
+        issue.description = description
+        issue.custom_fields = custom_fields
+      end
+    ensure
+      @@mutex.unlock
     end
     unless status_obj.nil?
       issue.status = status_obj
