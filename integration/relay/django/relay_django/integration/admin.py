@@ -14,6 +14,7 @@ class TeamServerAdminForm(forms.ModelForm):
 @admin.register(Integration)
 class IntegrationAdmin(admin.ModelAdmin):
     save_on_top = True
+    save_as = True
     autocomplete_fields = ['backlog', 'gitlab', 'googlechat']
     form = TeamServerAdminForm
     actions = None

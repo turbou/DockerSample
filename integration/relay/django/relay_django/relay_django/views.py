@@ -105,8 +105,8 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
             'created_at': created_at.isoformat() # required Administrator(project or group owner) only.
         }
         res = requests.post(url, json=data, headers=headers)
-        print(res.status_code)
-        print('oyoyo!! ', res.text)
+        #print(res.status_code)
+        #print('oyoyo!! ', res.text)
         if res.status_code == requests.codes.created:
             gitlab_note = GitlabNote(vul=gitlab_mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
             gitlab_note.gitlab_note_id = res.json()['id']
@@ -135,12 +135,12 @@ def syncCommentFromGitlab(ts_config, org_id, app_id, vul_id):
         #print(issue_note['author']['name'], issue_note['created_at'], issue_note['body'])
         data_dict = {'note': issue_note['body']}
         res = callAPI2(url, 'POST', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-        print(res.status_code)
-        print('buhihi!! ', res.text)
-        print(res.json())
+        #print(res.status_code)
+        #print('buhihi!! ', res.text)
+        #print(res.json())
         if res.status_code == requests.codes.ok:
             res_json = res.json()
-            print(res_json['note']['creation'])
+            #print(res_json['note']['creation'])
             gitlab_note = GitlabNote(vul=gitlab_mapping, note=issue_note['body'], creator=issue_note['author']['name'], contrast_note_id=res_json['note']['id'])
             gitlab_note.gitlab_note_id = issue_note['id']
             created_at = dt.fromtimestamp(res_json['note']['creation'] / 1000)
@@ -235,10 +235,10 @@ def gitlab(request):
         return HttpResponse(status=200)
     if not json_data['event_type'] in ['issue', 'note']:
         return HttpResponse(status=200)
-    print(json_data['event_type'])
+    #print(json_data['event_type'])
 
     if json_data['event_type'] == 'note':
-        print(json_data['issue']['iid'])
+        #print(json_data['issue']['iid'])
         gitlab_mapping = GitlabVul.objects.filter(gitlab_issue_id=json_data['issue']['iid']).first()
         if gitlab_mapping is None:
             return HttpResponse(status=200)
@@ -250,13 +250,13 @@ def gitlab(request):
     elif json_data['event_type'] == 'issue':
         if not 'action' in json_data['object_attributes']:
             return HttpResponse(status=200)
-        print(json_data)
-        print(json_data['object_attributes']['action'])
+        #print(json_data)
+        #print(json_data['object_attributes']['action'])
         if json_data['object_attributes']['action'] == 'open':
             return HttpResponse(status=200)
         #print(json_data['object_attributes'].keys())
-        print(json_data['object_attributes']['iid'])
-        print(json_data['object_attributes']['action'])
+        #print(json_data['object_attributes']['iid'])
+        #print(json_data['object_attributes']['action'])
         gitlab_mapping = GitlabVul.objects.filter(gitlab_issue_id=json_data['object_attributes']['iid']).first()
         if gitlab_mapping is None:
             return HttpResponse(status=200)
@@ -271,7 +271,7 @@ def gitlab(request):
             data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
             #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
             res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-            print(res.text)
+            #print(res.text)
         elif json_data['object_attributes']['action'] == 'reopen':
             ts_config = gitlab_mapping.gitlab.integrations.first()
             teamserver_url = ts_config.url
@@ -279,7 +279,7 @@ def gitlab(request):
             data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Reported'}
             #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
             res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-            print(res.text)
+            #print(res.text)
     else:
         return HttpResponse(status=200)
     return HttpResponse(status=200)
@@ -538,7 +538,7 @@ def hook(request):
                     'PRIVATE-TOKEN': ts_config.gitlab.access_token
                 }
                 res = requests.post(url, json=data, headers=headers)
-                print(res.status_code)
+                #print(res.status_code)
                 if res.status_code == requests.codes.created:
                     mapping = GitlabVul(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
                     mapping.gitlab_issue_id = res.json()['id']
@@ -562,8 +562,8 @@ def hook(request):
                     'Content-Type': 'application/json',
                 }       
                 res = requests.post(url, json=data, headers=headers)
-                print(res.status_code)
-                print(res.json())
+                #print(res.status_code)
+                #print(res.json())
                 return HttpResponse(status=200)
     
             return HttpResponse(status=200)
@@ -583,7 +583,7 @@ def hook(request):
             if vul_id is None:
                 print(_('problem_with_customfield'))
                 return HttpResponse(status=200)
-            print(status)
+            #print(status)
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
                 if status in ['Reported', 'Suspicious', 'Confirmed']:
@@ -596,7 +596,7 @@ def hook(request):
                         'PRIVATE-TOKEN': ts_config.gitlab.access_token
                     }
                     res = requests.put(url, headers=headers)
-                    print(res.status_code)
+                    #print(res.status_code)
                     return HttpResponse(status=200)
                 elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed']:
                     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
@@ -608,17 +608,17 @@ def hook(request):
                         'PRIVATE-TOKEN': ts_config.gitlab.access_token
                     }
                     res = requests.put(url, headers=headers)
-                    print(res.status_code)
+                    #print(res.status_code)
                     return HttpResponse(status=200)
                 else:
                     return HttpResponse(status=200)
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABILITY_COMMENT':
             print(_('event_new_vulnerability_comment'))
-            print(json_data['description'])
-            print(json_data['vulnerability_id'])
+            #print(json_data['description'])
+            #print(json_data['vulnerability_id'])
             integration_name = json_data.get('integration_name')
-            print(integration_name)
+            #print(integration_name)
             if integration_name:
                 if not Integration.objects.filter(name=integration_name).exists():
                     return HttpResponse(status=404)
@@ -695,7 +695,7 @@ def hook(request):
                     'PRIVATE-TOKEN': ts_config.gitlab.access_token
                 }
                 res = requests.post(url, json=data, headers=headers)
-                print(res.status_code)
+                #print(res.status_code)
                 #print(res.json())
                 if res.status_code == requests.codes.created:
                     mapping = GitlabLib(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)

@@ -1,6 +1,9 @@
-docker exec -i django python /project/django_project/manage.py dumpdata application --format=json --indent=4 > ./application.json
-docker exec -i django python /project/django_project/manage.py loaddata /project/django_project/application.json
+docker exec -i relay.django python /project/django_project/manage.py migrate
+docker exec -i relay.django python /project/django_project/manage.py batch_createsuperuser --username admin --email xxxxx@contrastsecurity.com --password contrast
 
-docker exec -i django python /project/django_project/manage.py dumpdata integration --format=json --indent=4 > ./integration.json
-docker exec -i django python /project/django_project/manage.py loaddata /project/django_project/integration.json
+docker exec -i relay.django python /project/django_project/manage.py dumpdata application --format=json --indent=4 > ./relay_django/application.json
+docker exec -i relay.django python /project/django_project/manage.py loaddata /project/django_project/application.json
+
+docker exec -i relay.django python /project/django_project/manage.py dumpdata integration --format=json --indent=4 > ./relay_django/integration.json
+docker exec -i relay.django python /project/django_project/manage.py loaddata /project/django_project/integration.json
 
