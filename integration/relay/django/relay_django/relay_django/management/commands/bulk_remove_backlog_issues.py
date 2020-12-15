@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from relay_django.models import Backlog
+from application.models import Backlog
 
 import json
 import requests
