@@ -18,14 +18,15 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
+from django.utils.translation import gettext_lazy as _
 from . import views
 
 #admin.site.site_title = 'ContrastSecurity統合管理'
 #admin.site.site_header = 'ContrastSecurity統合管理サイト'
 #admin.site.index_title = 'メニュー'
-admin.site.site_title = 'ContrastSecurity Integration Management'
-admin.site.site_header = 'ContrastSecurity Integration Management Site'
-admin.site.index_title = 'Menu'
+admin.site.site_title = _('Contrast Integration Management')
+admin.site.site_header = _('Contrast Integration Management')
+admin.site.index_title = _('Menu')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

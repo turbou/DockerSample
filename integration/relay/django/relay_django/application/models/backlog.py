@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 
 class Backlog(models.Model):
     name = models.CharField('Name', max_length=20, unique=True,
@@ -15,6 +16,6 @@ class Backlog(models.Model):
         return '%s' % (self.name)
 
     class Meta:
-        verbose_name = 'Backlog'
-        verbose_name_plural = 'Backlog List'
+        verbose_name = _('Backlog')
+        verbose_name_plural = _('Backlog List')
 

@@ -18,6 +18,93 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "Contrast Integration Management"
+msgstr "コントラスト統合管理"
+
+msgid "Menu"
+msgstr "メニュー"
+
+msgid "application"
+msgstr "アプリケーション"
+
+msgid "Backlog"
+msgstr "Backlog"
+
+msgid "Backlog List"
+msgstr "Backlog一覧"
+
+msgid "Gitlab"
+msgstr "Gitlab"
+
+msgid "Gitlab List"
+msgstr "Gitlab一覧"
+
+msgid "Name"
+msgstr "名前"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Username"
+msgstr "ユーザー名"
+
+msgid "Access Token"
+msgstr "アクセストークン"
+
+msgid "Owner's Access Token"
+msgstr "オーナーのアクセストークン"
+
+msgid "For bulk process"
+msgstr "一括処理の際に必要です。"
+
+msgid "Project ID"
+msgstr "プロジェクトID"
+
+msgid "Labels(Vul)"
+msgstr "ラベル(脆弱性)"
+
+msgid "Labels(Lib)"
+msgstr "ラベル(ライブラリ)"
+
+msgid "Report User"
+msgstr "API発行ユーザー"
+
+msgid "Option"
+msgstr "オプション"
+
+msgid "Gitlab Vulnerability"
+msgstr "Gitlab脆弱性"
+
+msgid "Gitlab Vulnerabilities"
+msgstr "Gitlab脆弱性一覧"
+
+msgid "Gitlab Vulnerability Note"
+msgstr "Gitlab脆弱性コメント"
+
+msgid "Gitlab Vulnerability Notes"
+msgstr "Gitlab脆弱性コメント一覧"
+
+msgid "Gitlab Library"
+msgstr "Gitlab脆弱ライブラリ"
+
+msgid "Gitlab Libraries"
+msgstr "Gitlab脆弱ライブラリ一覧"
+
+msgid "GoogleChat"
+msgstr "GoogleChat"
+
+msgid "GoogleChat List"
+msgstr "GoogleChat一覧"
+
+msgid "integration"
+msgstr "コントラスト統合"
+
+msgid "Integration"
+msgstr "TeamServer連携"
+
+msgid "Integration List"
+msgstr "TeamServer連携一覧"
+
 #: relay_django/views.py:236
 msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"

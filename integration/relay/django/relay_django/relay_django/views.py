@@ -499,10 +499,11 @@ def hook(request):
             story_json = get_story_res.json()
             chapters = []
             for chapter in story_json['story']['chapters']:
-                chapters.append('%s\n' % chapter['introText'])
+                chapters.append('%s\n\n' % chapter['introText'])
                 if chapter['type'] == 'properties':
-                    for key, value in chapter['properties']:
+                    for key in chapter['properties']:
                         chapters.append('%s\n' % key)
+                        value = chapter['properties'][key]
                         chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % value['value'])
                 elif chapter['type'] in ['configuration', 'location', 'recreation', 'dataflow', 'source']:
                     chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % chapter['body'])

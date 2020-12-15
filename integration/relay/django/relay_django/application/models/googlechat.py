@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 
 class GoogleChat(models.Model):
     name = models.CharField('Name', max_length=20, unique=True,
@@ -11,6 +12,6 @@ class GoogleChat(models.Model):
         return '%s' % (self.name)
 
     class Meta:
-        verbose_name = 'GoogleChat'
-        verbose_name_plural = 'GoogleChat List'
+        verbose_name = _('GoogleChat')
+        verbose_name_plural = _('GoogleChat List')
 

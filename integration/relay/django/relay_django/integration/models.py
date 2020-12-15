@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 from application.models import Backlog, Gitlab, GoogleChat
 
 class Integration(models.Model):
@@ -19,6 +20,6 @@ class Integration(models.Model):
         return '%s' % (self.name)
 
     class Meta:
-        verbose_name = 'Integration'
-        verbose_name_plural = 'Integration List'
+        verbose_name = _('Integration')
+        verbose_name_plural = _('Integration List')
 

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from nested_admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
 from .models import Backlog, Gitlab, GitlabVul, GitlabNote, GitlabLib, GoogleChat
 
@@ -88,8 +89,8 @@ class GitlabAdmin(NestedModelAdmin):
     ]
     fieldsets = [ 
         (None, {'fields': ['name', 'url', 'project_id', ('vul_labels', 'lib_labels')]}),
-        ('Report User', {'fields': [('report_username', 'access_token'),]}),
-        ('Option', {'fields': ['owner_access_token',]}),
+        (_('Report User'), {'fields': [('report_username', 'access_token'),]}),
+        (_('Option'), {'fields': ['owner_access_token',]}),
     ]
 
     def vul_count(self, obj):
