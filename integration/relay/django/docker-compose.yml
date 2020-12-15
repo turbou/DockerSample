@@ -6,7 +6,7 @@ services:
     container_name: relay.nginx
     restart: always
     ports:
-      - "8091:80"
+      - "8087:80"
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
       - ./relay_django/static:/usr/share/nginx/html/static
@@ -44,6 +44,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin
       PGADMIN_DEFAULT_PASSWORD: "password"
+    volumes:
+      - ./pgadmin4:/var/lib/pgadmin
     hostname: pgadmin4
     restart: always
 
