@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-16 22:16+0900\n"
+"POT-Creation-Date: 2020-12-16 22:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,27 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: application/admin.py:92
+#: application/admin.py:95
 msgid "Report User"
 msgstr "API発行ユーザー"
 
-#: application/admin.py:93
+#: application/admin.py:96
 msgid "Option"
 msgstr "オプション"
 
-#: application/admin.py:110
+#: application/admin.py:113
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
-#: application/admin.py:111
+#: application/admin.py:114
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
-#: application/admin.py:119
+#: application/admin.py:130
 msgid "Removed all Gitlab issues."
 msgstr "GitlabのIssueを一括削除しました。"
 
-#: application/admin.py:120
+#: application/admin.py:131
 msgid "Delete all issues"
 msgstr "GitlabのIssueを一括削除します。"
 
@@ -47,7 +47,7 @@ msgid "application"
 msgstr "アプリケーション"
 
 #: application/models/backlog.py:6 application/models/gitlab.py:6
-#: application/models/googlechat.py:6
+#: application/models/googlechat.py:6 integration/models.py:7
 msgid "Name"
 msgstr "名前"
 
@@ -55,7 +55,7 @@ msgstr "名前"
 msgid "URL"
 msgstr "URL"
 
-#: application/models/backlog.py:10
+#: application/models/backlog.py:10 integration/models.py:12
 msgid "API Key"
 msgstr "APIキー"
 
@@ -87,7 +87,7 @@ msgstr "プロジェクトオーナーのアクセストークン"
 msgid "For bulk process"
 msgstr "一括処理の際には必要となります。"
 
-#: application/models/gitlab.py:11
+#: application/models/gitlab.py:11 integration/models.py:13
 msgid "Username"
 msgstr "ユーザー名"
 
@@ -154,6 +154,26 @@ msgstr "GoogleChat一覧"
 #: integration/apps.py:7
 msgid "integration"
 msgstr "コントラスト統合"
+
+#: integration/models.py:9
+msgid "Set this name to the TeamServer Generic Webhook Payload."
+msgstr "この名前をTeamServerのGeneric WebhookのPayloadに設定してください。"
+
+#: integration/models.py:11
+msgid "TeamServer URL"
+msgstr "TeamServer URL"
+
+#: integration/models.py:11
+msgid "e.g. https://app.contrastsecurity.com/Contrast"
+msgstr "例) https://app.contrastsecurity.com/Contrast"
+
+#: integration/models.py:13
+msgid "Login ID (mail address)"
+msgstr "ログインID (メールアドレス)"
+
+#: integration/models.py:14
+msgid "Service Key"
+msgstr "サービスキー"
 
 #: integration/models.py:23
 msgid "Integration"
