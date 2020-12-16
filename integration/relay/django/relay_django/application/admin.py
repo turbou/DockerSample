@@ -13,11 +13,93 @@ class BacklogAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['api_key'].widget.attrs = {'size':100}
 
+    def clean(self):
+        cleaned_data = super().clean()
+        headers = { 
+            'Content-Type': 'application/json'
+        }   
+        # /api/v2/projects/:projectIdOrKey 
+        url = '%s/api/v2/projects/%s?apiKey=%s' % (cleaned_data['url'], cleaned_data['project_key'], cleaned_data['api_key'])
+        res = requests.get(url, headers=headers)
+        project_id = None
+        if res.status_code == 200:
+            project_id = res.json()['id']
+        if project_id is None:
+            raise forms.ValidationError({'project_key':['このプロジェクトキーは存在しません。']})
+        self.instance.project_id = project_id
+
+        # /api/v2/projects/:projectIdOrKey/issueTypes 
+        url = '%s/api/v2/projects/%s/issueTypes?apiKey=%s' % (cleaned_data['url'], cleaned_data['project_key'], cleaned_data['api_key'])
+        res = requests.get(url, headers=headers)
+        issuetype_id = None
+        if res.status_code == 200:
+            for issuetype in res.json():
+                if issuetype['name'] == cleaned_data['issuetype_name']:
+                    issuetype_id = issuetype['id']
+                    break
+        if issuetype_id is None:
+            self.add_error('issuetype_name', 'この種別は存在しません。')
+        self.instance.issuetype_id = issuetype_id
+
+        # /api/v2/priorities 
+        url = '%s/api/v2/priorities?apiKey=%s' % (cleaned_data['url'], cleaned_data['api_key'])
+        res = requests.get(url, headers=headers)
+        priority_id = None
+        if res.status_code == 200:
+            for priority in res.json():
+                if priority['name'] == cleaned_data['priority_name']:
+                    priority_id = priority['id']
+                    break
+        if priority_id is None:
+            self.add_error('priority_name', 'この優先度は存在しません。')
+        self.instance.priority_id = priority_id
+
+        return cleaned_data
+
 @admin.register(Backlog)
 class BacklogAdmin(admin.ModelAdmin):
     form = BacklogAdminForm
     search_fields = ('name', 'url',)
-    list_display = ('name', 'url',)
+    actions = ['delete_all_issues',]
+    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp')
+    fieldsets = [ 
+        (None, {'fields': ['name', 'url', 'api_key', 'project_key', 'issuetype_name', 'priority_name']}),
+    ]
+
+    def project_disp(self, obj):
+        return '%s (%s)' % (obj.project_key, obj.project_id)
+    project_disp.short_description = 'プロジェクト'
+    project_disp.admin_order_field = 'project_id'
+
+    def issuetype_disp(self, obj):
+        return '%s (%s)' % (obj.issuetype_name, obj.issuetype_id)
+    issuetype_disp.short_description = '種別'
+    issuetype_disp.admin_order_field = 'issuetype_id'
+
+    def priority_disp(self, obj):
+        return '%s (%s)' % (obj.priority_name, obj.priority_id)
+    priority_disp.short_description = '優先度'
+    priority_disp.admin_order_field = 'priority_id'
+
+    def delete_all_issues(self, request, queryset):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        backlogs = Backlog.objects.filter(pk__in=selected)
+        for backlog in backlogs:
+            url = '%s/api/v2/issues' % (backlog.url)
+            params = {'apiKey': backlog.api_key, 'projectId[]': backlog.project_id, 'count': 100}
+            res = requests.get(url, params=params)
+            issues_json = res.json()
+            del_params = {'apiKey': backlog.api_key}
+            for issue in issues_json:
+                del_url = '%s/api/v2/issues/%s' % (backlog.url, issue['id'])
+                res = requests.delete(del_url, params=del_params)
+        self.message_user(request, _('Removed all Backlog issues.'), level=messages.INFO)
+    delete_all_issues.short_description = _('Delete all Backlog issues')
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop('delete_selected')
+        return actions
 
 class GitlabNoteInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -91,7 +173,7 @@ class GitlabAdmin(NestedModelAdmin):
         GitlabLibInline,
     ]
     fieldsets = [ 
-        (None, {'fields': ['name', 'url', 'project_id', ('vul_labels', 'lib_labels')]}),
+        (None, {'fields': ['name', 'url', 'project_key', ('vul_labels', 'lib_labels')]}),
         (_('Report User'), {'fields': [('report_username', 'access_token'),]}),
         (_('Option'), {'fields': ['owner_access_token',]}),
     ]
@@ -128,7 +210,7 @@ class GitlabAdmin(NestedModelAdmin):
                 del_url = '%s/api/v4/projects/%s/issues/%s' % (gitlab.url, gitlab.project_id, issue['iid'])
                 res = requests.delete(del_url, headers=headers)
         self.message_user(request, _('Removed all Gitlab issues.'), level=messages.INFO)
-    delete_all_issues.short_description = _('Delete all issues')
+    delete_all_issues.short_description = _('Delete all Gitlab issues')
 
     def get_actions(self, request):
         actions = super().get_actions(request)

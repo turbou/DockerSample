@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-16 22:36+0900\n"
+"POT-Creation-Date: 2020-12-17 03:54+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,28 +18,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: application/admin.py:95
+#: application/admin.py:96
+#, fuzzy
+#| msgid "Removed all Gitlab issues."
+msgid "Removed all Backlog issues."
+msgstr "GitlabのIssueを一括削除しました。"
+
+#: application/admin.py:97
+msgid "Delete all Backlog issues"
+msgstr "BacklogのIssueを一括削除します。"
+
+#: application/admin.py:177
 msgid "Report User"
 msgstr "API発行ユーザー"
 
-#: application/admin.py:96
+#: application/admin.py:178
 msgid "Option"
 msgstr "オプション"
 
-#: application/admin.py:113
+#: application/admin.py:195
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
-#: application/admin.py:114
+#: application/admin.py:196
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
-#: application/admin.py:130
+#: application/admin.py:212
 msgid "Removed all Gitlab issues."
 msgstr "GitlabのIssueを一括削除しました。"
 
-#: application/admin.py:131
-msgid "Delete all issues"
+#: application/admin.py:213
+msgid "Delete all Gitlab issues"
 msgstr "GitlabのIssueを一括削除します。"
 
 #: application/apps.py:7
@@ -59,23 +69,35 @@ msgstr "URL"
 msgid "API Key"
 msgstr "APIキー"
 
-#: application/models/backlog.py:11 application/models/gitlab.py:13
+#: application/models/backlog.py:11
+msgid "Project Key"
+msgstr "プロジェクトキー"
+
+#: application/models/backlog.py:12 application/models/gitlab.py:13
 msgid "Project ID"
 msgstr "プロジェクトID"
 
-#: application/models/backlog.py:12
+#: application/models/backlog.py:13
+msgid "IssueType Name"
+msgstr "種別名"
+
+#: application/models/backlog.py:14
 msgid "IssueType ID"
 msgstr "種別ID"
 
-#: application/models/backlog.py:13
+#: application/models/backlog.py:15
+msgid "Priority Name"
+msgstr "優先度"
+
+#: application/models/backlog.py:16
 msgid "Priority ID"
 msgstr "優先度ID"
 
-#: application/models/backlog.py:19
+#: application/models/backlog.py:28
 msgid "Backlog"
 msgstr "Backlog"
 
-#: application/models/backlog.py:20
+#: application/models/backlog.py:29
 msgid "Backlog List"
 msgstr "Backlog一覧"
 
@@ -191,21 +213,21 @@ msgstr "コントラスト統合管理"
 msgid "Menu"
 msgstr "メニュー"
 
-#: relay_django/views.py:460
+#: relay_django/views.py:302
 msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:610
+#: relay_django/views.py:463
 msgid "problem_with_customfield"
 msgstr ""
 
-#: relay_django/views.py:643
+#: relay_django/views.py:498
 #, fuzzy
 #| msgid "event_new_vulnerability"
 msgid "event_new_vulnerability_comment"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:663
+#: relay_django/views.py:518
 msgid "event_new_vulnerable_library"
 msgstr "[Contrast plugin] 新しい脆弱性ライブラリを受信"
 
