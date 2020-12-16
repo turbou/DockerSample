@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-08 02:43+0900\n"
+"POT-Creation-Date: 2020-12-16 22:16+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,101 +18,213 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Contrast Integration Management"
-msgstr "コントラスト統合管理"
-
-msgid "Menu"
-msgstr "メニュー"
-
-msgid "application"
-msgstr "アプリケーション"
-
-msgid "Backlog"
-msgstr "Backlog"
-
-msgid "Backlog List"
-msgstr "Backlog一覧"
-
-msgid "Gitlab"
-msgstr "Gitlab"
-
-msgid "Gitlab List"
-msgstr "Gitlab一覧"
-
-msgid "Name"
-msgstr "名前"
-
-msgid "URL"
-msgstr "URL"
-
-msgid "Username"
-msgstr "ユーザー名"
-
-msgid "Access Token"
-msgstr "アクセストークン"
-
-msgid "Owner's Access Token"
-msgstr "オーナーのアクセストークン"
-
-msgid "For bulk process"
-msgstr "一括処理の際に必要です。"
-
-msgid "Project ID"
-msgstr "プロジェクトID"
-
-msgid "Labels(Vul)"
-msgstr "ラベル(脆弱性)"
-
-msgid "Labels(Lib)"
-msgstr "ラベル(ライブラリ)"
-
+#: application/admin.py:92
 msgid "Report User"
 msgstr "API発行ユーザー"
 
+#: application/admin.py:93
 msgid "Option"
 msgstr "オプション"
 
+#: application/admin.py:110
+msgid "Vulnerability, library information cleared."
+msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
+
+#: application/admin.py:111
+msgid "Clear Vulnerability and Library Mapping"
+msgstr "脆弱性とライブラリの関連付け情報を削除します。"
+
+#: application/admin.py:119
+msgid "Removed all Gitlab issues."
+msgstr "GitlabのIssueを一括削除しました。"
+
+#: application/admin.py:120
+msgid "Delete all issues"
+msgstr "GitlabのIssueを一括削除します。"
+
+#: application/apps.py:7
+msgid "application"
+msgstr "アプリケーション"
+
+#: application/models/backlog.py:6 application/models/gitlab.py:6
+#: application/models/googlechat.py:6
+msgid "Name"
+msgstr "名前"
+
+#: application/models/backlog.py:9 application/models/gitlab.py:9
+msgid "URL"
+msgstr "URL"
+
+#: application/models/backlog.py:10
+msgid "API Key"
+msgstr "APIキー"
+
+#: application/models/backlog.py:11 application/models/gitlab.py:13
+msgid "Project ID"
+msgstr "プロジェクトID"
+
+#: application/models/backlog.py:12
+msgid "IssueType ID"
+msgstr "種別ID"
+
+#: application/models/backlog.py:13
+msgid "Priority ID"
+msgstr "優先度ID"
+
+#: application/models/backlog.py:19
+msgid "Backlog"
+msgstr "Backlog"
+
+#: application/models/backlog.py:20
+msgid "Backlog List"
+msgstr "Backlog一覧"
+
+#: application/models/gitlab.py:10
+msgid "Project Owner's Access Token"
+msgstr "プロジェクトオーナーのアクセストークン"
+
+#: application/models/gitlab.py:10
+msgid "For bulk process"
+msgstr "一括処理の際には必要となります。"
+
+#: application/models/gitlab.py:11
+msgid "Username"
+msgstr "ユーザー名"
+
+#: application/models/gitlab.py:11
+msgid "For report user(Project Maintainer is required)"
+msgstr "プロジェクトのメンテナーメンバである必要があります。"
+
+#: application/models/gitlab.py:12
+msgid "Access Token"
+msgstr "アクセストークン"
+
+#: application/models/gitlab.py:14
+msgid "Labels(Vul)"
+msgstr "ラベル(脆弱性)"
+
+#: application/models/gitlab.py:15
+msgid "Labels(Lib)"
+msgstr "ラベル(ライブラリ)"
+
+#: application/models/gitlab.py:21
+msgid "Gitlab"
+msgstr "Gitlab"
+
+#: application/models/gitlab.py:22
+msgid "Gitlab List"
+msgstr "Gitlab一覧"
+
+#: application/models/gitlab.py:37
 msgid "Gitlab Vulnerability"
 msgstr "Gitlab脆弱性"
 
+#: application/models/gitlab.py:38
 msgid "Gitlab Vulnerabilities"
 msgstr "Gitlab脆弱性一覧"
 
+#: application/models/gitlab.py:55
 msgid "Gitlab Vulnerability Note"
 msgstr "Gitlab脆弱性コメント"
 
+#: application/models/gitlab.py:56
 msgid "Gitlab Vulnerability Notes"
 msgstr "Gitlab脆弱性コメント一覧"
 
+#: application/models/gitlab.py:72
 msgid "Gitlab Library"
 msgstr "Gitlab脆弱ライブラリ"
 
+#: application/models/gitlab.py:73
 msgid "Gitlab Libraries"
 msgstr "Gitlab脆弱ライブラリ一覧"
 
+#: application/models/googlechat.py:9
+msgid "Webhook"
+msgstr "Webhook"
+
+#: application/models/googlechat.py:15
 msgid "GoogleChat"
 msgstr "GoogleChat"
 
+#: application/models/googlechat.py:16
 msgid "GoogleChat List"
 msgstr "GoogleChat一覧"
 
+#: integration/apps.py:7
 msgid "integration"
 msgstr "コントラスト統合"
 
+#: integration/models.py:23
 msgid "Integration"
 msgstr "TeamServer連携"
 
+#: integration/models.py:24
 msgid "Integration List"
 msgstr "TeamServer連携一覧"
 
-#: relay_django/views.py:236
+#: relay_django/urls.py:27 relay_django/urls.py:28
+msgid "Contrast Integration Management"
+msgstr "コントラスト統合管理"
+
+#: relay_django/urls.py:29
+msgid "Menu"
+msgstr "メニュー"
+
+#: relay_django/views.py:460
 msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:317
-msgid "event_vulnerability_changestatus"
-msgstr "[Contrast plugin] 脆弱性のステータス変更を受信"
+#: relay_django/views.py:610
+msgid "problem_with_customfield"
+msgstr ""
 
-#: relay_django/views.py:319
+#: relay_django/views.py:643
+#, fuzzy
+#| msgid "event_new_vulnerability"
+msgid "event_new_vulnerability_comment"
+msgstr "[Contrast plugin] 新しい脆弱性を受信"
+
+#: relay_django/views.py:663
 msgid "event_new_vulnerable_library"
 msgstr "[Contrast plugin] 新しい脆弱性ライブラリを受信"
+
+#: templates/admin/index.html:21
+#, python-format
+msgid "Models in the %(name)s application"
+msgstr ""
+
+#: templates/admin/index.html:32
+msgid "Add"
+msgstr ""
+
+#: templates/admin/index.html:39
+msgid "View"
+msgstr ""
+
+#: templates/admin/index.html:41
+msgid "Change"
+msgstr ""
+
+#: templates/admin/index.html:52
+msgid "You don't have permission to view or edit anything."
+msgstr ""
+
+#: templates/admin/index.html:60
+msgid "Recent actions"
+msgstr ""
+
+#: templates/admin/index.html:61
+msgid "My actions"
+msgstr ""
+
+#: templates/admin/index.html:65
+msgid "None available"
+msgstr ""
+
+#: templates/admin/index.html:79
+msgid "Unknown content"
+msgstr ""
+
+#~ msgid "event_vulnerability_changestatus"
+#~ msgstr "[Contrast plugin] 脆弱性のステータス変更を受信"

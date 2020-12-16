@@ -7,9 +7,9 @@ class Gitlab(models.Model):
         validators=[RegexValidator(regex='^[A-Za-z0-9_]{4,20}$', message='名前は半角英数字、アンスコ4文字〜20文字です。')]
     )   
     url = models.URLField(_('URL'), help_text='http://gitlab.gitlab:8085')
-    owner_access_token = models.CharField(_('Owner\'s Access Token'), max_length=50, help_text=_('For bulk process'), blank=True, null=True)
-    report_username = models.CharField(_('Username'), max_length=50, help_text='For report user(Project Maintainer is required)')
-    access_token = models.CharField(_('Access Token'), max_length=50, help_text='For report user')
+    owner_access_token = models.CharField(_('Project Owner\'s Access Token'), max_length=50, help_text=_('For bulk process'), blank=True, null=True)
+    report_username = models.CharField(_('Username'), max_length=50, help_text=_('For report user(Project Maintainer is required)'))
+    access_token = models.CharField(_('Access Token'), max_length=50)
     project_id = models.CharField(_('Project ID'), max_length=5, help_text='It\'s a number, not a name.')
     vul_labels = models.CharField(_('Labels(Vul)'), max_length=50, help_text='Comma-separated list of label names')
     lib_labels = models.CharField(_('Labels(Lib)'), max_length=50, help_text='Comma-separated list of label names')

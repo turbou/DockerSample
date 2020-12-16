@@ -514,6 +514,31 @@ def hook(request):
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
+            # ---------- Backlog ---------- #
+            if ts_config.backlog:
+                url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
+                # projectId=97197&summary=$Title+$VulnerabilityRule&issueTypeId=456121&priorityId=3&description=$Message
+                # payload = {'projectId': json_data['project'], 'summary': json_data['vulnerability_rule']}
+                data = {
+                    'projectId': ts_config.backlog.project_id,
+                    'summary': summary,
+                    'issueTypeId': ts_config.backlog.issuetype_id,
+                    'priorityId': ts_config.backlog.priority_id,
+                    'description': ''.join(description),
+                }   
+                headers = {
+                    'Content-Type': 'application/json'
+                }
+                res = requests.post(url, json=data, headers=headers)
+                print(res.status_code)
+                print(res.json())
+                if res.status_code == 201:
+                    pass
+                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
+                else:
+                    pass
+                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
                 deco_mae = "## "
@@ -565,7 +590,7 @@ def hook(request):
                 res = requests.post(url, json=data, headers=headers)
                 #print(res.status_code)
                 #print(res.json())
-                return HttpResponse(status=200)
+                #return HttpResponse(status=200)
     
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_OPEN' or json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_CLOSED':
@@ -636,11 +661,14 @@ def hook(request):
             return HttpResponse(status=200)
         elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))
-            config_name = json_data.get('config_name')
-            if config_name:
-                ts_config = Integration.objects.get(name=config_name)
+            integration_name = json_data.get('integration_name')
+            print(integration_name)
+            if integration_name:
+                if not Integration.objects.filter(name=integration_name).exists():
+                    return HttpResponse(status=404)
             else:
-                ts_config = Integration.objects.first()
+                return HttpResponse(status=404)
+            ts_config = Integration.objects.get(name=integration_name)
             org_id = json_data['organization_id']
             app_id = json_data['application_id']
             r = re.compile("index.html#\/" + org_id + "\/libraries\/(.+)\/([a-z0-9]+)\)")
@@ -666,6 +694,8 @@ def hook(request):
             self_url = ''
             if m is not None:
                 self_url = m.group(1)
+
+            # ---------- Backlog ---------- #
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
@@ -702,9 +732,11 @@ def hook(request):
                     mapping = GitlabLib(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
                     mapping.gitlab_issue_id = res.json()['id']
                     mapping.save()
-                    return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
+                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
                 else:
-                    return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+                    pass
+                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+            return HttpResponse(status=200)
         else:
             return HttpResponse(status=200)
     elif request.method == 'PUT':

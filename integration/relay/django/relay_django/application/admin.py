@@ -5,6 +5,9 @@ from django.utils.translation import gettext_lazy as _
 from nested_admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
 from .models import Backlog, Gitlab, GitlabVul, GitlabNote, GitlabLib, GoogleChat
 
+import json
+import requests
+
 class BacklogAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,7 +84,7 @@ class GitlabLibInline(NestedTabularInline):
 class GitlabAdmin(NestedModelAdmin):
     save_on_top = True
     search_fields = ('name', 'url',)
-    actions = ['clear_mappings',]
+    actions = ['clear_mappings', 'delete_all_issues']
     list_display = ('name', 'url', 'vul_count', 'lib_count')
     inlines = [
         GitlabVulInline,
@@ -107,8 +110,25 @@ class GitlabAdmin(NestedModelAdmin):
         for gitlab in gitlabs:
             gitlab.vuls.all().delete()
             gitlab.libs.all().delete()
-        self.message_user(request, '脆弱性、ライブラリの情報をクリアしました。', level=messages.INFO)
-    clear_mappings.short_description = 'Clear Vulnerability and Library Mapping'
+        self.message_user(request, _('Vulnerability, library information cleared.'), level=messages.INFO)
+    clear_mappings.short_description = _('Clear Vulnerability and Library Mapping')
+
+    def delete_all_issues(self, request, queryset):
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        gitlabs = Gitlab.objects.filter(pk__in=selected)
+        for gitlab in gitlabs:
+            url = '%s/api/v4/projects/%s/issues?labels=%s' % (gitlab.url, gitlab.project_id, 'Any')
+            headers = { 
+                'Content-Type': 'application/json',
+                'PRIVATE-TOKEN': gitlab.owner_access_token
+            }   
+            res = requests.get(url, headers=headers)
+            issues_json = res.json()
+            for issue in issues_json:
+                del_url = '%s/api/v4/projects/%s/issues/%s' % (gitlab.url, gitlab.project_id, issue['iid'])
+                res = requests.delete(del_url, headers=headers)
+        self.message_user(request, _('Removed all Gitlab issues.'), level=messages.INFO)
+    delete_all_issues.short_description = _('Delete all issues')
 
     def get_actions(self, request):
         actions = super().get_actions(request)
