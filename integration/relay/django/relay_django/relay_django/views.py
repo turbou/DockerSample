@@ -464,10 +464,34 @@ def hook(request):
                 return HttpResponse(status=200)
             #print(status)
             # ---------- Backlog ---------- #
-
+            if ts_config.backlog:
+                status_id = None
+                if status in ['Reported', '報告済']:
+                    pass
+                elif status in ['Suspicious', '疑わしい']:
+                    pass
+                elif status in ['Confirmed', '確認済']:
+                    pass
+                elif status in ['NotAProblem', 'Not a Problem', '問題無し']:
+                    pass
+                elif status in ['Remediated', '修復済']:
+                    pass
+                elif status in ['Fixed', '修正完了']:
+                    pass
+                # /api/v2/issues/:issueIdOrKey 
+                url = '%s/api/v2/issues/%s?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
+                data = {
+                    'statusId': status_id,
+                }   
+                headers = {
+                    #'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+                res = requests.patch(url, json=data, headers=headers)
+                print(res.status_code)
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
-                if status in ['Reported', 'Suspicious', 'Confirmed']:
+                if status in ['Reported', 'Suspicious', 'Confirmed', '報告済', '疑わしい', '確認済']:
                     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
                     if gitlab_mapping is None:
                         return HttpResponse(status=200)
@@ -479,7 +503,7 @@ def hook(request):
                     res = requests.put(url, headers=headers)
                     #print(res.status_code)
                     return HttpResponse(status=200)
-                elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed']:
+                elif status in ['NotAProblem', 'Not a Problem', 'Remediated', 'Fixed', '問題無し', '修復済', '修正完了']:
                     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
                     if gitlab_mapping is None:
                         return HttpResponse(status=200)
