@@ -22,11 +22,11 @@ class Gitlab(models.Model):
         verbose_name_plural = _('Gitlab List')
 
 class GitlabVul(models.Model):
-    gitlab = models.ForeignKey(Gitlab, verbose_name='Gitlab', related_name='vuls', related_query_name='vul', on_delete=models.PROTECT)
-    contrast_org_id = models.CharField('Organization ID', max_length=36)
-    contrast_app_id = models.CharField('Application ID', max_length=36)
-    contrast_vul_id = models.CharField('Vulnerability ID', max_length=19, blank=True, null=True)
-    gitlab_issue_id = models.PositiveSmallIntegerField('Issue IID')
+    gitlab = models.ForeignKey(Gitlab, verbose_name=_('Gitlab'), related_name='vuls', related_query_name='vul', on_delete=models.PROTECT)
+    contrast_org_id = models.CharField(_('Organization ID'), max_length=36)
+    contrast_app_id = models.CharField(_('Application ID'), max_length=36)
+    contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19, blank=True, null=True)
+    gitlab_issue_id = models.PositiveSmallIntegerField(_('Issue IID'))
 
     def __str__(self):
         if self.id:
@@ -38,13 +38,13 @@ class GitlabVul(models.Model):
         verbose_name_plural = _('Gitlab Vulnerabilities')
 
 class GitlabNote(models.Model):
-    vul = models.ForeignKey(GitlabVul, verbose_name='Gitlab Vulnerability', related_name='notes', related_query_name='note', on_delete=models.CASCADE)
-    note = models.TextField('Note')
-    creator = models.CharField('Creator', max_length=200)
-    created_at = models.DateTimeField('Created', blank=True, null=True)
-    updated_at = models.DateTimeField('Updated', blank=True, null=True)
-    contrast_note_id = models.CharField('Contrast Note ID', max_length=36, unique=True)
-    gitlab_note_id = models.PositiveSmallIntegerField('Gitlab Note ID')
+    vul = models.ForeignKey(GitlabVul, verbose_name=_('Gitlab Vulnerability'), related_name='notes', related_query_name='note', on_delete=models.CASCADE)
+    note = models.TextField(_('Note'))
+    creator = models.CharField(_('Creator'), max_length=200)
+    created_at = models.DateTimeField(_('Created'), blank=True, null=True)
+    updated_at = models.DateTimeField(_('Updated'), blank=True, null=True)
+    contrast_note_id = models.CharField(_('Contrast Note ID'), max_length=36, unique=True)
+    gitlab_note_id = models.PositiveSmallIntegerField(_('Gitlab Comment ID'))
 
     def __str__(self):
         if self.id:
@@ -56,12 +56,12 @@ class GitlabNote(models.Model):
         verbose_name_plural = _('Gitlab Vulnerability Notes')
 
 class GitlabLib(models.Model):
-    gitlab = models.ForeignKey(Gitlab, verbose_name='Gitlab', related_name='libs', related_query_name='lib', on_delete=models.PROTECT)
-    contrast_org_id = models.CharField('Organization ID', max_length=36)
-    contrast_app_id = models.CharField('Application ID', max_length=36)
-    contrast_lib_lg = models.CharField('Library Language', max_length=20, blank=True, null=True)
-    contrast_lib_id = models.CharField('Library ID', max_length=40, blank=True, null=True)
-    gitlab_issue_id = models.PositiveSmallIntegerField('Issue IID')
+    gitlab = models.ForeignKey(Gitlab, verbose_name=_('Gitlab'), related_name='libs', related_query_name='lib', on_delete=models.PROTECT)
+    contrast_org_id = models.CharField(_('Organization ID'), max_length=36)
+    contrast_app_id = models.CharField(_('Application ID'), max_length=36)
+    contrast_lib_lg = models.CharField(_('Library Language'), max_length=20, blank=True, null=True)
+    contrast_lib_id = models.CharField(_('Library ID'), max_length=40, blank=True, null=True)
+    gitlab_issue_id = models.PositiveSmallIntegerField(_('Issue IID'))
 
     def __str__(self):
         if self.id:

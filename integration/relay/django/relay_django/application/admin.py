@@ -3,11 +3,74 @@ from django import forms
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from nested_admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
-from .models import Backlog, Gitlab, GitlabVul, GitlabNote, GitlabLib, GoogleChat
+from .models import Backlog, BacklogVul, BacklogComment, BacklogLib
+from .models import Gitlab, GitlabVul, GitlabNote, GitlabLib, GoogleChat
+from .models import GoogleChat
 
 import json
 import requests
 import copy
+
+class BacklogCommentInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'contrast_vul_id' in self.fields:
+            self.fields['contrast_vul_id'].widget.attrs = {'size':23}
+
+class BacklogCommentInline(NestedStackedInline):
+    model = BacklogComment
+    form = BacklogCommentInlineForm
+    extra = 0
+    ordering = ('-created_at',)
+    readonly_fields = ('comment', 'creator', 'created_at', 'updated_at', 'contrast_note_id', 'backlog_comment_id')
+    fieldsets = [ 
+        (None, {'fields': ['comment', ('creator', 'created_at', 'updated_at'), ('contrast_note_id', 'backlog_comment_id')]}),
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class BacklogVulInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'contrast_vul_id' in self.fields:
+            self.fields['contrast_vul_id'].widget.attrs = {'size':23}
+
+class BacklogVulInline(NestedTabularInline):
+    model = BacklogVul
+    form = BacklogVulInlineForm
+    extra = 0
+    inlines = [
+        BacklogCommentInline,
+    ]
+    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'backlog_issue_id')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class BacklogLibInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'contrast_lib_lg' in self.fields:
+            self.fields['contrast_lib_lg'].widget.attrs = {'size':16}
+
+class BacklogLibInline(NestedTabularInline):
+    model = BacklogLib
+    form = BacklogLibInlineForm
+    extra = 0
+    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_lib_lg', 'contrast_lib_id', 'backlog_issue_id')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class BacklogAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -88,11 +151,15 @@ class BacklogAdminForm(forms.ModelForm):
         return cleaned_data
 
 @admin.register(Backlog)
-class BacklogAdmin(admin.ModelAdmin):
+class BacklogAdmin(NestedModelAdmin):
     form = BacklogAdminForm
     search_fields = ('name', 'url',)
     actions = ['delete_all_issues',]
     list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp')
+    inlines = [
+        BacklogVulInline,
+        BacklogLibInline,
+    ]
     fieldsets = [ 
         (None, {'fields': ['name', 'url', 'api_key', 'project_key', 'issuetype_name', 'priority_name']}),
         (_('Status Mapping'), {'fields': [
@@ -212,7 +279,7 @@ class GitlabAdmin(NestedModelAdmin):
         GitlabLibInline,
     ]
     fieldsets = [ 
-        (None, {'fields': ['name', 'url', 'project_key', ('vul_labels', 'lib_labels')]}),
+        (None, {'fields': ['name', 'url', 'project_id', ('vul_labels', 'lib_labels')]}),
         (_('Report User'), {'fields': [('report_username', 'access_token'),]}),
         (_('Option'), {'fields': ['owner_access_token',]}),
     ]
