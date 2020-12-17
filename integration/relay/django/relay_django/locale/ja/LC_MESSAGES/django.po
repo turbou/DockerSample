@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-17 15:45+0900\n"
+"POT-Creation-Date: 2020-12-17 18:22+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -159,12 +159,105 @@ msgstr "修正完了"
 msgid "Fixed ID"
 msgstr ""
 
-#: application/models/backlog.py:35
+#: application/models/backlog.py:35 application/models/backlog.py:39
+#: application/models/backlog.py:73
 msgid "Backlog"
 msgstr "Backlog"
 
 #: application/models/backlog.py:36
 msgid "Backlog List"
+msgstr "Backlog一覧"
+
+#: application/models/backlog.py:40 application/models/backlog.py:74
+msgid "Organization ID"
+msgstr ""
+
+#: application/models/backlog.py:41 application/models/backlog.py:75
+#, fuzzy
+#| msgid "application"
+msgid "Application ID"
+msgstr "アプリケーション"
+
+#: application/models/backlog.py:42
+#, fuzzy
+#| msgid "Gitlab Vulnerability"
+msgid "Vulnerability ID"
+msgstr "Gitlab脆弱性"
+
+#: application/models/backlog.py:43 application/models/backlog.py:78
+#, fuzzy
+#| msgid "IssueType ID"
+msgid "Issue ID"
+msgstr "種別ID"
+
+#: application/models/backlog.py:51 application/models/backlog.py:55
+#, fuzzy
+#| msgid "Gitlab Vulnerability"
+msgid "Backlog Vulnerability"
+msgstr "Gitlab脆弱性"
+
+#: application/models/backlog.py:52
+#, fuzzy
+#| msgid "Gitlab Vulnerabilities"
+msgid "Backlog Vulnerabilities"
+msgstr "Gitlab脆弱性一覧"
+
+#: application/models/backlog.py:56
+msgid "Comment"
+msgstr ""
+
+#: application/models/backlog.py:57
+msgid "Creator"
+msgstr ""
+
+#: application/models/backlog.py:58
+msgid "Created"
+msgstr ""
+
+#: application/models/backlog.py:59
+msgid "Updated"
+msgstr ""
+
+#: application/models/backlog.py:60
+msgid "Contrast Note ID"
+msgstr ""
+
+#: application/models/backlog.py:61
+#, fuzzy
+#| msgid "Backlog List"
+msgid "Backlog Comment ID"
+msgstr "Backlog一覧"
+
+#: application/models/backlog.py:69
+#, fuzzy
+#| msgid "Gitlab Vulnerability Note"
+msgid "Backlog Vulnerability Comment"
+msgstr "Gitlab脆弱性コメント"
+
+#: application/models/backlog.py:70
+#, fuzzy
+#| msgid "Gitlab Vulnerability Notes"
+msgid "Backlog Vulnerability Comments"
+msgstr "Gitlab脆弱性コメント一覧"
+
+#: application/models/backlog.py:76
+msgid "Library Language"
+msgstr ""
+
+#: application/models/backlog.py:77
+msgid "Library ID"
+msgstr ""
+
+#: application/models/backlog.py:86
+#, fuzzy
+#| msgid "Backlog List"
+msgid "Backlog Library"
+msgstr "Backlog一覧"
+
+#: application/models/backlog.py:87
+#, fuzzy
+#| msgid "Backlog List"
+msgid "Backlog Libraries"
 msgstr "Backlog一覧"
 
 #: application/models/gitlab.py:10
@@ -287,13 +380,13 @@ msgstr "[Contrast plugin] 新しい脆弱性を受信"
 msgid "problem_with_customfield"
 msgstr ""
 
-#: relay_django/views.py:498
+#: relay_django/views.py:522
 #, fuzzy
 #| msgid "event_new_vulnerability"
 msgid "event_new_vulnerability_comment"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:518
+#: relay_django/views.py:542
 msgid "event_new_vulnerable_library"
 msgstr "[Contrast plugin] 新しい脆弱性ライブラリを受信"
 
