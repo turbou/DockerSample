@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-17 03:54+0900\n"
+"POT-Creation-Date: 2020-12-17 15:45+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,37 +18,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: application/admin.py:96
-#, fuzzy
-#| msgid "Removed all Gitlab issues."
-msgid "Removed all Backlog issues."
-msgstr "GitlabのIssueを一括削除しました。"
+#: application/admin.py:29
+msgid "This ProjectKey does not exist."
+msgstr "このプロジェクトキーは存在しません。"
 
-#: application/admin.py:97
+#: application/admin.py:42
+msgid "This IssueType does not exist."
+msgstr "この種別は存在しません。"
+
+#: application/admin.py:55
+msgid "This Priority does not exist."
+msgstr "この優先度は存在しません。"
+
+#: application/admin.py:86
+msgid "This Status does not exist."
+msgstr "この状態は存在しません。"
+
+#: application/admin.py:98
+msgid "Status Mapping"
+msgstr "状態マッピング"
+
+#: application/admin.py:135
+msgid "Removed all Backlog issues."
+msgstr "BacklogのIssueを一括削除しました。"
+
+#: application/admin.py:136
 msgid "Delete all Backlog issues"
 msgstr "BacklogのIssueを一括削除します。"
 
-#: application/admin.py:177
+#: application/admin.py:216
 msgid "Report User"
 msgstr "API発行ユーザー"
 
-#: application/admin.py:178
+#: application/admin.py:217
 msgid "Option"
 msgstr "オプション"
 
-#: application/admin.py:195
+#: application/admin.py:234
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
-#: application/admin.py:196
+#: application/admin.py:235
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
-#: application/admin.py:212
+#: application/admin.py:251
 msgid "Removed all Gitlab issues."
 msgstr "GitlabのIssueを一括削除しました。"
 
-#: application/admin.py:213
+#: application/admin.py:252
 msgid "Delete all Gitlab issues"
 msgstr "GitlabのIssueを一括削除します。"
 
@@ -93,11 +111,59 @@ msgstr "優先度"
 msgid "Priority ID"
 msgstr "優先度ID"
 
+#: application/models/backlog.py:18
+msgid "Reported"
+msgstr "報告済"
+
+#: application/models/backlog.py:19
+msgid "Reported ID"
+msgstr ""
+
+#: application/models/backlog.py:20
+msgid "Suspicious"
+msgstr "疑わしい"
+
+#: application/models/backlog.py:21
+msgid "Suspicious ID"
+msgstr ""
+
+#: application/models/backlog.py:22
+msgid "Confirmed"
+msgstr "確認済"
+
+#: application/models/backlog.py:23
+msgid "Confirmed ID"
+msgstr ""
+
+#: application/models/backlog.py:24
+msgid "Not a Problem"
+msgstr "問題無し"
+
+#: application/models/backlog.py:25
+msgid "Not a Problem ID"
+msgstr ""
+
+#: application/models/backlog.py:26
+msgid "Remediated"
+msgstr "修復済"
+
+#: application/models/backlog.py:27
+msgid "Remediated ID"
+msgstr ""
+
 #: application/models/backlog.py:28
+msgid "Fixed"
+msgstr "修正完了"
+
+#: application/models/backlog.py:29
+msgid "Fixed ID"
+msgstr ""
+
+#: application/models/backlog.py:35
 msgid "Backlog"
 msgstr "Backlog"
 
-#: application/models/backlog.py:29
+#: application/models/backlog.py:36
 msgid "Backlog List"
 msgstr "Backlog一覧"
 

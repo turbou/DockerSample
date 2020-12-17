@@ -7,6 +7,7 @@ from .models import Backlog, Gitlab, GitlabVul, GitlabNote, GitlabLib, GoogleCha
 
 import json
 import requests
+import copy
 
 class BacklogAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -25,7 +26,7 @@ class BacklogAdminForm(forms.ModelForm):
         if res.status_code == 200:
             project_id = res.json()['id']
         if project_id is None:
-            raise forms.ValidationError({'project_key':['このプロジェクトキーは存在しません。']})
+            raise forms.ValidationError({'project_key':[_('This ProjectKey does not exist.')]})
         self.instance.project_id = project_id
 
         # /api/v2/projects/:projectIdOrKey/issueTypes 
@@ -38,7 +39,7 @@ class BacklogAdminForm(forms.ModelForm):
                     issuetype_id = issuetype['id']
                     break
         if issuetype_id is None:
-            self.add_error('issuetype_name', 'この種別は存在しません。')
+            self.add_error('issuetype_name', _('This IssueType does not exist.'))
         self.instance.issuetype_id = issuetype_id
 
         # /api/v2/priorities 
@@ -51,8 +52,38 @@ class BacklogAdminForm(forms.ModelForm):
                     priority_id = priority['id']
                     break
         if priority_id is None:
-            self.add_error('priority_name', 'この優先度は存在しません。')
+            self.add_error('priority_name', _('This Priority does not exist.'))
         self.instance.priority_id = priority_id
+
+        # /api/v2/projects/:projectIdOrKey/statuses
+        url = '%s/api/v2/projects/%s/statuses?apiKey=%s' % (cleaned_data['url'], cleaned_data['project_key'], cleaned_data['api_key'])
+        res = requests.get(url, headers=headers)
+        print(res.json())
+        statuse_tuple = [
+            ('status_reported', 'status_reported_id'),
+            ('status_suspicious', 'status_suspicious_id'),
+            ('status_confirmed', 'status_confirmed_id'),
+            ('status_notaproblem', 'status_notaproblem_id'),
+            ('status_remediated', 'status_remediated_id'),
+            ('status_fixed', 'status_fixed_id'),
+        ]
+        chk_statuses = [
+            'status_reported',
+            'status_suspicious',
+            'status_confirmed',
+            'status_notaproblem',
+            'status_remediated',
+            'status_fixed',
+        ]
+        ng_statuses = copy.copy(chk_statuses)
+        if res.status_code == 200:
+            for chk_status in chk_statuses:
+                for status in res.json():
+                    if status['name'] == cleaned_data[chk_status]:
+                        setattr(self.instance, '%s_id' % chk_status, status['id'])
+                        ng_statuses.remove(chk_status)
+        for ng_status in ng_statuses:
+            self.add_error(ng_status, _('This Status does not exist.'))
 
         return cleaned_data
 
@@ -64,6 +95,14 @@ class BacklogAdmin(admin.ModelAdmin):
     list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp')
     fieldsets = [ 
         (None, {'fields': ['name', 'url', 'api_key', 'project_key', 'issuetype_name', 'priority_name']}),
+        (_('Status Mapping'), {'fields': [
+            'status_reported',
+            'status_suspicious',
+            'status_confirmed',
+            'status_notaproblem',
+            'status_remediated',
+            'status_fixed'
+        ]}),
     ]
 
     def project_disp(self, obj):
