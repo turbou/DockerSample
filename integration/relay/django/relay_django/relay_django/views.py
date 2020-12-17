@@ -2,6 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
 from integration.models import Integration
+#from application.models import Backlog, BacklogVul, BacklogNote, BacklogLib
 from application.models import Gitlab, GitlabVul, GitlabNote, GitlabLib
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated

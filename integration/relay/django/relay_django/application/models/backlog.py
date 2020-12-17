@@ -40,7 +40,7 @@ class BacklogVul(models.Model):
     contrast_org_id = models.CharField(_('Organization ID'), max_length=36)
     contrast_app_id = models.CharField(_('Application ID'), max_length=36)
     contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19, blank=True, null=True)
-    backlog_issue_id = models.PositiveSmallIntegerField(_('Issue ID'))
+    issue_id = models.PositiveSmallIntegerField(_('Issue ID'))
 
     def __str__(self):
         if self.id:
@@ -51,14 +51,14 @@ class BacklogVul(models.Model):
         verbose_name = _('Backlog Vulnerability')
         verbose_name_plural = _('Backlog Vulnerabilities')
 
-class BacklogComment(models.Model):
+class BacklogNote(models.Model):
     vul = models.ForeignKey(BacklogVul, verbose_name=_('Backlog Vulnerability'), related_name='comments', related_query_name='comment', on_delete=models.CASCADE)
-    comment = models.TextField(_('Comment'))
+    note = models.TextField(_('Comment'))
     creator = models.CharField(_('Creator'), max_length=200)
     created_at = models.DateTimeField(_('Created'), blank=True, null=True)
     updated_at = models.DateTimeField(_('Updated'), blank=True, null=True)
     contrast_note_id = models.CharField(_('Contrast Note ID'), max_length=36, unique=True)
-    backlog_comment_id = models.PositiveSmallIntegerField(_('Backlog Comment ID'))
+    note_id = models.PositiveSmallIntegerField(_('Backlog Comment ID'))
 
     def __str__(self):
         if self.id:
@@ -75,7 +75,7 @@ class BacklogLib(models.Model):
     contrast_app_id = models.CharField(_('Application ID'), max_length=36)
     contrast_lib_lg = models.CharField(_('Library Language'), max_length=20, blank=True, null=True)
     contrast_lib_id = models.CharField(_('Library ID'), max_length=40, blank=True, null=True)
-    backlog_issue_id = models.PositiveSmallIntegerField(_('Issue ID'))
+    issue_id = models.PositiveSmallIntegerField(_('Issue ID'))
 
     def __str__(self):
         if self.id:
