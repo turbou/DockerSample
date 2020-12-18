@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-17 22:21+0900\n"
+"POT-Creation-Date: 2020-12-19 02:14+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,55 +18,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: application/admin.py:92
+#: application/admin/backlog.py:91
 msgid "This ProjectKey does not exist."
 msgstr "このプロジェクトキーは存在しません。"
 
-#: application/admin.py:105
+#: application/admin/backlog.py:105
 msgid "This IssueType does not exist."
 msgstr "この種別は存在しません。"
 
-#: application/admin.py:118
+#: application/admin/backlog.py:119
 msgid "This Priority does not exist."
 msgstr "この優先度は存在しません。"
 
-#: application/admin.py:149
+#: application/admin/backlog.py:155
 msgid "This Status does not exist."
 msgstr "この状態は存在しません。"
 
-#: application/admin.py:165
+#: application/admin/backlog.py:172
 msgid "Status Mapping"
 msgstr "状態マッピング"
 
-#: application/admin.py:202
-msgid "Removed all Backlog issues."
-msgstr "BacklogのIssueを一括削除しました。"
-
-#: application/admin.py:203
-msgid "Delete all Backlog issues"
-msgstr "BacklogのIssueを一括削除します。"
-
-#: application/admin.py:283
-msgid "Report User"
-msgstr "API発行ユーザー"
-
-#: application/admin.py:284
-msgid "Option"
-msgstr "オプション"
-
-#: application/admin.py:301
+#: application/admin/backlog.py:203 application/admin/gitlab.py:103
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
-#: application/admin.py:302
+#: application/admin/backlog.py:204 application/admin/gitlab.py:104
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
-#: application/admin.py:318
+#: application/admin/backlog.py:218
+msgid "Removed all Backlog issues."
+msgstr "BacklogのIssueを一括削除しました。"
+
+#: application/admin/backlog.py:219
+msgid "Delete all Backlog issues"
+msgstr "BacklogのIssueを一括削除します。"
+
+#: application/admin/gitlab.py:85
+msgid "Report User"
+msgstr "API発行ユーザー"
+
+#: application/admin/gitlab.py:86
+msgid "Option"
+msgstr "オプション"
+
+#: application/admin/gitlab.py:120
 msgid "Removed all Gitlab issues."
 msgstr "GitlabのIssueを一括削除しました。"
 
-#: application/admin.py:319
+#: application/admin/gitlab.py:121
 msgid "Delete all Gitlab issues"
 msgstr "GitlabのIssueを一括削除します。"
 
@@ -115,130 +115,141 @@ msgstr "優先度ID"
 msgid "Reported"
 msgstr "報告済"
 
-#: application/models/backlog.py:19
+#: application/models/backlog.py:19 application/models/backlog.py:22
+#: application/models/backlog.py:25 application/models/backlog.py:28
+#: application/models/backlog.py:31 application/models/backlog.py:34
+msgid "Prioritize"
+msgstr "優先"
+
+#: application/models/backlog.py:20
 msgid "Reported ID"
 msgstr ""
 
-#: application/models/backlog.py:20
+#: application/models/backlog.py:21
 msgid "Suspicious"
 msgstr "疑わしい"
 
-#: application/models/backlog.py:21
+#: application/models/backlog.py:23
 msgid "Suspicious ID"
 msgstr ""
 
-#: application/models/backlog.py:22
+#: application/models/backlog.py:24
 msgid "Confirmed"
 msgstr "確認済"
 
-#: application/models/backlog.py:23
+#: application/models/backlog.py:26
 msgid "Confirmed ID"
 msgstr ""
 
-#: application/models/backlog.py:24
+#: application/models/backlog.py:27
 msgid "Not a Problem"
 msgstr "問題無し"
 
-#: application/models/backlog.py:25
+#: application/models/backlog.py:29
 msgid "Not a Problem ID"
 msgstr ""
 
-#: application/models/backlog.py:26
+#: application/models/backlog.py:30
 msgid "Remediated"
 msgstr "修復済"
 
-#: application/models/backlog.py:27
+#: application/models/backlog.py:32
 msgid "Remediated ID"
 msgstr ""
 
-#: application/models/backlog.py:28
+#: application/models/backlog.py:33
 msgid "Fixed"
 msgstr "修正完了"
 
-#: application/models/backlog.py:29
+#: application/models/backlog.py:34
+msgid "If the same state name is mapped, this is prioritized."
+msgstr "同じ状態名がマッピングされている場合、こちらを優先します。"
+
+#: application/models/backlog.py:35
 msgid "Fixed ID"
 msgstr ""
 
-#: application/models/backlog.py:35 application/models/backlog.py:39
-#: application/models/backlog.py:73
+#: application/models/backlog.py:41 application/models/backlog.py:45
+#: application/models/backlog.py:79
 msgid "Backlog"
 msgstr "Backlog"
 
-#: application/models/backlog.py:36
+#: application/models/backlog.py:42
 msgid "Backlog List"
 msgstr "Backlog一覧"
 
-#: application/models/backlog.py:40 application/models/backlog.py:74
+#: application/models/backlog.py:46 application/models/backlog.py:80
 #: application/models/gitlab.py:26 application/models/gitlab.py:60
 msgid "Organization ID"
 msgstr "組織ID"
 
-#: application/models/backlog.py:41 application/models/backlog.py:75
+#: application/models/backlog.py:47 application/models/backlog.py:81
 #: application/models/gitlab.py:27 application/models/gitlab.py:61
 msgid "Application ID"
 msgstr "アプリケーションID"
 
-#: application/models/backlog.py:42 application/models/gitlab.py:28
+#: application/models/backlog.py:48 application/models/gitlab.py:28
 msgid "Vulnerability ID"
 msgstr "脆弱性ID"
 
-#: application/models/backlog.py:43 application/models/backlog.py:78
+#: application/models/backlog.py:49 application/models/backlog.py:84
+#: application/models/gitlab.py:29
 msgid "Issue ID"
 msgstr "課題ID"
 
-#: application/models/backlog.py:51 application/models/backlog.py:55
+#: application/models/backlog.py:57 application/models/backlog.py:61
 msgid "Backlog Vulnerability"
 msgstr "Backlog脆弱性"
 
-#: application/models/backlog.py:52
+#: application/models/backlog.py:58
 msgid "Backlog Vulnerabilities"
 msgstr "Backlog脆弱性一覧"
 
-#: application/models/backlog.py:56
+#: application/models/backlog.py:62
 msgid "Comment"
 msgstr "コメント"
 
-#: application/models/backlog.py:57 application/models/gitlab.py:43
+#: application/models/backlog.py:63 application/models/gitlab.py:43
 msgid "Creator"
 msgstr "報告者"
 
-#: application/models/backlog.py:58 application/models/gitlab.py:44
+#: application/models/backlog.py:64 application/models/gitlab.py:44
 msgid "Created"
 msgstr "作成日時"
 
-#: application/models/backlog.py:59 application/models/gitlab.py:45
+#: application/models/backlog.py:65 application/models/gitlab.py:45
 msgid "Updated"
 msgstr "更新日時"
 
-#: application/models/backlog.py:60 application/models/gitlab.py:46
+#: application/models/backlog.py:66 application/models/gitlab.py:46
 msgid "Contrast Note ID"
 msgstr "ContrastコメントID"
 
-#: application/models/backlog.py:61
+#: application/models/backlog.py:67
 msgid "Backlog Comment ID"
 msgstr "BacklogコメントID"
 
-#: application/models/backlog.py:69
+#: application/models/backlog.py:75
 msgid "Backlog Vulnerability Comment"
 msgstr "Backlog脆弱性コメント"
 
-#: application/models/backlog.py:70
+#: application/models/backlog.py:76
 msgid "Backlog Vulnerability Comments"
 msgstr "Backlog脆弱性コメント一覧"
 
-#: application/models/backlog.py:76 application/models/gitlab.py:62
+#: application/models/backlog.py:82 application/models/gitlab.py:62
 msgid "Library Language"
 msgstr "ライブラリ言語"
 
-#: application/models/backlog.py:77 application/models/gitlab.py:63
+#: application/models/backlog.py:83 application/models/gitlab.py:63
 msgid "Library ID"
 msgstr "ライブラリID"
 
-#: application/models/backlog.py:86
+#: application/models/backlog.py:92
 msgid "Backlog Library"
 msgstr "Backlogライブラリ"
 
-#: application/models/backlog.py:87
+#: application/models/backlog.py:93
 msgid "Backlog Libraries"
 msgstr "Backlogライブラリ一覧"
 
@@ -279,10 +290,6 @@ msgstr "Gitlab"
 msgid "Gitlab List"
 msgstr "Gitlab一覧"
 
-#: application/models/gitlab.py:29 application/models/gitlab.py:64
-msgid "Issue IID"
-msgstr "Issue IID"
-
 #: application/models/gitlab.py:37 application/models/gitlab.py:41
 msgid "Gitlab Vulnerability"
 msgstr "Gitlab脆弱性"
@@ -306,6 +313,10 @@ msgstr "Gitlab脆弱性コメント"
 #: application/models/gitlab.py:56
 msgid "Gitlab Vulnerability Notes"
 msgstr "Gitlab脆弱性コメント一覧"
+
+#: application/models/gitlab.py:64
+msgid "Issue IID"
+msgstr "Issue IID"
 
 #: application/models/gitlab.py:72
 msgid "Gitlab Library"
@@ -367,21 +378,21 @@ msgstr "コントラスト統合管理"
 msgid "Menu"
 msgstr "メニュー"
 
-#: relay_django/views.py:302
+#: relay_django/views.py:330
 msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:463
+#: relay_django/views.py:488
 msgid "problem_with_customfield"
 msgstr ""
 
-#: relay_django/views.py:522
+#: relay_django/views.py:550
 #, fuzzy
 #| msgid "event_new_vulnerability"
 msgid "event_new_vulnerability_comment"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:542
+#: relay_django/views.py:570
 msgid "event_new_vulnerable_library"
 msgstr "[Contrast plugin] 新しい脆弱性ライブラリを受信"
 

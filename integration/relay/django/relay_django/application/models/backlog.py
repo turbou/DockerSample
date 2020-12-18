@@ -16,16 +16,22 @@ class Backlog(models.Model):
     priority_id = models.CharField(_('Priority ID'), max_length=10, blank=True, null=True)
     # Status
     status_reported = models.CharField(_('Reported'), max_length=50, blank=True, null=True)
+    status_reported_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_reported_id = models.CharField(_('Reported ID'), max_length=10, blank=True, null=True)
     status_suspicious = models.CharField(_('Suspicious'), max_length=50, blank=True, null=True)
+    status_suspicious_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_suspicious_id = models.CharField(_('Suspicious ID'), max_length=10, blank=True, null=True)
     status_confirmed = models.CharField(_('Confirmed'), max_length=50, blank=True, null=True)
+    status_confirmed_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_confirmed_id = models.CharField(_('Confirmed ID'), max_length=50, blank=True, null=True)
     status_notaproblem = models.CharField(_('Not a Problem'), max_length=50, blank=True, null=True)
+    status_notaproblem_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_notaproblem_id = models.CharField(_('Not a Problem ID'), max_length=50, blank=True, null=True)
     status_remediated = models.CharField(_('Remediated'), max_length=50, blank=True, null=True)
+    status_remediated_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_remediated_id = models.CharField(_('Remediated ID'), max_length=50, blank=True, null=True)
     status_fixed = models.CharField(_('Fixed'), max_length=50, blank=True, null=True)
+    status_fixed_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_fixed_id = models.CharField(_('Fixed ID'), max_length=50, blank=True, null=True)
 
     def __str__(self):

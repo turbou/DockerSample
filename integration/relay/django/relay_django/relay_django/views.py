@@ -231,7 +231,21 @@ class JSONWebTokenAuthenticationBacklog(BaseJSONWebTokenAuthentication):
 def backlog(request):
     print('backlog!!')
     json_data = json.loads(request.body)
-    print(json_data)
+    #print(json_data)
+    issue_id = None
+    status_id = None
+    for change in json_data['content']['changes']:
+        if change['field'] == 'status':
+            status_id = change['new_value']
+    backlog_mapping = BacklogVul.objects.filter(issue_id=json_data['content']['id']).first()
+    if backlog_mapping is None:
+        return HttpResponse(status=200)
+    ts_config = backlog_mapping.backlog.integrations.first()
+    teamserver_url = ts_config.url
+    url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, backlog_mapping.contrast_org_id)
+    data_dict = {'traces': [backlog_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
+    res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+    #print(res.text)
     return HttpResponse(status=200)
 
 class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):

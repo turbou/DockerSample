@@ -170,12 +170,12 @@ class BacklogAdmin(NestedModelAdmin):
     fieldsets = [ 
         (None, {'fields': ['name', 'url', 'api_key', 'project_key', 'issuetype_name', 'priority_name']}),
         (_('Status Mapping'), {'fields': [
-            'status_reported',
-            'status_suspicious',
-            'status_confirmed',
-            'status_notaproblem',
-            'status_remediated',
-            'status_fixed'
+            ('status_reported', 'status_reported_priority'),
+            ('status_suspicious', 'status_suspicious_priority'),
+            ('status_confirmed', 'status_confirmed_priority'),
+            ('status_notaproblem', 'status_notaproblem_priority'),
+            ('status_remediated', 'status_remediated_priority'),
+            ('status_fixed', 'status_fixed_priority'),
         ]}),
     ]
 
