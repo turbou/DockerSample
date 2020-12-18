@@ -25,8 +25,8 @@ class GitlabVul(models.Model):
     gitlab = models.ForeignKey(Gitlab, verbose_name=_('Gitlab'), related_name='vuls', related_query_name='vul', on_delete=models.PROTECT)
     contrast_org_id = models.CharField(_('Organization ID'), max_length=36)
     contrast_app_id = models.CharField(_('Application ID'), max_length=36)
-    contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19, blank=True, null=True)
-    issue_id = models.PositiveSmallIntegerField(_('Issue IID'))
+    contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19)
+    issue_id = models.CharField(_('Issue ID'), max_length=100)
 
     def __str__(self):
         if self.id:

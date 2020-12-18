@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse
 from integration.models import Integration
-#from application.models import Backlog, BacklogVul, BacklogNote, BacklogLib
+from application.models import Backlog, BacklogVul, BacklogNote, BacklogLib
 from application.models import Gitlab, GitlabVul, GitlabNote, GitlabLib
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
@@ -99,7 +99,7 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
               elif c_prop['name'] == 'status.change.substatus' and len(c_prop['value']) > 0:
                 status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
         note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
-        url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+        url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
         created_at = dt.fromtimestamp(c_note['creation'] / 1000)
         data = {
             'body': note_str,
@@ -120,7 +120,7 @@ def syncCommentFromGitlab(ts_config, org_id, app_id, vul_id):
     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
     if gitlab_mapping is None:
         return HttpResponse(status=200)
-    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
     headers = {
         'Content-Type': 'application/json',
         'PRIVATE-TOKEN': ts_config.gitlab.access_token
@@ -165,7 +165,7 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
     if gitlab_mapping is None:
         return HttpResponse(status=200)
-    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+    url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
     headers = {
         'Content-Type': 'application/json',
         'PRIVATE-TOKEN': ts_config.gitlab.access_token
@@ -182,7 +182,7 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
     print(issue_note_ids)
 
     for issue_note in issue_notes_json:
-        url = '%s/api/v4/projects/%s/issues/%d/notes/%d' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id, issue_note['id'])
+        url = '%s/api/v4/projects/%s/issues/%d/notes/%d' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id, issue_note['id'])
         res = requests.delete(url, headers=headers)
         print(res.status_code)
 
@@ -212,7 +212,7 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
               elif c_prop['name'] == 'status.change.substatus' and len(c_prop['value']) > 0:
                 status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
         note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
-        url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+        url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
         created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
         data = {
             'body': note_str,
@@ -240,7 +240,7 @@ def gitlab(request):
 
     if json_data['event_type'] == 'note':
         #print(json_data['issue']['iid'])
-        gitlab_mapping = GitlabVul.objects.filter(gitlab_issue_id=json_data['issue']['iid']).first()
+        gitlab_mapping = GitlabVul.objects.filter(issue_id=json_data['issue']['iid']).first()
         if gitlab_mapping is None:
             return HttpResponse(status=200)
         if json_data['user']['username'] == gitlab_mapping.gitlab.report_username: # 無限ループ止め
@@ -258,7 +258,7 @@ def gitlab(request):
         #print(json_data['object_attributes'].keys())
         #print(json_data['object_attributes']['iid'])
         #print(json_data['object_attributes']['action'])
-        gitlab_mapping = GitlabVul.objects.filter(gitlab_issue_id=json_data['object_attributes']['iid']).first()
+        gitlab_mapping = GitlabVul.objects.filter(issue_id=json_data['object_attributes']['iid']).first()
         if gitlab_mapping is None:
             return HttpResponse(status=200)
         #print(gitlab_mapping.contrast_org_id)
@@ -384,14 +384,11 @@ def hook(request):
                     'Content-Type': 'application/json'
                 }
                 res = requests.post(url, json=data, headers=headers)
-                print(res.status_code)
-                #print(res.json())
-                if res.status_code == 201:
-                    pass
-                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
-                else:
-                    pass
-                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+                #print(res.status_code)
+                if res.status_code == requests.codes.created: # 201
+                    mapping = BacklogVul(backlog=ts_config.backlog, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                    mapping.issue_id = res.json()['id']
+                    mapping.save()
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
@@ -419,9 +416,9 @@ def hook(request):
                 }
                 res = requests.post(url, json=data, headers=headers)
                 #print(res.status_code)
-                if res.status_code == requests.codes.created:
+                if res.status_code == requests.codes.created: # 201
                     mapping = GitlabVul(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
-                    mapping.gitlab_issue_id = res.json()['id']
+                    mapping.issue_id = res.json()['id']
                     mapping.save()
 
             # ---------- Google Chat ---------- #
@@ -468,19 +465,20 @@ def hook(request):
             if ts_config.backlog:
                 status_id = None
                 if status in ['Reported', '報告済']:
-                    pass
+                    status_id = ts_config.backlog.status_reported_id
                 elif status in ['Suspicious', '疑わしい']:
-                    pass
+                    status_id = ts_config.backlog.status_suspicious_id
                 elif status in ['Confirmed', '確認済']:
-                    pass
+                    status_id = ts_config.backlog.status_confirmed_id
                 elif status in ['NotAProblem', 'Not a Problem', '問題無し']:
-                    pass
+                    status_id = ts_config.backlog.status_notaproblem_id
                 elif status in ['Remediated', '修復済']:
-                    pass
+                    status_id = ts_config.backlog.status_remediated_id
                 elif status in ['Fixed', '修正完了']:
-                    pass
+                    status_id = ts_config.backlog.status_fixed_id
+                backlog_mapping = BacklogVul.objects.filter(contrast_vul_id=vul_id).first()
                 # /api/v2/issues/:issueIdOrKey 
-                url = '%s/api/v2/issues/%s?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
+                url = '%s/api/v2/issues/%s?apiKey=%s' % (ts_config.backlog.url, backlog_mapping.issue_id, ts_config.backlog.api_key)
                 data = {
                     'statusId': status_id,
                 }   
@@ -496,7 +494,7 @@ def hook(request):
                     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
                     if gitlab_mapping is None:
                         return HttpResponse(status=200)
-                    url = '%s/api/v4/projects/%s/issues/%d?state_event=reopen' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+                    url = '%s/api/v4/projects/%s/issues/%d?state_event=reopen' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
                     headers = {
                         'Content-Type': 'application/json',
                         'PRIVATE-TOKEN': ts_config.gitlab.access_token
@@ -508,7 +506,7 @@ def hook(request):
                     gitlab_mapping = GitlabVul.objects.filter(contrast_vul_id=vul_id).first()
                     if gitlab_mapping is None:
                         return HttpResponse(status=200)
-                    url = '%s/api/v4/projects/%s/issues/%d?state_event=close' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.gitlab_issue_id)
+                    url = '%s/api/v4/projects/%s/issues/%d?state_event=close' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
                     headers = {
                         'Content-Type': 'application/json',
                         'PRIVATE-TOKEN': ts_config.gitlab.access_token
@@ -646,7 +644,7 @@ def hook(request):
                 #print(res.json())
                 if res.status_code == requests.codes.created:
                     mapping = GitlabLib(gitlab=ts_config.gitlab, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
-                    mapping.gitlab_issue_id = res.json()['id']
+                    mapping.issue_id = res.json()['id']
                     mapping.save()
                     #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
                 else:

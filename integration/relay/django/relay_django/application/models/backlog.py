@@ -39,8 +39,8 @@ class BacklogVul(models.Model):
     backlog = models.ForeignKey(Backlog, verbose_name=_('Backlog'), related_name='vuls', related_query_name='vul', on_delete=models.PROTECT)
     contrast_org_id = models.CharField(_('Organization ID'), max_length=36)
     contrast_app_id = models.CharField(_('Application ID'), max_length=36)
-    contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19, blank=True, null=True)
-    issue_id = models.PositiveSmallIntegerField(_('Issue ID'))
+    contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19)
+    issue_id = models.CharField(_('Issue ID'), max_length=100)
 
     def __str__(self):
         if self.id:
