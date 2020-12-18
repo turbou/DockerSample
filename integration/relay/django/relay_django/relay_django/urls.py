@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/token/verify/', verify_jwt_token),
     path('api/token/refresh/', refresh_jwt_token),
     path('hook/', views.hook, name='hook'),    # from TeamServer
+    path('backlog/', views.backlog, name='backlog'), # from Backlog webhook
     path('gitlab/', views.gitlab, name='gitlab'), # from Gitlab webhook
 ] + static('static/', document_root=settings.STATIC_ROOT)
 

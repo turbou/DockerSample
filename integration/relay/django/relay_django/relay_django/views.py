@@ -221,6 +221,19 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
         res = requests.post(url, json=data, headers=headers)
         print('oyoyo!! ', res.text)
 
+class JSONWebTokenAuthenticationBacklog(BaseJSONWebTokenAuthentication):
+    def get_jwt_value(self, request):
+         return request.query_params.get('token')
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated, ))
+@authentication_classes((JSONWebTokenAuthenticationBacklog,))
+def backlog(request):
+    print('backlog!!')
+    json_data = json.loads(request.body)
+    print(json_data)
+    return HttpResponse(status=200)
+
 class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
     def get_jwt_value(self, request):
          return request.headers.get('X-Gitlab-Token')
