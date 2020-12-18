@@ -483,11 +483,13 @@ def hook(request):
                     'statusId': status_id,
                 }   
                 headers = {
-                    #'Content-Type': 'application/json',
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json'
                 }
                 res = requests.patch(url, json=data, headers=headers)
                 print(res.status_code)
+                #print(res.json())
+                if res.status_code == requests.codes.ok: # 200
+                    pass
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
                 if status in ['Reported', 'Suspicious', 'Confirmed', '報告済', '疑わしい', '確認済']:
