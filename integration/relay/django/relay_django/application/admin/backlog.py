@@ -74,9 +74,14 @@ class BacklogAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['api_key'].widget.attrs = {'size':100}
+        for f in self.fields:
+            if f.startswith('status_'):
+                if self.fields[f].widget.input_type == 'text':
+                    self.fields[f].widget.attrs = {'size': 50, 'placeholder':_('If not specified, status change will be ignored.')}
 
     def clean(self):
         cleaned_data = super().clean()
+        # ----- 与えられたBacklogの各表示名からAPI発行時に必要なIDを取得 -----
         headers = { 
             'Content-Type': 'application/json'
         }   
@@ -153,6 +158,31 @@ class BacklogAdminForm(forms.ModelForm):
                         continue
             for ng_status in ng_statuses:
                 self.add_error(ng_status, _('This Status does not exist.'))
+
+        # ----- 状態マッピングで優先チェックボックスの付け方に問題がないか確認 -----
+        chk_status_dict = {}
+        for chk_status in chk_statuses:
+            if not chk_status in cleaned_data:
+                continue
+            sts_str = cleaned_data[chk_status]
+            if sts_str in chk_status_dict:
+                appear_cnt = chk_status_dict[sts_str]['appear_cnt']
+                appear_cnt+=1
+                prior_cnt = chk_status_dict[sts_str]['prior_cnt']
+                if cleaned_data['%s_priority' % chk_status] == True:
+                    prior_cnt+=1
+                fields =  chk_status_dict[sts_str]['fields']
+                fields.add(chk_status)
+                chk_status_dict[sts_str] = {'fields': fields, 'appear_cnt': appear_cnt, 'prior_cnt': prior_cnt}
+            else:
+                prior_cnt = 1 if cleaned_data['%s_priority' % chk_status] == True else 0
+                chk_status_dict[sts_str] = {'fields': {chk_status}, 'appear_cnt': 1, 'prior_cnt': prior_cnt}
+        for key in chk_status_dict:
+            print(key, chk_status_dict[key])
+            value = chk_status_dict[key]
+            if value['appear_cnt'] > 1 and value['prior_cnt'] != 1:
+                for f in value['fields']:
+                    self.add_error('%s_priority' % f, _('Please specify only one priority.'))
 
         return cleaned_data
 

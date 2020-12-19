@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-19 02:14+0900\n"
+"POT-Creation-Date: 2020-12-19 22:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,39 +18,47 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: application/admin/backlog.py:91
+#: application/admin/backlog.py:80
+msgid "If not specified, status change will be ignored."
+msgstr ""
+
+#: application/admin/backlog.py:96
 msgid "This ProjectKey does not exist."
 msgstr "このプロジェクトキーは存在しません。"
 
-#: application/admin/backlog.py:105
+#: application/admin/backlog.py:110
 msgid "This IssueType does not exist."
 msgstr "この種別は存在しません。"
 
-#: application/admin/backlog.py:119
+#: application/admin/backlog.py:124
 msgid "This Priority does not exist."
 msgstr "この優先度は存在しません。"
 
-#: application/admin/backlog.py:155
+#: application/admin/backlog.py:160
 msgid "This Status does not exist."
 msgstr "この状態は存在しません。"
 
-#: application/admin/backlog.py:172
+#: application/admin/backlog.py:185
+msgid "Please specify only one priority."
+msgstr "１つだけ優先指定してください。"
+
+#: application/admin/backlog.py:202
 msgid "Status Mapping"
 msgstr "状態マッピング"
 
-#: application/admin/backlog.py:203 application/admin/gitlab.py:103
+#: application/admin/backlog.py:233 application/admin/gitlab.py:103
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
-#: application/admin/backlog.py:204 application/admin/gitlab.py:104
+#: application/admin/backlog.py:234 application/admin/gitlab.py:104
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
-#: application/admin/backlog.py:218
+#: application/admin/backlog.py:248
 msgid "Removed all Backlog issues."
 msgstr "BacklogのIssueを一括削除しました。"
 
-#: application/admin/backlog.py:219
+#: application/admin/backlog.py:249
 msgid "Delete all Backlog issues"
 msgstr "BacklogのIssueを一括削除します。"
 
@@ -121,6 +129,12 @@ msgstr "報告済"
 msgid "Prioritize"
 msgstr "優先"
 
+#: application/models/backlog.py:19 application/models/backlog.py:22
+#: application/models/backlog.py:25 application/models/backlog.py:28
+#: application/models/backlog.py:31 application/models/backlog.py:34
+msgid "If the same state name is mapped, this is prioritized."
+msgstr "同じ状態名がマッピングされている場合、こちらを優先します。"
+
 #: application/models/backlog.py:20
 msgid "Reported ID"
 msgstr ""
@@ -160,10 +174,6 @@ msgstr ""
 #: application/models/backlog.py:33
 msgid "Fixed"
 msgstr "修正完了"
-
-#: application/models/backlog.py:34
-msgid "If the same state name is mapped, this is prioritized."
-msgstr "同じ状態名がマッピングされている場合、こちらを優先します。"
 
 #: application/models/backlog.py:35
 msgid "Fixed ID"
