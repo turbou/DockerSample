@@ -241,11 +241,47 @@ def backlog(request):
     if backlog_mapping is None:
         return HttpResponse(status=200)
     ts_config = backlog_mapping.backlog.integrations.first()
+    statuses = [ 
+        'status_reported',
+        'status_suspicious',
+        'status_confirmed',
+        'status_notaproblem',
+        'status_remediated',
+        'status_fixed',
+    ]
+    target_status = None
+    target_status_set = set()
+    for status in statuses:
+        sts_id = getattr(backlog_mapping.backlog, '%s_id' % status)
+        if status_id == sts_id:
+            target_status_set.add(status)
+    if len(target_status_set) == 1:
+        target_status = list(target_status_set)[0]
+    elif len(target_status_set) > 1:
+        for status2 in target_status_set:
+            if getattr(backlog_mapping.backlog, '%s_priority' % status2):
+                target_status = status2
+                break
+    else:
+        return HttpResponse(status=200)
+    contrast_status = None
+    if target_status == 'tatus_reported':
+        contrast_status = 'Reported'
+    elif target_status == 'status_suspicious':
+        contrast_status = 'Suspicious'
+    elif target_status == 'status_confirmed':
+        contrast_status = 'Confirmed'
+    elif target_status == 'status_notaproblem':
+        contrast_status = 'NotAProblem'
+    elif target_status == 'status_remediated':
+        contrast_status = 'Remediated'
+    elif target_status == 'status_fixed':
+        contrast_status = 'Fixed'
     teamserver_url = ts_config.url
     url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, backlog_mapping.contrast_org_id)
-    data_dict = {'traces': [backlog_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
+    data_dict = {'traces': [backlog_mapping.contrast_vul_id], 'status': contrast_status, 'note': 'status changed by Gitlab.'}
     res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-    #print(res.text)
+    print(res.status_code)
     return HttpResponse(status=200)
 
 class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
