@@ -367,7 +367,8 @@ def gitlab(request):
 def hook(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
-        if json_data['event_type'] == 'TEST_CONNECTION':
+        event_type = json_data['event_type']
+        if event_type == 'TEST_CONNECTION':
             integration_name = json_data.get('integration_name')
             print(integration_name)
             if integration_name:
@@ -376,8 +377,11 @@ def hook(request):
             else:
                 return HttpResponse(status=404)
             return HttpResponse(status=200)
-        elif json_data['event_type'] == 'NEW_VULNERABILITY':
-            print(_('event_new_vulnerability'))
+        elif event_type == 'NEW_VULNERABILITY' or event_type == 'VULNERABILITY_DUPLICATE':
+            if event_type == 'NEW_VULNERABILITY':
+                print(_('event_new_vulnerability'))
+            else:
+                print(_('event_dup_vulnerability'))
             #print(json_data['description'])
             integration_name = json_data.get('integration_name')
             if integration_name:
@@ -431,53 +435,50 @@ def hook(request):
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
+            deco_mae = "## "
+            deco_ato = ""
+            description = []
+            description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+            description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+            description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
+            description.append('%s\n\n' %  (convertMustache(story)))
+            description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
+            description.append('%s\n\n' %  (convertMustache(howtofix)))
+            description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
+            description.append(self_url)
+
             # ---------- Backlog ---------- #
             if ts_config.backlog:
-                deco_mae = "## "
-                deco_ato = ""
-                description = []
-                description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
-                description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(story)))
-                description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(howtofix)))
-                description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
-                description.append(self_url)
-                url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
-                # projectId=97197&summary=$Title+$VulnerabilityRule&issueTypeId=456121&priorityId=3&description=$Message
-                # payload = {'projectId': json_data['project'], 'summary': json_data['vulnerability_rule']}
-                data = {
-                    'projectId': ts_config.backlog.project_id,
-                    'summary': summary,
-                    'issueTypeId': ts_config.backlog.issuetype_id,
-                    'priorityId': ts_config.backlog.priority_id,
-                    'description': ''.join(description),
-                }   
                 headers = {
                     'Content-Type': 'application/json'
                 }
-                res = requests.post(url, json=data, headers=headers)
-                #print(res.status_code)
-                if res.status_code == requests.codes.created: # 201
-                    mapping = BacklogVul(backlog=ts_config.backlog, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
-                    mapping.issue_id = res.json()['id']
-                    mapping.save()
+                if BacklogVul.objects.filter(contrast_vul_id=vul_id).exists():
+                    backlog_mapping = BacklogVul.objects.filter(contrast_vul_id=vul_id).first()
+                    # /api/v2/issues/:issueIdOrKey 
+                    url = '%s/api/v2/issues/%s?apiKey=%s' % (ts_config.backlog.url, backlog_mapping.issue_id, ts_config.backlog.api_key)
+                    data = {
+                        'description': ''.join(description),
+                    }   
+                    res = requests.patch(url, json=data, headers=headers)
+                    print(res.status_code)
+                elif event_type == 'VULNERABILITY_DUPLICATE':
+                    url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
+                    data = {
+                        'projectId': ts_config.backlog.project_id,
+                        'summary': summary,
+                        'issueTypeId': ts_config.backlog.issuetype_id,
+                        'priorityId': ts_config.backlog.priority_id,
+                        'description': ''.join(description),
+                    }   
+                    res = requests.post(url, json=data, headers=headers)
+                    print(res.status_code)
+                    if res.status_code == requests.codes.created: # 201
+                        mapping = BacklogVul(backlog=ts_config.backlog, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                        mapping.issue_id = res.json()['id']
+                        mapping.save()
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
-                deco_mae = "## "
-                deco_ato = ""
-                description = []
-                description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
-                description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(story)))
-                description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(howtofix)))
-                description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
-                description.append(self_url)
-    
                 url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
                 data = {
                     'title': summary,
@@ -518,7 +519,7 @@ def hook(request):
                 #return HttpResponse(status=200)
     
             return HttpResponse(status=200)
-        elif json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_OPEN' or json_data['event_type'] == 'VULNERABILITY_CHANGESTATUS_CLOSED':
+        elif event_type == 'VULNERABILITY_CHANGESTATUS_OPEN' or event_type == 'VULNERABILITY_CHANGESTATUS_CLOSED':
             #print(_('event_vulnerability_changestatus'))
             integration_name = json_data.get('integration_name')
             print(integration_name)
@@ -593,7 +594,7 @@ def hook(request):
                 else:
                     return HttpResponse(status=200)
             return HttpResponse(status=200)
-        elif json_data['event_type'] == 'NEW_VULNERABILITY_COMMENT':
+        elif event_type == 'NEW_VULNERABILITY_COMMENT':
             print(_('event_new_vulnerability_comment'))
             #print(json_data['description'])
             #print(json_data['vulnerability_id'])
@@ -613,7 +614,7 @@ def hook(request):
             if ts_config.gitlab:
                 syncCommentFromContrast(ts_config, org_id, app_id, vul_id)
             return HttpResponse(status=200)
-        elif json_data['event_type'] == 'NEW_VULNERABLE_LIBRARY':
+        elif event_type == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))
             integration_name = json_data.get('integration_name')
             print(integration_name)
