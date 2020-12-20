@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-19 22:07+0900\n"
+"POT-Creation-Date: 2020-12-20 22:39+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,19 +46,27 @@ msgstr "１つだけ優先指定してください。"
 msgid "Status Mapping"
 msgstr "状態マッピング"
 
-#: application/admin/backlog.py:233 application/admin/gitlab.py:103
+#: application/admin/backlog.py:229 application/admin/gitlab.py:91
+msgid "Vulnerability Count"
+msgstr "脆弱性数"
+
+#: application/admin/backlog.py:233 application/admin/gitlab.py:95
+msgid "Library Count"
+msgstr "ライブラリ数"
+
+#: application/admin/backlog.py:241 application/admin/gitlab.py:103
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
-#: application/admin/backlog.py:234 application/admin/gitlab.py:104
+#: application/admin/backlog.py:242 application/admin/gitlab.py:104
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
-#: application/admin/backlog.py:248
+#: application/admin/backlog.py:256
 msgid "Removed all Backlog issues."
 msgstr "BacklogのIssueを一括削除しました。"
 
-#: application/admin/backlog.py:249
+#: application/admin/backlog.py:257
 msgid "Delete all Backlog issues"
 msgstr "BacklogのIssueを一括削除します。"
 
@@ -388,21 +396,21 @@ msgstr "コントラスト統合管理"
 msgid "Menu"
 msgstr "メニュー"
 
-#: relay_django/views.py:330
+#: relay_django/views.py:366
 msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:488
+#: relay_django/views.py:524
 msgid "problem_with_customfield"
 msgstr ""
 
-#: relay_django/views.py:550
+#: relay_django/views.py:586
 #, fuzzy
 #| msgid "event_new_vulnerability"
 msgid "event_new_vulnerability_comment"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:570
+#: relay_django/views.py:606
 msgid "event_new_vulnerable_library"
 msgstr "[Contrast plugin] 新しい脆弱性ライブラリを受信"
 

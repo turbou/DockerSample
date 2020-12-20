@@ -88,11 +88,11 @@ class GitlabAdmin(NestedModelAdmin):
 
     def vul_count(self, obj):
         return obj.vuls.count()
-    vul_count.short_description = 'Vulnerability Count'
+    vul_count.short_description = _('Vulnerability Count')
 
     def lib_count(self, obj):
         return obj.libs.count()
-    lib_count.short_description = 'Library Count'
+    lib_count.short_description = _('Library Count')
 
     def clear_mappings(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)

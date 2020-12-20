@@ -64,7 +64,7 @@ class BacklogNote(models.Model):
     created_at = models.DateTimeField(_('Created'), blank=True, null=True)
     updated_at = models.DateTimeField(_('Updated'), blank=True, null=True)
     contrast_note_id = models.CharField(_('Contrast Note ID'), max_length=36, unique=True)
-    note_id = models.PositiveSmallIntegerField(_('Backlog Comment ID'))
+    note_id = models.CharField(_('Backlog Comment ID'), max_length=100)
 
     def __str__(self):
         if self.id:
@@ -81,7 +81,7 @@ class BacklogLib(models.Model):
     contrast_app_id = models.CharField(_('Application ID'), max_length=36)
     contrast_lib_lg = models.CharField(_('Library Language'), max_length=20, blank=True, null=True)
     contrast_lib_id = models.CharField(_('Library ID'), max_length=40, blank=True, null=True)
-    issue_id = models.PositiveSmallIntegerField(_('Issue ID'))
+    issue_id = models.CharField(_('Issue ID'), max_length=100)
 
     def __str__(self):
         if self.id:

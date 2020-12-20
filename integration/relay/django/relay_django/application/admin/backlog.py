@@ -192,7 +192,7 @@ class BacklogAdmin(NestedModelAdmin):
     form = BacklogAdminForm
     search_fields = ('name', 'url',)
     actions = ['clear_mappings', 'delete_all_issues',]
-    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp')
+    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp', 'vul_count', 'lib_count')
     inlines = [
         BacklogVulInline,
         BacklogLibInline,
@@ -223,6 +223,14 @@ class BacklogAdmin(NestedModelAdmin):
         return '%s (%s)' % (obj.priority_name, obj.priority_id)
     priority_disp.short_description = '優先度'
     priority_disp.admin_order_field = 'priority_id'
+
+    def vul_count(self, obj):
+        return obj.vuls.count()
+    vul_count.short_description = _('Vulnerability Count')
+
+    def lib_count(self, obj):
+        return obj.libs.count()
+    lib_count.short_description = _('Library Count')
 
     def clear_mappings(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)

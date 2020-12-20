@@ -669,12 +669,10 @@ def hook(request):
                 res = requests.post(url, json=data, headers=headers)
                 print(res.status_code)
                 #print(res.json())
-                if res.status_code == 201:
-                    pass
-                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=200)
-                else:
-                    pass
-                    #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+                if res.status_code == requests.codes.created: # 201
+                    mapping = BacklogLib(backlog=ts_config.backlog, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
+                    mapping.issue_id = res.json()['id']
+                    mapping.save()
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
