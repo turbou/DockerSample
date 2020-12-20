@@ -32,26 +32,35 @@ def callAPI(url, method, api_key, username, service_key, data=None):
         res = requests.put(url, data=data, headers=headers)
     return res
 
-def convertMustache(old_str):
-    # Link
-    #new_str = old_str.gsub(/{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}/, '[\2](\1)')
-    new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
-    # CodeBlock
-    #new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, "~~~\n").gsub(/{{\/[A-Za-z]+Block}}/, "\n~~~")
-    new_str = re.sub(r'{{#[A-Za-z]+Block}}', '~~~\n', new_str)
-    new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n~~~', new_str)
-    # Header
-    #new_str = new_str.gsub(/{{#header}}/, '### ').gsub(/{{\/header}}/, '')
-    new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
-    # List
-    #new_str = new_str.gsub(/{{#listElement}}/, '* ').gsub(/{{\/listElement}}/, '')
-    new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
-    # Other
-    #new_str = new_str.gsub(/{{(#|\/)[A-Za-z]+}}/, '')
-    new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
-    # <, >
-    #new_str = new_str.gsub(/&lt;/, '<').gsub(/&gt;/, '>')
-    new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
+def convertMustache(old_str, text_formatting_rule='markdown'):
+    if text_formatting_rule == 'markdown':
+        # Link
+        new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
+        # CodeBlock
+        new_str = re.sub(r'{{#[A-Za-z]+Block}}', '~~~\n', new_str)
+        new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n~~~', new_str)
+        # Header
+        new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
+        # List
+        new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
+        # Other
+        new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
+        # <, >
+        new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
+    else:
+        # Link
+        new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[[\2:\1]]', old_str)
+        # CodeBlock
+        new_str = re.sub(r'{{#[A-Za-z]+Block}}', '{code}\n', new_str)
+        new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n{/code}', new_str)
+        # Header
+        new_str = new_str.replace('{{#header}}', '*** ').replace('{{\/header}}', '')
+        # List
+        new_str = new_str.replace('{{#listElement}}', '- ').replace('{{\/listElement}}', '')
+        # Other
+        new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
+        # <, >
+        new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
     return new_str
 
 def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
@@ -435,23 +444,29 @@ def hook(request):
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
-            deco_mae = "## "
-            deco_ato = ""
-            description = []
-            description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-            description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
-            description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-            description.append('%s\n\n' %  (convertMustache(story)))
-            description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-            description.append('%s\n\n' %  (convertMustache(howtofix)))
-            description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
-            description.append(self_url)
 
             # ---------- Backlog ---------- #
             if ts_config.backlog:
                 headers = {
                     'Content-Type': 'application/json'
                 }
+                deco_mae = ''
+                deco_ato = ''
+                if ts_config.backlog.text_formatting.rule == 'markdown':
+                    deco_mae = '## '
+                    deco_ato = ''
+                else:
+                    deco_mae = '** '
+                    deco_ato = ''
+                description = []
+                description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(''.join(chapters), ts_config.backlog.text_formatting.rule)))
+                description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(story), ts_config.backlog.text_formatting.rule))
+                description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(howtofix), ts_config.backlog.text_formatting.rule))
+                description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
+                description.append(self_url)
                 if BacklogVul.objects.filter(contrast_vul_id=vul_id).exists():
                     backlog_mapping = BacklogVul.objects.filter(contrast_vul_id=vul_id).first()
                     # /api/v2/issues/:issueIdOrKey 
@@ -479,6 +494,17 @@ def hook(request):
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
+                deco_mae = "## "
+                deco_ato = ""
+                description = []
+                description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+                description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(story)))
+                description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
+                description.append('%s\n\n' %  (convertMustache(howtofix)))
+                description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
+                description.append(self_url)
                 url = '%s/api/v4/projects/%s/issues' % (ts_config.gitlab.url, ts_config.gitlab.project_id)
                 data = {
                     'title': summary,
