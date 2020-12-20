@@ -16,7 +16,7 @@ import re
 import base64
 import html
 
-def callAPI2(url, method, api_key, username, service_key, data=None):
+def callAPI(url, method, api_key, username, service_key, data=None):
     authorization = base64.b64encode(('%s:%s' % (username, service_key)).encode('utf-8'))
     headers = {
         'Authorization': authorization,
@@ -62,7 +62,7 @@ def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
     # TeamServer側のコメントすべて取得
     teamserver_url = ts_config.url
     url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
-    res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+    res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
     notes_json = res.json()
     #print(notes_json)
     r = re.compile("\(by .+\)")
@@ -135,7 +135,7 @@ def syncCommentFromGitlab(ts_config, org_id, app_id, vul_id):
             continue
         #print(issue_note['author']['name'], issue_note['created_at'], issue_note['body'])
         data_dict = {'note': issue_note['body']}
-        res = callAPI2(url, 'POST', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+        res = callAPI(url, 'POST', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
         #print(res.status_code)
         #print('buhihi!! ', res.text)
         #print(res.json())
@@ -153,7 +153,7 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
     # まずはTeamServer側のコメントすべて取得
     teamserver_url = ts_config.url
     url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
-    res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+    res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
     notes_json = res.json()
     #print(notes_json)
     note_ids = []
@@ -225,6 +225,15 @@ class JSONWebTokenAuthenticationBacklog(BaseJSONWebTokenAuthentication):
     def get_jwt_value(self, request):
          return request.query_params.get('token')
 
+STATUSES = [ 
+    'status_reported',
+    'status_suspicious',
+    'status_confirmed',
+    'status_notaproblem',
+    'status_remediated',
+    'status_fixed',
+]
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 @authentication_classes((JSONWebTokenAuthenticationBacklog,))
@@ -232,56 +241,63 @@ def backlog(request):
     print('backlog!!')
     json_data = json.loads(request.body)
     #print(json_data)
+
     issue_id = None
     status_id = None
     for change in json_data['content']['changes']:
         if change['field'] == 'status':
             status_id = change['new_value']
-    backlog_mapping = BacklogVul.objects.filter(issue_id=json_data['content']['id']).first()
-    if backlog_mapping is None:
+    if status_id is None:
         return HttpResponse(status=200)
-    ts_config = backlog_mapping.backlog.integrations.first()
-    statuses = [ 
-        'status_reported',
-        'status_suspicious',
-        'status_confirmed',
-        'status_notaproblem',
-        'status_remediated',
-        'status_fixed',
-    ]
-    target_status = None
-    target_status_set = set()
-    for status in statuses:
-        sts_id = getattr(backlog_mapping.backlog, '%s_id' % status)
-        if status_id == sts_id:
-            target_status_set.add(status)
-    if len(target_status_set) == 1:
-        target_status = list(target_status_set)[0]
-    elif len(target_status_set) > 1:
-        for status2 in target_status_set:
-            if getattr(backlog_mapping.backlog, '%s_priority' % status2):
-                target_status = status2
-                break
+
+    # 一括操作か個別操作かの判定
+    issue_id_list = []
+    if 'tx_id' in json_data['content']: # 一括操作
+        for issue in json_data['content']['link']:
+            issue_id_list.append(issue['id'])
+    elif 'id' in json_data['content']:  # 個別操作
+        issue_id_list.append(json_data['content']['id'])
     else:
         return HttpResponse(status=200)
-    contrast_status = None
-    if target_status == 'tatus_reported':
-        contrast_status = 'Reported'
-    elif target_status == 'status_suspicious':
-        contrast_status = 'Suspicious'
-    elif target_status == 'status_confirmed':
-        contrast_status = 'Confirmed'
-    elif target_status == 'status_notaproblem':
-        contrast_status = 'NotAProblem'
-    elif target_status == 'status_remediated':
-        contrast_status = 'Remediated'
-    elif target_status == 'status_fixed':
-        contrast_status = 'Fixed'
-    teamserver_url = ts_config.url
-    url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, backlog_mapping.contrast_org_id)
-    data_dict = {'traces': [backlog_mapping.contrast_vul_id], 'status': contrast_status, 'note': 'status changed by Gitlab.'}
-    res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
-    print(res.status_code)
+
+    for issue_id in issue_id_list:
+        backlog_mapping = BacklogVul.objects.filter(issue_id=issue_id).first()
+        if backlog_mapping is None:
+            continue
+        ts_config = backlog_mapping.backlog.integrations.first()
+        target_status = None
+        target_status_set = set()
+        for status in STATUSES:
+            sts_id = getattr(backlog_mapping.backlog, '%s_id' % status)
+            if status_id == sts_id:
+                target_status_set.add(status)
+        if len(target_status_set) == 1:
+            target_status = list(target_status_set)[0]
+        elif len(target_status_set) > 1:
+            for status2 in target_status_set:
+                if getattr(backlog_mapping.backlog, '%s_priority' % status2):
+                    target_status = status2
+                    break
+        else:
+            continue
+        contrast_status = None
+        if target_status == 'tatus_reported':
+            contrast_status = 'Reported'
+        elif target_status == 'status_suspicious':
+            contrast_status = 'Suspicious'
+        elif target_status == 'status_confirmed':
+            contrast_status = 'Confirmed'
+        elif target_status == 'status_notaproblem':
+            contrast_status = 'NotAProblem'
+        elif target_status == 'status_remediated':
+            contrast_status = 'Remediated'
+        elif target_status == 'status_fixed':
+            contrast_status = 'Fixed'
+        teamserver_url = ts_config.url
+        url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, backlog_mapping.contrast_org_id)
+        data_dict = {'traces': [backlog_mapping.contrast_vul_id], 'status': contrast_status, 'note': 'status changed by Gitlab.'}
+        res = callAPI(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+        print(res.status_code)
     return HttpResponse(status=200)
 
 class JSONWebTokenAuthenticationGitlab(BaseJSONWebTokenAuthentication):
@@ -333,16 +349,14 @@ def gitlab(request):
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
             data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Remediated', 'note': 'closed by Gitlab.'}
-            #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
-            res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+            res = callAPI(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
             #print(res.text)
         elif json_data['object_attributes']['action'] == 'reopen':
             ts_config = gitlab_mapping.gitlab.integrations.first()
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, gitlab_mapping.contrast_org_id)
             data_dict = {'traces': [gitlab_mapping.contrast_vul_id], 'status': 'Reported'}
-            #res = callAPI(url, 'PUT', ts_config.authorization, ts_config.api_key, json.dumps(data_dict))
-            res = callAPI2(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
+            res = callAPI(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, json.dumps(data_dict))
             #print(res.text)
     else:
         return HttpResponse(status=200)
@@ -384,8 +398,7 @@ def hook(request):
 
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
-            #res = callAPI(url, 'GET', ts_config.authorization, ts_config.api_key)
-            res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+            res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             vuln_json = res.json()
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
@@ -400,8 +413,7 @@ def hook(request):
                     if '{traceUuid}' in howtofix_url:
                         howtofix_url = howtofix_url.replace('{traceUuid}', vul_id)
             # Story
-            #get_story_res = callAPI(story_url, 'GET', ts_config.authorization, ts_config.api_key)
-            get_story_res = callAPI2(story_url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+            get_story_res = callAPI(story_url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             story_json = get_story_res.json()
             chapters = []
             for chapter in story_json['story']['chapters']:
@@ -415,8 +427,7 @@ def hook(request):
                     chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % chapter['body'])
             story = story_json['story']['risk']['formattedText']
             # How to fix
-            #get_howtofix_res = callAPI(howtofix_url, 'GET', ts_config.authorization, ts_config.api_key)
-            get_howtofix_res = callAPI2(howtofix_url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+            get_howtofix_res = callAPI(howtofix_url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             howtofix_json = get_howtofix_res.json()
             howtofix = howtofix_json['recommendation']['formattedText']
 
@@ -622,7 +633,7 @@ def hook(request):
             lib_id = m.group(2)
             teamserver_url = ts_config.url
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
-            res = callAPI2(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+            res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             lib_json = res.json()
             lib_name = lib_json['library']['file_name']
             file_version = lib_json['library']['file_version']

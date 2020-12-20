@@ -81,7 +81,7 @@ class BacklogAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # ----- 与えられたBacklogの各表示名からAPI発行時に必要なIDを取得 -----
+        # ----- 与えられたBacklogの各表示名からAPI発行時に必要なIDなどを取得 -----
         headers = { 
             'Content-Type': 'application/json'
         }   
@@ -90,11 +90,14 @@ class BacklogAdminForm(forms.ModelForm):
             url = '%s/api/v2/projects/%s?apiKey=%s' % (cleaned_data['url'], cleaned_data['project_key'], cleaned_data['api_key'])
             res = requests.get(url, headers=headers)
             project_id = None
+            text_formatting_rule = None
             if res.status_code == 200:
                 project_id = res.json()['id']
+                text_formatting_rule = res.json()['textFormattingRule']
             if project_id is None:
                 raise forms.ValidationError({'project_key':[_('This ProjectKey does not exist.')]})
             self.instance.project_id = project_id
+            self.instance.text_formatting_rule = text_formatting_rule
 
         if 'url' in cleaned_data and 'project_key' in cleaned_data and 'api_key' in cleaned_data and 'issuetype_name' in cleaned_data:
             # /api/v2/projects/:projectIdOrKey/issueTypes 

@@ -33,6 +33,8 @@ class Backlog(models.Model):
     status_fixed = models.CharField(_('Fixed'), max_length=50, blank=True, null=True)
     status_fixed_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_fixed_id = models.CharField(_('Fixed ID'), max_length=50, blank=True, null=True)
+    # Text Format
+    text_formatting_rule = models.CharField(_('Text Formatting Rule'), max_length=50, blank=True, null=True)
 
     def __str__(self):
         return '%s' % (self.name)
