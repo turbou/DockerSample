@@ -195,7 +195,7 @@ class BacklogAdmin(NestedModelAdmin):
     form = BacklogAdminForm
     search_fields = ('name', 'url',)
     actions = ['clear_mappings', 'delete_all_issues',]
-    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp', 'vul_count', 'lib_count')
+    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp', 'vul_count', 'lib_count', 'text_formatting_rule')
     inlines = [
         BacklogVulInline,
         BacklogLibInline,

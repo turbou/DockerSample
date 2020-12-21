@@ -2,10 +2,12 @@ from django.contrib import admin
 from django.conf import settings
 from django import forms
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 from .models import Integration
 
 import json
 import requests
+import base64
 
 class TeamServerAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -18,21 +20,18 @@ class TeamServerAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        #if 'url' in cleaned_data and 'api_key' in cleaned_data and 'username' in cleaned_data and 'service_key' in cleaned_data:
-        #    headers = {
-        #        'Content-Type': 'application/json'
-        #    }
-        #    url = '%s/api/ng/projects/%s?apiKey=%s' % (cleaned_data['url'], cleaned_data['project_key'], cleaned_data['api_key'])
-        #    res = requests.get(url, headers=headers)
-        #    project_id = None
-        #    text_formatting_rule = None
-        #    if res.status_code == 200:
-        #        pass
-#curl -X GET \
-#     https://eval.contrastsecurity.com/Contrast/api/ng/442311fd-c9d6-44a9-a00b-2b03db2d816c/applications/ \
-#     -H 'Authorization: dHVyYm91QGkuc29mdGJhbmsuanA6MTJNSlRJNkVOMjQ0Wlk5Qw==' \
-#     -H 'API-Key: EFhK6pIuD6mh5RX6YQ2iMOOavh9Mc52u' \
-#     -H 'Accept: application/json'
+        if 'url' in cleaned_data and 'org_id' in cleaned_data and 'api_key' in cleaned_data and 'username' in cleaned_data and 'service_key' in cleaned_data:
+            url = '%s/api/ng/%s/organizations/' % (cleaned_data['url'], cleaned_data['org_id'])
+            authorization = base64.b64encode(('%s:%s' % (cleaned_data['username'], cleaned_data['service_key'])).encode('utf-8'))
+            headers = { 
+                'Authorization': authorization,
+                'API-Key': cleaned_data['api_key'],
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            } 
+            res = requests.get(url, headers=headers)
+            if res.status_code != requests.codes.ok: # 200
+                raise forms.ValidationError(_('Unable to connect to Team Server. Please check the settings.'))
         return cleaned_data
 
 @admin.register(Integration)

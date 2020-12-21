@@ -452,7 +452,7 @@ def hook(request):
                 }
                 deco_mae = ''
                 deco_ato = ''
-                if ts_config.backlog.text_formatting.rule == 'markdown':
+                if ts_config.backlog.text_formatting_rule == 'markdown':
                     deco_mae = '## '
                     deco_ato = ''
                 else:
@@ -460,23 +460,14 @@ def hook(request):
                     deco_ato = ''
                 description = []
                 description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(''.join(chapters), ts_config.backlog.text_formatting.rule)))
+                description.append('%s\n\n' %  (convertMustache(''.join(chapters), ts_config.backlog.text_formatting_rule)))
                 description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(story), ts_config.backlog.text_formatting.rule))
+                description.append('%s\n\n' %  (convertMustache(story, ts_config.backlog.text_formatting_rule)))
                 description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(howtofix), ts_config.backlog.text_formatting.rule))
+                description.append('%s\n\n' %  (convertMustache(howtofix, ts_config.backlog.text_formatting_rule)))
                 description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
                 description.append(self_url)
-                if BacklogVul.objects.filter(contrast_vul_id=vul_id).exists():
-                    backlog_mapping = BacklogVul.objects.filter(contrast_vul_id=vul_id).first()
-                    # /api/v2/issues/:issueIdOrKey 
-                    url = '%s/api/v2/issues/%s?apiKey=%s' % (ts_config.backlog.url, backlog_mapping.issue_id, ts_config.backlog.api_key)
-                    data = {
-                        'description': ''.join(description),
-                    }   
-                    res = requests.patch(url, json=data, headers=headers)
-                    print(res.status_code)
-                elif event_type == 'VULNERABILITY_DUPLICATE':
+                if not BacklogVul.objects.filter(contrast_vul_id=vul_id).exists():
                     url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
                     data = {
                         'projectId': ts_config.backlog.project_id,
@@ -491,6 +482,15 @@ def hook(request):
                         mapping = BacklogVul(backlog=ts_config.backlog, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
                         mapping.issue_id = res.json()['id']
                         mapping.save()
+                elif event_type == 'VULNERABILITY_DUPLICATE':
+                    backlog_mapping = BacklogVul.objects.filter(contrast_vul_id=vul_id).first()
+                    # /api/v2/issues/:issueIdOrKey 
+                    url = '%s/api/v2/issues/%s?apiKey=%s' % (ts_config.backlog.url, backlog_mapping.issue_id, ts_config.backlog.api_key)
+                    data = {
+                        'description': ''.join(description),
+                    }   
+                    res = requests.patch(url, json=data, headers=headers)
+                    print(res.status_code)
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
@@ -680,8 +680,12 @@ def hook(request):
             if ts_config.backlog:
                 summary = lib_name
                 # description
-                deco_mae = "**"
-                deco_ato = "**"
+                if ts_config.backlog.text_formatting_rule == 'markdown':
+                    deco_mae = '## '
+                    deco_ato = ''
+                else:
+                    deco_mae = '** '
+                    deco_ato = ''
                 description = []
                 description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
                 description.append('%s\n\n' % (file_version))
