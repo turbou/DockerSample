@@ -404,7 +404,7 @@ def hook(request):
             app_id = json_data['application_id']
             vul_id = json_data['vulnerability_id']
             self_url = ''
-            r = re.compile(".+\((.+" + vul_id + ")\)")
+            r = re.compile(".+\((.+/vulns/[A-Z0-9\-]{19})\)")
             m = r.search(json_data['description'])
             if m is not None:
                 self_url = m.group(1)
@@ -433,7 +433,7 @@ def hook(request):
                 chapters.append('%s\n\n' % chapter['introText'])
                 if chapter['type'] == 'properties':
                     for key in chapter['properties']:
-                        chapters.append('%s\n' % key)
+                        chapters.append('%s\n\n' % key)
                         value = chapter['properties'][key]
                         chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % value['value'])
                 elif chapter['type'] in ['configuration', 'location', 'recreation', 'dataflow', 'source']:
