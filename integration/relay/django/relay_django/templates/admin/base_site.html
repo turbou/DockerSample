@@ -1,6 +1,10 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
+{% block extrahead %}
+{{ block.super }}
+<link rel="icon" href="{% static "admin/img/icon.png" %}">
+{% endblock %}
 {% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block branding %}
