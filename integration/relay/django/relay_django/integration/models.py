@@ -9,6 +9,7 @@ class Integration(models.Model):
         help_text=_('Set this name to the TeamServer Generic Webhook Payload.')
     )
     url = models.URLField(_('TeamServer URL'), help_text=_('e.g. https://app.contrastsecurity.com/Contrast'))
+    org_id = models.CharField(_('Organization ID'), max_length=36, unique=False)
     api_key = models.CharField(_('API Key'), max_length=50, unique=False)
     username = models.CharField(_('Username'), max_length=20, unique=False, help_text=_('Login ID (mail address)'))
     service_key = models.CharField(_('Service Key'), max_length=20, unique=False)
