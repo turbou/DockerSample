@@ -43,10 +43,6 @@ def convertMustache(old_str, text_formatting_rule='markdown'):
         new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
         # List
         new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
-        # Other
-        new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
-        # <, >
-        new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
     else:
         # Link
         new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[[\2:\1]]', old_str)
@@ -57,10 +53,21 @@ def convertMustache(old_str, text_formatting_rule='markdown'):
         new_str = new_str.replace('{{#header}}', '*** ').replace('{{\/header}}', '')
         # List
         new_str = new_str.replace('{{#listElement}}', '- ').replace('{{\/listElement}}', '')
-        # Other
-        new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
-        # <, >
-        new_str = new_str.replace('&lt;', '<').replace('&gt;', '>')
+
+    # New line
+    new_str = re.sub(r'{{{nl}}}', '\n', new_str)
+    # Other
+    new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
+    # Comment
+    new_str = re.sub(r'{{!.+}}', '', new_str)
+    # <, >
+    new_str = new_str.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ')
+    # Quot
+    new_str = new_str.replace('&quot;', '"')
+    # Tab
+    new_str = new_str.replace('\t', '    ')
+    # Character Reference
+    new_str = re.sub(r'&#[^;]+;', '', new_str)
     return new_str
 
 def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
