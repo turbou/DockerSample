@@ -12,8 +12,6 @@ class Backlog(models.Model):
     project_id = models.CharField(_('Project ID'), max_length=10, blank=True, null=True)
     issuetype_name = models.CharField(_('IssueType Name'), max_length=100)
     issuetype_id = models.CharField(_('IssueType ID'), max_length=10, blank=True, null=True)
-    priority_name = models.CharField(_('Priority Name'), max_length=100)
-    priority_id = models.CharField(_('Priority ID'), max_length=10, blank=True, null=True)
     # Status
     status_reported = models.CharField(_('Reported'), max_length=50, blank=True, null=True)
     status_reported_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
@@ -33,6 +31,19 @@ class Backlog(models.Model):
     status_fixed = models.CharField(_('Fixed'), max_length=50, blank=True, null=True)
     status_fixed_priority = models.BooleanField(_('Prioritize'), default=False, help_text=_('If the same state name is mapped, this is prioritized.'))
     status_fixed_id = models.CharField(_('Fixed ID'), max_length=50, blank=True, null=True)
+    # Priority
+    priority_critical = models.CharField(_('Critical'), max_length=50, blank=True, null=True)
+    priority_critical_id = models.CharField(_('Critical ID'), max_length=10, blank=True, null=True)
+    priority_high = models.CharField(_('High'), max_length=50, blank=True, null=True)
+    priority_high_id = models.CharField(_('High ID'), max_length=10, blank=True, null=True)
+    priority_medium = models.CharField(_('Medium'), max_length=50, blank=True, null=True)
+    priority_medium_id = models.CharField(_('Medium ID'), max_length=10, blank=True, null=True)
+    priority_low = models.CharField(_('Low'), max_length=50, blank=True, null=True)
+    priority_low_id = models.CharField(_('Low ID'), max_length=10, blank=True, null=True)
+    priority_note = models.CharField(_('Note'), max_length=50, blank=True, null=True)
+    priority_note_id = models.CharField(_('Note ID'), max_length=10, blank=True, null=True)
+    priority_cvelib = models.CharField(_('CVE Lib'), max_length=50, blank=True, null=True)
+    priority_cvelib_id = models.CharField(_('CVE Lib ID'), max_length=10, blank=True, null=True)
     # Text Format
     text_formatting_rule = models.CharField(_('Text Formatting Rule'), max_length=50, blank=True, null=True)
 

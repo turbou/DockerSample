@@ -113,33 +113,10 @@ class BacklogAdminForm(forms.ModelForm):
                 self.add_error('issuetype_name', _('This IssueType does not exist.'))
             self.instance.issuetype_id = issuetype_id
 
-        if 'url' in cleaned_data and 'api_key' in cleaned_data and 'priority_name' in cleaned_data:
-            # /api/v2/priorities 
-            url = '%s/api/v2/priorities?apiKey=%s' % (cleaned_data['url'], cleaned_data['api_key'])
-            res = requests.get(url, headers=headers)
-            priority_id = None
-            if res.status_code == 200:
-                for priority in res.json():
-                    if priority['name'] == cleaned_data['priority_name']:
-                        priority_id = priority['id']
-                        break
-            if priority_id is None:
-                self.add_error('priority_name', _('This Priority does not exist.'))
-            self.instance.priority_id = priority_id
-
         if 'url' in cleaned_data and 'project_key' in cleaned_data and 'api_key' in cleaned_data:
             # /api/v2/projects/:projectIdOrKey/statuses
             url = '%s/api/v2/projects/%s/statuses?apiKey=%s' % (cleaned_data['url'], cleaned_data['project_key'], cleaned_data['api_key'])
             res = requests.get(url, headers=headers)
-            print(res.json())
-            statuse_tuple = [
-                ('status_reported', 'status_reported_id'),
-                ('status_suspicious', 'status_suspicious_id'),
-                ('status_confirmed', 'status_confirmed_id'),
-                ('status_notaproblem', 'status_notaproblem_id'),
-                ('status_remediated', 'status_remediated_id'),
-                ('status_fixed', 'status_fixed_id'),
-            ]
             chk_statuses = [
                 'status_reported',
                 'status_suspicious',
@@ -181,11 +158,37 @@ class BacklogAdminForm(forms.ModelForm):
                 prior_cnt = 1 if cleaned_data['%s_priority' % chk_status] == True else 0
                 chk_status_dict[sts_str] = {'fields': {chk_status}, 'appear_cnt': 1, 'prior_cnt': prior_cnt}
         for key in chk_status_dict:
-            print(key, chk_status_dict[key])
+            #print(key, chk_status_dict[key])
             value = chk_status_dict[key]
             if value['appear_cnt'] > 1 and value['prior_cnt'] != 1:
                 for f in value['fields']:
                     self.add_error('%s_priority' % f, _('Please specify only one priority.'))
+
+        if 'url' in cleaned_data and 'api_key' in cleaned_data:
+            # /api/v2/priorities 
+            url = '%s/api/v2/priorities?apiKey=%s' % (cleaned_data['url'], cleaned_data['api_key'])
+            res = requests.get(url, headers=headers)
+            chk_priorities = [
+                'priority_critical',
+                'priority_high',
+                'priority_medium',
+                'priority_low',
+                'priority_note',
+                'priority_cvelib',
+            ]
+            ng_priorities = copy.copy(chk_priorities)
+            if res.status_code == 200:
+                for chk_priority in chk_priorities:
+                    if chk_priority in cleaned_data and cleaned_data[chk_priority]:
+                        for priority in res.json():
+                            if priority['name'] == cleaned_data[chk_priority]:
+                                setattr(self.instance, '%s_id' % chk_priority, priority['id'])
+                                ng_priorities.remove(chk_priority)
+                    else:
+                        ng_priorities.remove(chk_priority)
+                        continue
+            for ng_priority in ng_priorities:
+                self.add_error(ng_priority, _('This Priority does not exist.'))
 
         return cleaned_data
 
@@ -195,13 +198,13 @@ class BacklogAdmin(NestedModelAdmin):
     form = BacklogAdminForm
     search_fields = ('name', 'url',)
     actions = ['clear_mappings', 'delete_all_issues',]
-    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'priority_disp', 'vul_count', 'lib_count', 'text_formatting_rule')
+    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'vul_count', 'lib_count', 'text_formatting_rule')
     inlines = [
         BacklogVulInline,
         BacklogLibInline,
     ]
     fieldsets = [ 
-        (None, {'fields': ['name', 'url', 'api_key', 'project_key', 'issuetype_name', 'priority_name']}),
+        (None, {'fields': ['name', 'url', 'api_key', 'project_key', 'issuetype_name',]}),
         (_('Status Mapping'), {'fields': [
             ('status_reported', 'status_reported_priority'),
             ('status_suspicious', 'status_suspicious_priority'),
@@ -209,6 +212,14 @@ class BacklogAdmin(NestedModelAdmin):
             ('status_notaproblem', 'status_notaproblem_priority'),
             ('status_remediated', 'status_remediated_priority'),
             ('status_fixed', 'status_fixed_priority'),
+        ]}),
+        (_('Priority Mapping'), {'fields': [
+            'priority_critical',
+            'priority_high',
+            'priority_medium',
+            'priority_low',
+            'priority_note',
+            'priority_cvelib',
         ]}),
     ]
 
@@ -221,11 +232,6 @@ class BacklogAdmin(NestedModelAdmin):
         return '%s (%s)' % (obj.issuetype_name, obj.issuetype_id)
     issuetype_disp.short_description = '種別'
     issuetype_disp.admin_order_field = 'issuetype_id'
-
-    def priority_disp(self, obj):
-        return '%s (%s)' % (obj.priority_name, obj.priority_id)
-    priority_disp.short_description = '優先度'
-    priority_disp.admin_order_field = 'priority_id'
 
     def vul_count(self, obj):
         return obj.vuls.count()

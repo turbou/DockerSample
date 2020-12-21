@@ -474,13 +474,27 @@ def hook(request):
                 description.append('%s\n\n' %  (convertMustache(howtofix, ts_config.backlog.text_formatting_rule)))
                 description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
                 description.append(self_url)
+
+                severity = vuln_json['trace']['severity']
+                priority_id = None
+                if severity == 'Critical':
+                    priority_id = ts_config.backlog.priority_critical_id
+                elif severity == 'High':
+                    priority_id = ts_config.backlog.priority_high_id
+                elif severity == 'Medium':
+                    priority_id = ts_config.backlog.priority_medium_id
+                elif severity == 'Low':
+                    priority_id = ts_config.backlog.priority_low_id
+                elif severity == 'Note':
+                    priority_id = ts_config.backlog.priority_note_id
+
                 if not BacklogVul.objects.filter(contrast_vul_id=vul_id).exists():
                     url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
                     data = {
                         'projectId': ts_config.backlog.project_id,
                         'summary': summary,
                         'issueTypeId': ts_config.backlog.issuetype_id,
-                        'priorityId': ts_config.backlog.priority_id,
+                        'priorityId': priority_id,
                         'description': ''.join(description),
                     }   
                     res = requests.post(url, json=data, headers=headers)
@@ -704,12 +718,13 @@ def hook(request):
                 description.append('%s\n\n' % ('\n'.join(cve_list)))
                 description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
                 description.append(self_url)
+                priority_id = ts_config.backlog.priority_cvelib_id
                 url = '%s/api/v2/issues?apiKey=%s' % (ts_config.backlog.url, ts_config.backlog.api_key)
                 data = {
                     'projectId': ts_config.backlog.project_id,
                     'summary': summary,
                     'issueTypeId': ts_config.backlog.issuetype_id,
-                    'priorityId': ts_config.backlog.priority_id,
+                    'priorityId': priority_id,
                     'description': ''.join(description),
                 }   
                 headers = {
