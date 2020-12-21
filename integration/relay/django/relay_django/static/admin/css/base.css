@@ -21,7 +21,7 @@ a:link, a:visited {
 }
 
 a:focus, a:hover {
-    color: #036;
+    color: #0DA1A9;
 }
 
 a:focus {
@@ -451,7 +451,6 @@ select[multiple] {
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
     background: #f8f8f8;
     padding: 10px 15px;
-    border: none;
     border: 1px solid #ededed;
     border-radius: 4px;
     color: rgb(153, 153, 153);
@@ -467,6 +466,7 @@ a.button {
 .button:hover, input[type=submit]:hover, input[type=button]:hover {
     background: #3cc3b2;
     color: #fff;
+    outline: none;
 }
 
 .button[disabled], input[type=submit][disabled], input[type=button][disabled] {
