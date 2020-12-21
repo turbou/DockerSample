@@ -394,7 +394,7 @@ msgstr "コントラスト統合管理"
 
 #: relay_django/urls.py:29
 msgid "Menu"
-msgstr "メニュー"
+msgstr "コントラスト統合管理"
 
 #: relay_django/views.py:366
 msgid "event_new_vulnerability"
