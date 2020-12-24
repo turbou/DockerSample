@@ -32,27 +32,43 @@ def callAPI(url, method, api_key, username, service_key, data=None):
         res = requests.put(url, data=data, headers=headers)
     return res
 
-def convertMustache(old_str, text_formatting_rule='markdown'):
-    if text_formatting_rule == 'markdown':
-        # Link
-        new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
-        # CodeBlock
-        new_str = re.sub(r'{{#[A-Za-z]+Block}}', '~~~\n', new_str)
-        new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n~~~', new_str)
-        # Header
-        new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
-        # List
-        new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
-    else:
-        # Link
-        new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[[\2:\1]]', old_str)
-        # CodeBlock
-        new_str = re.sub(r'{{#[A-Za-z]+Block}}', '{code}\n', new_str)
-        new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n{/code}', new_str)
-        # Header
-        new_str = new_str.replace('{{#header}}', '*** ').replace('{{\/header}}', '')
-        # List
-        new_str = new_str.replace('{{#listElement}}', '- ').replace('{{\/listElement}}', '')
+def convertMustache(old_str):
+    # Link
+    new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
+    # CodeBlock
+    new_str = re.sub(r'{{#[A-Za-z]+Block}}', '~~~\n', new_str)
+    new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n~~~', new_str)
+    # Header
+    new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
+    # List
+    new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
+    # Table
+    r = re.compile('({{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}})')
+    while True:
+      tbl_bgn_idx = new_str.find('{{#table}}')
+      tbl_end_idx = new_str.find('{{/table}}')
+      print(tbl_bgn_idx, tbl_end_idx)
+      if tbl_bgn_idx < 0 or tbl_end_idx < 0:
+        break
+      else:
+        tbl_str = new_str[tbl_bgn_idx:tbl_end_idx + 10] # 10は{{/table}}の文字数
+        tbl_str = re.sub(r'({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{/tableHeaderRow}})[\s]*{{/tableRow}})', '\\1' + "\n{{#tableRowX}}" + '\\2' + '{{/tableRowX}}', tbl_str)
+        m = r.search(tbl_str)
+        if m is not None:
+          replace_str = m.group(1).replace('tableHeaderRow', 'tableHeaderRowX')
+          tbl_str = re.sub(r'{{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}}', replace_str, tbl_str)
+          tbl_str = re.sub(r'({{#tableHeaderRowX}})(.+?)({{/tableHeaderRowX}})', '\\1---\\3', tbl_str)
+        tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}', '|', tbl_str)
+        tbl_str = re.sub(r'{{/tableHeaderRow}}[\s]*', '|', tbl_str)
+        tbl_str = re.sub(r'[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}', '|', tbl_str)
+        tbl_str = re.sub(r'{{/tableHeaderRowX}}[\s]*', '|', tbl_str)
+        tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableCell}}', '|', tbl_str)
+        tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
+        tbl_str = re.sub(r'[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}', '\n|', tbl_str)
+        tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
+        tbl_str = re.sub(r'{{{nl}}}', '<br>', tbl_str)
+        tbl_str = re.sub(r'{{(#|/)[A-Za-z]+}}', '', tbl_str) # ここで残ったmustacheを全削除
+        new_str = '%s%s%s' % (new_str[:tbl_bgn_idx], tbl_str, new_str[tbl_end_idx + 10:])
 
     # New line
     new_str = re.sub(r'{{{nl}}}', '\n', new_str)
@@ -442,7 +458,10 @@ def hook(request):
                     for key in chapter['properties']:
                         chapters.append('%s\n\n' % key)
                         value = chapter['properties'][key]
-                        chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % value['value'])
+                        if value['value'].startswith('{{#table}}'):
+                            chapters.append('\n%s\n' % value['value'])
+                        else:
+                            chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % value['value'])
                 elif chapter['type'] in ['configuration', 'location', 'recreation', 'dataflow', 'source']:
                     chapters.append('{{#xxxxBlock}}%s{{/xxxxBlock}}\n' % chapter['body'])
             story = story_json['story']['risk']['formattedText']
@@ -457,21 +476,15 @@ def hook(request):
                 headers = {
                     'Content-Type': 'application/json'
                 }
-                deco_mae = ''
+                deco_mae = '## '
                 deco_ato = ''
-                if ts_config.backlog.text_formatting_rule == 'markdown':
-                    deco_mae = '## '
-                    deco_ato = ''
-                else:
-                    deco_mae = '** '
-                    deco_ato = ''
                 description = []
                 description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(''.join(chapters), ts_config.backlog.text_formatting_rule)))
+                description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
                 description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(story, ts_config.backlog.text_formatting_rule)))
+                description.append('%s\n\n' %  (convertMustache(story)))
                 description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-                description.append('%s\n\n' %  (convertMustache(howtofix, ts_config.backlog.text_formatting_rule)))
+                description.append('%s\n\n' %  (convertMustache(howtofix)))
                 description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
                 description.append(self_url)
 
@@ -701,12 +714,8 @@ def hook(request):
             if ts_config.backlog:
                 summary = lib_name
                 # description
-                if ts_config.backlog.text_formatting_rule == 'markdown':
-                    deco_mae = '## '
-                    deco_ato = ''
-                else:
-                    deco_mae = '** '
-                    deco_ato = ''
+                deco_mae = '## '
+                deco_ato = ''
                 description = []
                 description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
                 description.append('%s\n\n' % (file_version))
