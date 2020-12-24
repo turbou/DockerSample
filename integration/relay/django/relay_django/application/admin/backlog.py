@@ -96,8 +96,9 @@ class BacklogAdminForm(forms.ModelForm):
                 text_formatting_rule = res.json()['textFormattingRule']
             if project_id is None:
                 raise forms.ValidationError({'project_key':[_('This ProjectKey does not exist.')]})
+            if text_formatting_rule != 'markdown':
+                raise forms.ValidationError(_('Text Formatting Rule should be markdown.'))
             self.instance.project_id = project_id
-            self.instance.text_formatting_rule = text_formatting_rule
 
         if 'url' in cleaned_data and 'project_key' in cleaned_data and 'api_key' in cleaned_data and 'issuetype_name' in cleaned_data:
             # /api/v2/projects/:projectIdOrKey/issueTypes 
@@ -198,7 +199,7 @@ class BacklogAdmin(NestedModelAdmin):
     form = BacklogAdminForm
     search_fields = ('name', 'url',)
     actions = ['clear_mappings', 'delete_all_issues',]
-    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'vul_count', 'lib_count', 'text_formatting_rule')
+    list_display = ('name', 'url', 'project_disp', 'issuetype_disp', 'vul_count', 'lib_count')
     inlines = [
         BacklogVulInline,
         BacklogLibInline,
