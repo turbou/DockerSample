@@ -7,6 +7,6 @@ aws deploy create-deployment-group \
   --region ap-northeast-1 \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --deployment-group-name PetClinicDeployGroup \
-  --service-role-arn arn:aws:iam::310199975805:role/service-role/CodeDeployServiceRole-Demo \
+  --service-role-arn arn:aws:iam::[ACCOUNT_ID]:role/service-role/CodeDeployServiceRole-Demo \
   --ec2-tag-filters Key=Target,Value=PetClinic,Type=KEY_AND_VALUE
 

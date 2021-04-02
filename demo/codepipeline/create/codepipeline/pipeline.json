@@ -1,10 +1,10 @@
 {
     "pipeline": {
         "name": "PetClinicDemo",
-        "roleArn": "arn:aws:iam::310199975805:role/service-role/CodePipelineServiceRole-Demo",
+        "roleArn": "arn:aws:iam::[ACCOUNT_ID]:role/service-role/CodePipelineServiceRole-Demo",
         "artifactStore": {
             "type": "S3",
-            "location": "310199975805-petclinic-demo"
+            "location": "[ACCOUNT_ID]-petclinic-demo"
         },
         "stages": [
             {
@@ -25,7 +25,7 @@
                             "Owner": "turbou",
                             "PollForSourceChanges": "false",
                             "Repo": "PetClinicDemo"
-                        }, 
+                        },
                         "outputArtifacts": [
                             {
                                 "name": "SourceArtifact"

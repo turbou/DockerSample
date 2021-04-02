@@ -23,7 +23,7 @@
         "privilegedMode": false,
         "imagePullCredentialsType": "CODEBUILD"
     },
-    "serviceRole": "arn:aws:iam::310199975805:role/service-role/CodeBuildServiceRole-Demo",
+    "serviceRole": "arn:aws:iam::[ACCOUNT_ID]:role/service-role/CodeBuildServiceRole-Demo",
     "timeoutInMinutes": 60,
     "queuedTimeoutInMinutes": 480,
     "logsConfig": {
@@ -38,14 +38,14 @@
         }
     },
     "buildBatchConfig": {
-        "serviceRole": "arn:aws:iam::310199975805:role/service-role/CodeBuildServiceRole-Demo", 
+        "serviceRole": "arn:aws:iam::[ACCOUNT_ID]:role/service-role/CodeBuildServiceRole-Demo",
         "combineArtifacts": true,
         "restrictions": {
             "maximumBuildsAllowed": 1,
             "computeTypesAllowed": [
-                "BUILD_GENERAL1_SMALL"  
-            ]   
-        },  
+                "BUILD_GENERAL1_SMALL"
+            ]
+        },
         "timeoutInMins": 10
     }
 }
