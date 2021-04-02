@@ -1,0 +1,15 @@
+version: '3' 
+
+services:
+  tomcat:
+    build:
+      context: .
+    container_name: tomcat_sample
+    environment:
+      CONTRAST__SERVER__NAME: Taka_Docker
+      CONTRAST__APPLICATION__NAME: Tomcat_Sample_Taka
+      CONTRAST__AGENT__LOGGER__STDOUT: 'true'
+      CONTRAST__AGENT__LOGGER__LEVEL: DEBUG
+    ports:
+      - "8080:8080"
+
