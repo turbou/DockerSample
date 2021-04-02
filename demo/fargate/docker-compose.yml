@@ -2,6 +2,7 @@ version: '3'
 
 services:
   tomcat:
+    image: sample/tomcat8
     build:
       context: .
     container_name: tomcat_sample
