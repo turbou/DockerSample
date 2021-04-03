@@ -1,0 +1,56 @@
+{
+    "family": "tomcat-task-definition",
+    "executionRoleArn": "arn:aws:iam::[ACCOUNT_ID]:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+        {
+            "name": "tomcat_sample",
+            "image": "[ACCOUNT_ID].dkr.ecr.ap-northeast-1.amazonaws.com/sample/tomcat:8.5.54",
+            "cpu": 512,
+            "memory": 1024,
+            "memoryReservation": 512,
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "CONTRAST__SERVER__NAME",
+                    "value": "ECS"
+                },
+                {
+                    "name": "CONTRAST__APPLICATION__NAME",
+                    "value": "Tomcat_Sample_ECS"
+                },
+                {
+                    "name": "CONTRAST__AGENT__LOGGER__LEVEL",
+                    "value": "DEBUG"
+                },
+                {
+                    "name": "CONTRAST__AGENT__LOGGER__STDOUT",
+                    "value": "true"
+                }
+            ],
+            "readonlyRootFilesystem": true,
+            "interactive": true,
+            "pseudoTerminal": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/demo/fargate",
+                    "awslogs-region": "ap-northeast-1",
+                    "awslogs-stream-prefix": "tomcat"
+                }
+            }
+        }
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "512",
+    "memory": "1024"
+}
