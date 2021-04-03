@@ -1,13 +1,23 @@
-# PetClinicの脆弱性テストをCodePipelineでやってみる
+# Fargate上のコンテナで稼働するTomcatサンプルをTeamServerにオンボードさせてみる
 
-## サンプルアプリの準備
+## 稼働確認用のDockerイメージを生成する
 
-#### 1. サンプルSpringBootアプリの準備
-https://github.com/turbou/PetClinicDemo を自身のGithubなどにフォークします。
+#### 1. Contrastエージェント（Java）のDL
+TeamServerからJava用のエージェントをダウンロードして、このREADME.mdと同じ位置に配置します。
 
-#### 2. Githubのアクセストークンの準備
-Personal access tokensでアクセストークンを生成します。  
-```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
+#### 2. 設定など変更（任意）
+Contrastエージェントへのdocker-compose.yml内のenvironmentで指定できます。
+設定可能な環境変数は以下のコマンドで確認できます。txtに出力するなどして、ご確認ください。
+```
+java -jar contrast.jar properties > properties.txt
+```
+その他、ポート番号など変更がある場合は適宜、修正してください。
+
+#### 3. Dockerビルド
+docker-compose.ymlのある場所で  
+```
+docker-compose build
+```  
 生成したアクセストークンで置換してください。
 
 #### 3. サンプルアプリの中の簡単な説明
