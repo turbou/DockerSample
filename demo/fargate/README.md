@@ -1,6 +1,6 @@
 # Fargate上のコンテナで稼働するTomcatサンプルをTeamServerにオンボードさせてみる
 
-## 稼働確認用のDockerイメージを生成する
+## 稼働確認用のDockerイメージ生成から、ECRへのpush
 
 #### 1. Contrastエージェント（Java）のDL
 TeamServerからJava用のエージェントをダウンロードして、このREADME.mdと同じ位置に配置します。
@@ -18,6 +18,9 @@ docker-compose.ymlのある場所で
 ```bash
 docker-compose build
 ```  
+
+#### 4. ECRへのDockerイメージpush
+```aws/ecr/readme.txt```の手順で、ECRリポジトリの作成から、上で生成したDockerイメージのpushまでを行います。
 
 #### 3. サンプルアプリの中の簡単な説明
 - buildspec.yml  
