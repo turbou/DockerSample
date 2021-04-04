@@ -18,7 +18,11 @@ docker-compose.ymlのある場所で
 ```bash
 docker-compose build
 ```  
-
+ローカルでサンプルアプリの起動と、TeamServerへのオンボードを確認する場合は以下のコマンドを実行してください。
+```bash
+docker-compose up -d
+```
+`localhost:8080/sample`で接続します。またTeamServerでオンボードを確認してください。
 #### 4. ECRへのDockerイメージpush
 ```aws/ecr/readme.txt```の手順で、ECRリポジトリの作成から、上で生成したDockerイメージのpushまでを行います。
 
