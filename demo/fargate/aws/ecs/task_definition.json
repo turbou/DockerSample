@@ -35,7 +35,7 @@
                     "value": "true"
                 }
             ],
-            "readonlyRootFilesystem": true,
+            "readonlyRootFilesystem": false,
             "interactive": true,
             "pseudoTerminal": true,
             "logConfiguration": {
