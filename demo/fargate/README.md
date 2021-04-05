@@ -54,5 +54,15 @@ http://XXX.XXX.XXX.XXX/sample
 ```
 画面が表示されたら、次はTeamServerで、サーバ、アプリケーションページで、オンボードされていることを確認します。
 
+### 3. クリーンアップ
+サービスを削除します。
+```bash
+aws ecs delete-service --cluster tomcat_sample --service tomcat_sample-service --force
+```
+クラスターを削除します。
+```bash
+aws ecs delete-cluster --cluster tomcat_sample
+```
+
 以上
 
