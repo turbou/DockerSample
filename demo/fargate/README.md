@@ -48,7 +48,11 @@ docker-compose up -d
 6. ecs
 
 ### 2. TeamServerでのオンボード確認
-編集中
+AWSコンソールにて、実行中タスクのパブリックIPを確認して、Tomacatサンプルページにアクセスします。
+```
+http://XXX.XXX.XXX.XXX/sample
+```
+画面が表示されたら、次はTeamServerで、サーバ、アプリケーションページで、オンボードされていることを確認します。
 
 以上
 
