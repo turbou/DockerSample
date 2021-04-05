@@ -14,7 +14,7 @@
 TeamServerからJava用のエージェントをダウンロードして、このREADME.mdと同じ位置に配置します。
 
 ### 2. 設定など変更（任意）
-Contrastエージェントへの環境変数による制御は、docker-compose.yml内のenvironmentで指定できます。
+Contrastエージェントへの環境変数による制御は、docker-compose.yml内のenvironmentで指定できます。  
 設定可能な環境変数は以下のコマンドで確認できます。txtに出力するなどして、ご確認ください。
 ```bash
 java -jar contrast.jar properties > properties.txt
