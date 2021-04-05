@@ -1,5 +1,13 @@
 # Fargate上のコンテナで稼働するTomcatサンプルをTeamServerにオンボードさせてみる
 
+## 前提条件
+- この手順ではAWS CLI, ECS CLIを使います。事前にインストールと設定を済ませてください。
+- ecsTaskExecutionRoleという管理ポリシーが必要となります。ロールに存在しない場合は適宜作成してください。  
+  参考） https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/task_execution_IAM_role.html
+## 手順補足
+- AWSの必要なものについてはすべてCLIで作成できるように手順やjsonファイルを用意していますが、適宜、コンソールから作成いただいても問題ありません。  
+- タスク定義のjsonファイル内に[ACCOUNT_ID]となっている箇所がありますので、事前に自身のアカウントIDに置換しておいてください。
+
 ## 稼働確認用のDockerイメージ生成から、ECRへのpush
 
 ### 1. Contrastエージェント（Java）のDL
