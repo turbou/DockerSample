@@ -1,7 +1,7 @@
 # Fargate上のコンテナで稼働するTomcatサンプルをTeamServerにオンボードさせてみる
 
 ## 前提条件
-- この手順ではAWS CLI, ECS CLIを使います。事前にインストールと設定を済ませてください。
+- この手順ではAWS CLIを使います。事前にインストールと設定を済ませてください。
 - ecsTaskExecutionRoleという管理ポリシーが必要となります。ロールに存在しない場合は適宜作成してください。  
   参考） https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/task_execution_IAM_role.html
 ## 手順補足
