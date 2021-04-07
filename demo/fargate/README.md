@@ -14,7 +14,7 @@
 TeamServerからJava用のエージェントをダウンロードして、このREADME.mdと同じ位置に配置します。
 
 ### 2. 設定など変更（任意）
-Contrastエージェントへのdocker-compose.yml内のenvironmentで指定できます。
+Contrastエージェントへの環境変数による制御は、docker-compose.yml内のenvironmentで指定できます。  
 設定可能な環境変数は以下のコマンドで確認できます。txtに出力するなどして、ご確認ください。
 ```bash
 java -jar contrast.jar properties > properties.txt
@@ -48,7 +48,21 @@ docker-compose up -d
 6. ecs
 
 ### 2. TeamServerでのオンボード確認
-編集中
+AWSコンソールにて、実行中タスクのパブリックIPを確認して、Tomacatサンプルページにアクセスします。
+```
+http://XXX.XXX.XXX.XXX/sample
+```
+画面が表示されたら、次はTeamServerで、サーバ、アプリケーションページで、オンボードされていることを確認します。
+
+### 3. クリーンアップ
+サービスを削除します。
+```bash
+aws ecs delete-service --cluster tomcat_sample --service tomcat_sample-service --force
+```
+クラスターを削除します。
+```bash
+aws ecs delete-cluster --cluster tomcat_sample
+```
 
 以上
 
