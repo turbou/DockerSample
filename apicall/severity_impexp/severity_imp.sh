@@ -24,10 +24,17 @@ while read -r RULE_NAME; do
     IMPACT=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .impact'`
     LIKELIHOOD=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .likelihood'`
     CONFIDENCE=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .confidence'`
+    IMPACT_CUSTOMIZED=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .customized_impact'`
+    LIKELIHOOD_CUSTOMIZED=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .customized_likelihood'`
+    CONFIDENCE_CUSTOMIZED=`cat ./rules.json | jq -r --arg title "$RULE_NAME" '.rules[] | select(.name==$title) | .customized_confidence'`
     #echo "  impact: $IMPACT"
     #echo "  likelihood: $LIKELIHOOD"
     #echo "  confidence: $CONFIDENCE"
     #echo '{"confidence_level": "'$CONFIDENCE'", "impact": "'$IMPACT'", "likelihood": "'$LIKELIHOOD'"}' | jq > rule.json
+    if [ $IMPACT_CUSTOMIZED = "false" -a $LIKELIHOOD_CUSTOMIZED = "false" -a $CONFIDENCE_CUSTOMIZED = "false" ]; then
+        echo "  Skip."
+        continue
+    fi
     curl -X POST -sS \
         ${API_URL}/rules/${RULE_NAME} \
         -H "Authorization: ${AUTHORIZATION}" \
