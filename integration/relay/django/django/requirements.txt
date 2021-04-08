@@ -1,4 +1,4 @@
-Django==2.2.13
+Django==2.2.20
 django-nested-admin==3.3.2
 pyasn1==0.4.5
 pytz==2019.1
