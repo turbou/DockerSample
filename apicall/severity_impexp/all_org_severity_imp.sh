@@ -12,8 +12,8 @@ fi
 
 BASEURL=$CONTRAST_BASEURL
 API_KEY=$CONTRAST_API_KEY
-USERNAME=$CONTRAST_USERNAME
-SERVICE_KEY=$CONTRAST_SERVICE_KEY
+USERNAME=$CONTRAST_USERNAME       # SuperAdminユーザー
+SERVICE_KEY=$CONTRAST_SERVICE_KEY # SuperAdminユーザー
 AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 API_URL="${BASEURL}/api/ng"
 GROUP_NAME=RulesAdminGroup
@@ -28,15 +28,15 @@ curl -X GET -sS -G \
 
 GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
-rm -f ./group.json
-curl -X GET -sS -G \
-     ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID} \
-     -d expand=skip_links \
-     -H "Authorization: ${AUTHORIZATION}" \
-     -H "API-Key: ${API_KEY}" \
-     -H 'Accept: application/json' -J -o group.json
-
-CHK_USERNAME=`cat ./group.json | jq -r --arg email "${USERNAME}" '.group.users[] | select(.uid==$email) | .full_name'`
+#rm -f ./group.json
+#curl -X GET -sS -G \
+#     ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID} \
+#     -d expand=skip_links \
+#     -H "Authorization: ${AUTHORIZATION}" \
+#     -H "API-Key: ${API_KEY}" \
+#     -H 'Accept: application/json' -J -o group.json
+#
+#CHK_USERNAME=`cat ./group.json | jq -r --arg email "${USERNAME}" '.group.users[] | select(.uid==$email) | .full_name'`
 
 rm -f ./organizaions.json
 curl -X GET -sS -G \
