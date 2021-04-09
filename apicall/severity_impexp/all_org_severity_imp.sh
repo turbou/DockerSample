@@ -18,6 +18,7 @@ AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 API_URL="${BASEURL}/api/ng"
 GROUP_NAME=RulesAdminGroup
 
+# 既存のグループを取得します。
 rm -f ./groups.json
 curl -X GET -sS -G \
      ${API_URL}/superadmin/ac/groups \
@@ -28,16 +29,7 @@ curl -X GET -sS -G \
 
 GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
-#rm -f ./group.json
-#curl -X GET -sS -G \
-#     ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID} \
-#     -d expand=skip_links \
-#     -H "Authorization: ${AUTHORIZATION}" \
-#     -H "API-Key: ${API_KEY}" \
-#     -H 'Accept: application/json' -J -o group.json
-#
-#CHK_USERNAME=`cat ./group.json | jq -r --arg email "${USERNAME}" '.group.users[] | select(.uid==$email) | .full_name'`
-
+# 組織一覧を取得します。
 rm -f ./organizaions.json
 curl -X GET -sS -G \
      ${API_URL}/superadmin/organizations \
@@ -46,20 +38,34 @@ curl -X GET -sS -G \
      -H "API-Key: ${API_KEY}" \
      -H 'Accept: application/json' -J -o organizations.json
 
+# 組織IDからjson配列を生成します。
 SCOPES=
 while read -r ORG_ID; do
     SCOPES=$SCOPES'{"org":{"id":"'$ORG_ID'","role":"rules_admin"},"app":{"exceptions":[]}},'
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
 SCOPES=`echo $SCOPES | sed "s/,$//"`
 SCOPES="["$SCOPES"]"
-curl -X PUT -sS \
-    ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID} \
-    -H "Authorization: ${AUTHORIZATION}" \
-    -H "API-Key: ${API_KEY}" \
-    -H "Content-Type: application/json" \
-    -H 'Accept: application/json' \
-    -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}'
 
+# グループがない場合は作成、ある場合は組織の割当を更新します。
+if [ "${GRP_ID}" = "" ]; then
+    curl -X POST -sS \
+        ${API_URL}/superadmin/ac/groups/organizational?expand=skip_links \
+        -H "Authorization: ${AUTHORIZATION}" \
+        -H "API-Key: ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H 'Accept: application/json' \
+        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}'
+else
+    curl -X PUT -sS \
+        ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID}?expand=skip_links \
+        -H "Authorization: ${AUTHORIZATION}" \
+        -H "API-Key: ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H 'Accept: application/json' \
+        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}'
+fi
+
+# 組織ごとのAPIキーを取得します。
 rm -f orgid_apikey_map.txt
 while read -r ORG_ID; do
     curl -X GET -sS -G \
@@ -72,6 +78,7 @@ while read -r ORG_ID; do
     echo "$ORG_ID:$GET_API_KEY" >> orgid_apikey_map.txt
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
 
+# 組織ごとにルールの重大度を反映していきます。
 while read -r ORG_ID; do
     ORG_API_KEY=`grep ${ORG_ID} ./orgid_apikey_map.txt | awk -F: '{print $2}'`
     while read -r RULE_NAME; do
