@@ -1,3 +1,20 @@
+### 前提条件
+本スクリプトはMacおよびLinuxで動作を確認しています。  
+動作にはjqが必要となります。
+
+- [jq](https://stedolan.github.io/jq/) for JSON parse.
+  
+    ```bash
+    # Mac
+    brew install jq
+    # CentOS
+    yum -y install epel-release
+    yum -y install jq
+    # Ubuntu
+    apt -y update
+    apt -y install jq
+    ```
+
 ### 環境変数をセット
 エクスポートでもインポートでもスクリプト実行時に必要です。
 ```bash
