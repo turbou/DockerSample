@@ -54,4 +54,6 @@ EOP（オンプレ）版TeamServerでデフォルトで提供されるcontrast_s
 ./all_org_severity_imp.sh
 ```
 
+処理終了後、EOP配下の各組織のASSESSルール画面にて、反映結果をご確認ください。
+
 以上
