@@ -1,0 +1,18 @@
+version: '3' 
+
+services:
+  tomcat:
+    image: sample/tomcat2:8.5.54
+    build:
+      context: .
+    container_name: tomcat_sample
+    environment:
+      CONTRAST__SERVER__NAME: Docker
+      CONTRAST__APPLICATION__NAME: Tomcat_Sample
+      CONTRAST__AGENT__LOGGER__STDOUT: 'true'
+      CONTRAST__AGENT__LOGGER__LEVEL: DEBUG
+    volumes:
+      - ./contrast.jar:/usr/local/tomcat/contrast.jar
+    ports:
+      - "8080:8080"
+
