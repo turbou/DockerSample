@@ -36,7 +36,12 @@ services:
     ports:
       - "8085:8081"
 ```
-
+### pgadmin4のマウントディレクトリの事前作成
+```bash
+# docker-compose.ymlのある場所で
+mkdir pgadmin4
+chown 5050:5050 pgadmin4/
+```
 ### Djangoコンテナの起動
 ```bash
 # docker-compose.ymlのある場所で
@@ -56,6 +61,7 @@ docker exec -i django python /project/django_project/manage.py batch_createsuper
 
 ### Djangoへの接続
 http://xxx.xxx.xxx.xxx:8085/admin/  
+*ポート番号は上で設定したものとなります。*  
 admin/xxxxx
 
 ### 各サービスごとの接続設定
