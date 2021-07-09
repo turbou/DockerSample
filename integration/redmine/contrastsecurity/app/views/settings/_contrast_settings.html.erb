@@ -28,6 +28,31 @@
   </tbody>
 </table>
 <br />
+<h4><%= l(:config_section_proxy) %></h4>
+<table>
+  <tbody>
+    <tr>
+      <th align="left"><%= l(:proxy_host) %></th>
+      <td><%= text_field_tag('settings[proxy_host]', @settings['proxy_host'], {size:"30"})%></td>
+      <th align="left"><%= l(:proxy_port) %></th>
+      <td><%= text_field_tag('settings[proxy_port]', @settings['proxy_port'], {size:"10"})%></td>
+    </tr>
+  </tbody>
+</table>
+<fieldset class="box">
+  <legend><%= l(:proxy_auth) %></legend>
+  <table>
+    <tbody>
+      <tr>
+        <th align="left"><%= l(:proxy_userpass) %></th>
+        <td><%= text_field_tag('settings[proxy_user]', @settings['proxy_user'], {size:"20"})%></td>
+        <td align="center">/</th>
+        <td><%= password_field_tag('settings[proxy_pass]', @settings['proxy_pass'], {size:"20"})%></td>
+      </tr>
+    </tbody>
+  </table>
+</fieldset>
+<br />
 <h4><%= l(:config_section_import) %></h4>
 <table>
   <tbody>
