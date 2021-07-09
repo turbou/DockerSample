@@ -50,13 +50,18 @@ class IntegrationAdmin(admin.ModelAdmin):
         ('GoogleChat', {'fields': ['googlechat',]}),
     ]
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        self.request = request
+        return qs
+
     def hook_url(self, obj):
         script_name = ''
         if settings.USE_X_FORWARDED_HOST:
-            script_name = settings.FORCE_SCRIPT_NAME
+            script_name = '%s' % settings.FORCE_SCRIPT_NAME
         msg_buffer = []
-        msg_buffer.append('TeamServer Generic Webhook => http://XXXXXXXXXX%s/hook/' % script_name)
-        msg_buffer.append('Gitlab Project Webhook => http://XXXXXXXXXX%s/gitlab/' % script_name)
+        msg_buffer.append('TeamServer Generic Webhook => %RELAYAPP_URL%{}/hook/'.format(script_name))
+        msg_buffer.append('Gitlab Project Webhook => %RELAYAPP_URL%{}/gitlab/'.format(script_name))
         return mark_safe('<br />'.join(msg_buffer))
     hook_url.short_description = 'HOOK URL'
 

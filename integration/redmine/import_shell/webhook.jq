@@ -1,7 +1,7 @@
 {
   "summary": $Title,
   "description": $Message,
-  "project": "contrastsecurity4shell",
+  "project": "petclinic",
   "tracker": "脆弱性",
   "application_name": $ApplicationName,
   "application_code": $ApplicationCode,
