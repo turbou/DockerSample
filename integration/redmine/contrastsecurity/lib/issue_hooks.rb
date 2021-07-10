@@ -38,7 +38,7 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = ContrastUtil.callAPI(url: url)
+    res, msg = ContrastUtil.callAPI(url: url)
     vuln_json = JSON.parse(res.body)
     sts_chg_ptn = "\\(" + l(:text_journal_changed, :label => ".+", :old => ".+", :new => ".+") + "\\)\\R"
     sts_chg_pattern = /#{sts_chg_ptn}/
@@ -93,7 +93,7 @@ class IssueHook < Redmine::Hook::Listener
     note = note.sub(/#{reason_ptn}/, "")
     t_data = {"note" => note}.to_json
     if note_id.blank? && !private_note # note idがなく、でもプライベート注記じゃない（またプライベート注記じゃなくなった）場合
-      res = ContrastUtil.callAPI(url: url, method: "POST", data: t_data)
+      res, msg = ContrastUtil.callAPI(url: url, method: "POST", data: t_data)
       # note idを取得してredmine側のコメントに反映する。
       note_json = JSON.parse(res.body)
       if note_json['success']
@@ -128,7 +128,7 @@ class IssueHook < Redmine::Hook::Listener
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     # Get Status from TeamServer
     url = sprintf('%s/api/ng/%s/traces/%s/filter/%s?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = ContrastUtil.callAPI(url: url)
+    res, msg = ContrastUtil.callAPI(url: url)
     vuln_json = JSON.parse(res.body)
     note = params['issue']['notes']
     private_note = params['issue']['private_notes']
@@ -152,7 +152,7 @@ class IssueHook < Redmine::Hook::Listener
       if note.present? && private_note == "0"
         url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
         t_data = {"note" => note + " (by " + issue.last_updated_by.name + ")"}.to_json
-        res = ContrastUtil.callAPI(url: url, method: "POST", data: t_data)
+        res, msg = ContrastUtil.callAPI(url: url, method: "POST", data: t_data)
         # note idを取得してredmine側のコメントに反映する。
         note_json = JSON.parse(res.body)
         if note_json['success']

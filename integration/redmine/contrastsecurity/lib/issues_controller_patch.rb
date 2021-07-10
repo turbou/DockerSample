@@ -61,9 +61,9 @@ module IssuesControllerPatch
       if type == "VUL"
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/traces/%s/trace/%s', teamserver_url, org_id, app_id, vul_id)
-        res = ContrastUtil.callAPI(url: url)
+        res, msg = ContrastUtil.callAPI(url: url)
         # puts res.code
-        if res.code != "200"
+        if res.present? && res.code != "200"
           flash.now[:warning] = l(:vuln_does_not_exist)
           show = show_without_update
           return show
@@ -93,9 +93,9 @@ module IssuesControllerPatch
       else
         teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
         url = sprintf('%s/api/ng/%s/libraries/%s/%s?expand=vulns', teamserver_url, org_id, lib_lang, lib_id)
-        res = ContrastUtil.callAPI(url: url)
+        res, msg = ContrastUtil.callAPI(url: url)
         # puts res.code
-        if res.code != "200"
+        if res.present? && res.code != "200"
           flash.now[:warning] = l(:lib_does_not_exist)
           show = show_without_update
           return show

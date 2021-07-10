@@ -81,9 +81,24 @@ module ContrastUtil
     return status
   end
 
-  def callAPI(url: , method: "GET", data: nil, api_key: nil, username: nil, service_key: nil)
+  def callAPI(url: , method: "GET", data: nil, api_key: nil, username: nil, service_key: nil, proxy_addr: nil, proxy_port: nil, proxy_user: nil, proxy_pass: nil)
     uri = URI.parse(url)
-    http = Net::HTTP.new(uri.host, uri.port)
+    http = nil
+    proxy_addr ||= Setting.plugin_contrastsecurity['proxy_addr']
+    proxy_port ||= Setting.plugin_contrastsecurity['proxy_port']
+    proxy_user ||= Setting.plugin_contrastsecurity['proxy_user']
+    proxy_pass ||= Setting.plugin_contrastsecurity['proxy_pass']
+    proxy_uri = ""
+    if proxy_addr.present? && proxy_port.present?
+      proxy_uri = URI.parse(sprintf('http://%s:%d', proxy_addr, proxy_port))
+      if proxy_user.present? && proxy_pass.present?
+        http = Net::HTTP.new(uri.host, uri.port, proxy_uri.host, proxy_uri.port, proxy_user, proxy_pass)
+      else
+        http = Net::HTTP.new(uri.host, uri.port, proxy_uri.host, proxy_uri.port)
+      end
+    else
+      http = Net::HTTP.new(uri.host, uri.port)
+    end
     http.use_ssl = false
     if uri.scheme === "https"
       http.use_ssl = true
@@ -112,8 +127,13 @@ module ContrastUtil
     req["Authorization"] = auth_header
     req["API-Key"] = api_key
     req['Content-Type'] = req['Accept'] = 'application/json'
-    res = http.request(req)
-    return res 
+    begin
+      res = http.request(req)
+      return res, nil
+    rescue => e
+      puts [uri.to_s, e.class, e].join(" : ")
+      return nil, e.to_s 
+    end
   end
   module_function :callAPI
 

@@ -44,15 +44,27 @@ module SettingsControllerPatch
         api_key = setting['api_key']
         username = setting['username']
         service_key = setting['service_key']
+        proxy_addr = setting['proxy_host']
+        proxy_port = setting['proxy_port']
+        proxy_user = setting['proxy_user']
+        proxy_pass = setting['proxy_pass']
         if teamserver_url.empty? || org_id.empty? || api_key.empty? || username.empty? || service_key.empty?
           flash[:error] = l(:test_connect_fail)
           redirect_to plugin_settings_path(@plugin) and return
         end
         url = sprintf('%s/api/ng/%s/applications/', teamserver_url, org_id)
-        res = ContrastUtil.callAPI(url: url, api_key: api_key, username: username, service_key: service_key)
-        if res.code != "200"
-          flash[:error] = l(:test_connect_fail)
+        res, msg = ContrastUtil.callAPI(
+          url: url, api_key: api_key, username: username, service_key: service_key,
+          proxy_addr: proxy_addr, proxy_port: proxy_port, proxy_user: proxy_user, proxy_pass: proxy_pass
+        )
+        if res.nil?
+          flash[:error] = msg
           redirect_to plugin_settings_path(@plugin) and return
+        else
+          if res.code != "200"
+            flash[:error] = l(:test_connect_fail)
+            redirect_to plugin_settings_path(@plugin) and return
+          end
         end
         # ステータスマッピングチェック
         statuses = []

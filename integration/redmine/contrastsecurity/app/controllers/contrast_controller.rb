@@ -84,7 +84,7 @@ class ContrastController < ApplicationController
                    parsed_payload.app_id,
                    parsed_payload.vul_id)
 
-      res = ContrastUtil.callAPI(url: url)
+      res, msg = ContrastUtil.callAPI(url: url)
       vuln_json = JSON.parse(res.body)
       # logger.info(vuln_json)
       url = format(
@@ -93,7 +93,7 @@ class ContrastController < ApplicationController
         parsed_payload.org_id,
         parsed_payload.app_id
       )
-      res = ContrastUtil.callAPI(url: url)
+      res, msg = ContrastUtil.callAPI(url: url)
       app_info_json = JSON.parse(res.body)
 
       summary = '[' + app_info_json['application']['name'] + '] ' + vuln_json['trace']['title']
@@ -164,7 +164,7 @@ class ContrastController < ApplicationController
       chapters = ''
       story = ''
       if story_url.present?
-        get_story_res = ContrastUtil.callAPI(url: story_url)
+        get_story_res, msg = ContrastUtil.callAPI(url: story_url)
         story_json = JSON.parse(get_story_res.body)
         story_json['story']['chapters'].each do |chapter|
           chapters << chapter['introText'] + "\n"
@@ -186,7 +186,7 @@ class ContrastController < ApplicationController
       # How to fix
       howtofix = ''
       if howtofix_url.present?
-        get_howtofix_res = ContrastUtil.callAPI(url: howtofix_url)
+        get_howtofix_res, msg = ContrastUtil.callAPI(url: howtofix_url)
         howtofix_json = JSON.parse(get_howtofix_res.body)
         howtofix = howtofix_json['recommendation']['formattedText']
       end
@@ -258,7 +258,7 @@ class ContrastController < ApplicationController
                    TEAM_SERVER_URL, parsed_payload.org_id,
                    lib_info['lang'], lib_info['id'])
       # logger.info("LIBRARY_URL: #{url}")
-      res = ContrastUtil.callAPI(url: url)
+      res, msg = ContrastUtil.callAPI(url: url)
       # logger.info(JSON.parse(res.body))
       lib_json = JSON.parse(res.body)
       lib_name = lib_json['library']['file_name']
@@ -359,7 +359,7 @@ class ContrastController < ApplicationController
     vul_id = ''
     if parsed_payload.event_type != 'NEW_VULNERABLE_LIBRARY'
       url = "#{TEAM_SERVER_URL}/api/ng/#{parsed_payload.org_id}/traces/#{parsed_payload.app_id}/filter/#{parsed_payload.vul_id}"
-      res = ContrastUtil.callAPI(url: url)
+      res, msg = ContrastUtil.callAPI(url: url)
       parsed_response = JSON.parse(res.body)
       vul_id = parsed_response['trace']['uuid']
     end
