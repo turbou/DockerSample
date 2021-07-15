@@ -81,16 +81,16 @@ module ContrastUtil
     return status
   end
 
-  def callAPI(url: , method: "GET", data: nil, api_key: nil, username: nil, service_key: nil, proxy_addr: nil, proxy_port: nil, proxy_user: nil, proxy_pass: nil)
+  def callAPI(url: , method: "GET", data: nil, api_key: nil, username: nil, service_key: nil, proxy_host: nil, proxy_port: nil, proxy_user: nil, proxy_pass: nil)
     uri = URI.parse(url)
     http = nil
-    proxy_addr ||= Setting.plugin_contrastsecurity['proxy_addr']
+    proxy_host ||= Setting.plugin_contrastsecurity['proxy_host']
     proxy_port ||= Setting.plugin_contrastsecurity['proxy_port']
     proxy_user ||= Setting.plugin_contrastsecurity['proxy_user']
     proxy_pass ||= Setting.plugin_contrastsecurity['proxy_pass']
     proxy_uri = ""
-    if proxy_addr.present? && proxy_port.present?
-      proxy_uri = URI.parse(sprintf('http://%s:%d', proxy_addr, proxy_port))
+    if proxy_host.present? && proxy_port.present?
+      proxy_uri = URI.parse(sprintf('http://%s:%d', proxy_host, proxy_port))
       if proxy_user.present? && proxy_pass.present?
         http = Net::HTTP.new(uri.host, uri.port, proxy_uri.host, proxy_uri.port, proxy_user, proxy_pass)
       else
@@ -140,8 +140,8 @@ module ContrastUtil
   def syncComment(org_id, app_id, vul_id, issue)
     teamserver_url = Setting.plugin_contrastsecurity['teamserver_url']
     url = sprintf('%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links', teamserver_url, org_id, app_id, vul_id)
-    res = callAPI(url: url)
-    if res.code != "200"
+    res, msg = callAPI(url: url)
+    if res.present? && res.code != "200"
       return false
     end
     notes_json = JSON.parse(res.body)

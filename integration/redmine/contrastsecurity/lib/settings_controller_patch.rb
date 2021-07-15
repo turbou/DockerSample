@@ -44,7 +44,7 @@ module SettingsControllerPatch
         api_key = setting['api_key']
         username = setting['username']
         service_key = setting['service_key']
-        proxy_addr = setting['proxy_host']
+        proxy_host = setting['proxy_host']
         proxy_port = setting['proxy_port']
         proxy_user = setting['proxy_user']
         proxy_pass = setting['proxy_pass']
@@ -55,7 +55,7 @@ module SettingsControllerPatch
         url = sprintf('%s/api/ng/%s/applications/', teamserver_url, org_id)
         res, msg = ContrastUtil.callAPI(
           url: url, api_key: api_key, username: username, service_key: service_key,
-          proxy_addr: proxy_addr, proxy_port: proxy_port, proxy_user: proxy_user, proxy_pass: proxy_pass
+          proxy_host: proxy_host, proxy_port: proxy_port, proxy_user: proxy_user, proxy_pass: proxy_pass
         )
         if res.nil?
           flash[:error] = msg
