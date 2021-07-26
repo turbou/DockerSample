@@ -4,7 +4,7 @@ pyasn1==0.4.5
 pytz==2019.1
 python-dateutil==2.8.0
 psycopg2==2.8.4
-PyYAML==5.3
+PyYAML==5.4
 requests==2.23.0
 djangorestframework==3.12.1
 djangorestframework-jwt==1.11.0
