@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-25 03:05+0900\n"
+"POT-Creation-Date: 2021-07-20 08:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,18 +55,22 @@ msgid "Priority Mapping"
 msgstr "優先度マッピング"
 
 #: application/admin/backlog.py:239 application/admin/gitlab.py:91
+#: application/admin/redmine.py:91
 msgid "Vulnerability Count"
 msgstr "脆弱性数"
 
 #: application/admin/backlog.py:243 application/admin/gitlab.py:95
+#: application/admin/redmine.py:95
 msgid "Library Count"
 msgstr "ライブラリ数"
 
 #: application/admin/backlog.py:251 application/admin/gitlab.py:103
+#: application/admin/redmine.py:103
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
 #: application/admin/backlog.py:252 application/admin/gitlab.py:104
+#: application/admin/redmine.py:104
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
@@ -78,11 +82,11 @@ msgstr "BacklogのIssueを一括削除しました。"
 msgid "Delete all Backlog issues"
 msgstr "BacklogのIssueを一括削除します。"
 
-#: application/admin/gitlab.py:85
+#: application/admin/gitlab.py:85 application/admin/redmine.py:85
 msgid "Report User"
 msgstr "API発行ユーザー"
 
-#: application/admin/gitlab.py:86
+#: application/admin/gitlab.py:86 application/admin/redmine.py:86
 msgid "Option"
 msgstr "オプション"
 
@@ -94,16 +98,26 @@ msgstr "GitlabのIssueを一括削除しました。"
 msgid "Delete all Gitlab issues"
 msgstr "GitlabのIssueを一括削除します。"
 
+#: application/admin/redmine.py:120
+msgid "Removed all Redmine issues."
+msgstr "RedmineのIssueを一括削除しました。"
+
+#: application/admin/redmine.py:121
+msgid "Delete all Redmine issues"
+msgstr "RedmineのIssueを一括削除します。"
+
 #: application/apps.py:7
 msgid "application"
 msgstr "アプリケーション"
 
 #: application/models/backlog.py:6 application/models/gitlab.py:6
-#: application/models/googlechat.py:6 integration/models.py:7
+#: application/models/googlechat.py:6 application/models/redmine.py:6
+#: integration/models.py:7
 msgid "Name"
 msgstr "名前"
 
 #: application/models/backlog.py:9 application/models/gitlab.py:9
+#: application/models/redmine.py:9
 msgid "URL"
 msgstr "URL"
 
@@ -116,6 +130,7 @@ msgid "Project Key"
 msgstr "プロジェクトキー"
 
 #: application/models/backlog.py:12 application/models/gitlab.py:13
+#: application/models/redmine.py:11
 msgid "Project ID"
 msgstr "プロジェクトID"
 
@@ -220,6 +235,7 @@ msgid "Low ID"
 msgstr ""
 
 #: application/models/backlog.py:43 application/models/gitlab.py:42
+#: application/models/redmine.py:39
 msgid "Note"
 msgstr "注意"
 
@@ -250,21 +266,25 @@ msgstr "Backlog一覧"
 
 #: application/models/backlog.py:59 application/models/backlog.py:93
 #: application/models/gitlab.py:26 application/models/gitlab.py:60
+#: application/models/redmine.py:23 application/models/redmine.py:57
 #: integration/models.py:12
 msgid "Organization ID"
 msgstr "組織ID"
 
 #: application/models/backlog.py:60 application/models/backlog.py:94
 #: application/models/gitlab.py:27 application/models/gitlab.py:61
+#: application/models/redmine.py:24 application/models/redmine.py:58
 msgid "Application ID"
 msgstr "アプリケーションID"
 
 #: application/models/backlog.py:61 application/models/gitlab.py:28
+#: application/models/redmine.py:25
 msgid "Vulnerability ID"
 msgstr "脆弱性ID"
 
 #: application/models/backlog.py:62 application/models/backlog.py:97
 #: application/models/gitlab.py:29 application/models/gitlab.py:64
+#: application/models/redmine.py:26 application/models/redmine.py:61
 msgid "Issue ID"
 msgstr "課題ID"
 
@@ -281,18 +301,22 @@ msgid "Comment"
 msgstr "コメント"
 
 #: application/models/backlog.py:76 application/models/gitlab.py:43
+#: application/models/redmine.py:40
 msgid "Creator"
 msgstr "報告者"
 
 #: application/models/backlog.py:77 application/models/gitlab.py:44
+#: application/models/redmine.py:41
 msgid "Created"
 msgstr "作成日時"
 
 #: application/models/backlog.py:78 application/models/gitlab.py:45
+#: application/models/redmine.py:42
 msgid "Updated"
 msgstr "更新日時"
 
 #: application/models/backlog.py:79 application/models/gitlab.py:46
+#: application/models/redmine.py:43
 msgid "Contrast Note ID"
 msgstr "ContrastコメントID"
 
@@ -309,10 +333,12 @@ msgid "Backlog Vulnerability Comments"
 msgstr "Backlog脆弱性コメント一覧"
 
 #: application/models/backlog.py:95 application/models/gitlab.py:62
+#: application/models/redmine.py:59
 msgid "Library Language"
 msgstr "ライブラリ言語"
 
 #: application/models/backlog.py:96 application/models/gitlab.py:63
+#: application/models/redmine.py:60
 msgid "Library ID"
 msgstr "ライブラリID"
 
@@ -401,6 +427,51 @@ msgstr "GoogleChat"
 msgid "GoogleChat List"
 msgstr "GoogleChat一覧"
 
+#: application/models/redmine.py:10
+msgid "Access Key"
+msgstr "アクセスキー"
+
+#: application/models/redmine.py:12
+msgid "Tracker"
+msgstr ""
+
+#: application/models/redmine.py:18 application/models/redmine.py:22
+#: application/models/redmine.py:56
+msgid "Redmine"
+msgstr "Redmine"
+
+#: application/models/redmine.py:19
+msgid "Redmine List"
+msgstr "Redmine一覧"
+
+#: application/models/redmine.py:34 application/models/redmine.py:38
+msgid "Redmine Vulnerability"
+msgstr "Redmine脆弱性"
+
+#: application/models/redmine.py:35
+msgid "Redmine Vulnerabilities"
+msgstr "Redmine脆弱性一覧"
+
+#: application/models/redmine.py:44
+msgid "Redmine Comment ID"
+msgstr "Redmine コメントID"
+
+#: application/models/redmine.py:52
+msgid "Redmine Vulnerability Note"
+msgstr "Redmine脆弱性コメント"
+
+#: application/models/redmine.py:53
+msgid "Redmine Vulnerability Notes"
+msgstr "Redmine脆弱性コメント一覧"
+
+#: application/models/redmine.py:69
+msgid "Redmine Library"
+msgstr "Redmine脆弱ライブラリ"
+
+#: application/models/redmine.py:70
+msgid "Redmine Libraries"
+msgstr "Redmine脆弱ライブラリ一覧"
+
 #: integration/admin.py:34
 msgid "Unable to connect to Team Server. Please check the settings."
 msgstr ""
@@ -452,8 +523,6 @@ msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
 #: relay_django/views.py:416
-#, fuzzy
-#| msgid "event_new_vulnerability"
 msgid "event_dup_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
@@ -462,8 +531,6 @@ msgid "problem_with_customfield"
 msgstr ""
 
 #: relay_django/views.py:658
-#, fuzzy
-#| msgid "event_new_vulnerability"
 msgid "event_new_vulnerability_comment"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 

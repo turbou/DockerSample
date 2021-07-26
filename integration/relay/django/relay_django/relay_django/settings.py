@@ -57,7 +57,7 @@ MIDDLEWARE = [
 ]
 
 MY_ADMIN_REORDER = ( 
-    ("application", ( "Backlog", "Gitlab", "GoogleChat")),
+    ("application", ( "Backlog", "Gitlab", "GoogleChat", "Redmine")),
     ("integration", ("Integration",)),
 )
 

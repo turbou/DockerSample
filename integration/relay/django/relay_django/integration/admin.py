@@ -48,6 +48,7 @@ class IntegrationAdmin(admin.ModelAdmin):
         ('Backlog', {'fields': ['backlog',]}),
         ('Gitlab', {'fields': ['gitlab',]}),
         ('GoogleChat', {'fields': ['googlechat',]}),
+        ('Redmine', {'fields': ['redmine',]}),
     ]
 
     def get_queryset(self, request):
