@@ -4,10 +4,12 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from .models import Integration
+from relay_django.views import callAPI
 
 import json
 import requests
 import base64
+import traceback
 
 class TeamServerAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -21,17 +23,17 @@ class TeamServerAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if 'url' in cleaned_data and 'org_id' in cleaned_data and 'api_key' in cleaned_data and 'username' in cleaned_data and 'service_key' in cleaned_data:
-            url = '%s/api/ng/%s/organizations/' % (cleaned_data['url'], cleaned_data['org_id'])
-            authorization = base64.b64encode(('%s:%s' % (cleaned_data['username'], cleaned_data['service_key'])).encode('utf-8'))
-            headers = { 
-                'Authorization': authorization,
-                'API-Key': cleaned_data['api_key'],
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            } 
-            res = requests.get(url, headers=headers)
+            url = '%s/api/ng/%s/applications/' % (cleaned_data['url'], cleaned_data['org_id'])
+            res = callAPI(url, 'GET', cleaned_data['api_key'], cleaned_data['username'], cleaned_data['service_key'])
             if res.status_code != requests.codes.ok: # 200
                 raise forms.ValidationError(_('Unable to connect to Team Server. Please check the settings.'))
+            else:
+                try:
+                    json_data = res.json()
+                    if json_data['success']:
+                        return cleaned_data
+                except:
+                    raise forms.ValidationError(_('Unable to connect to Team Server. Please check the settings.'))
         return cleaned_data
 
 @admin.register(Integration)
