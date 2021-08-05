@@ -75,6 +75,17 @@ class RedmineLibInline(NestedTabularInline):
 
 class RedmineAdminForm(forms.ModelForm):
     tracker_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status_id_reported = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status_id_suspicious = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status_id_confirmed = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status_id_notaproblem = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status_id_remediated = forms.CharField(widget=forms.HiddenInput(), required=False)
+    status_id_fixed = forms.CharField(widget=forms.HiddenInput(), required=False)
+    severity_id_critical = forms.CharField(widget=forms.HiddenInput(), required=False)
+    severity_id_high = forms.CharField(widget=forms.HiddenInput(), required=False)
+    severity_id_medium = forms.CharField(widget=forms.HiddenInput(), required=False)
+    severity_id_low = forms.CharField(widget=forms.HiddenInput(), required=False)
+    severity_id_note = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -117,8 +128,23 @@ class RedmineAdmin(NestedModelAdmin):
         RedmineLibInline,
     ]
     fieldsets = [ 
-        (None, {'fields': ['name', 'url', 'project_id', ('tracker_name', 'tracker_id')]}),
+        (None, {'fields': ['name', 'url', ('project_id', 'tracker_name', 'tracker_id')]}),
         (_('Report User'), {'fields': ['access_key',]}),
+        ('ステータスマッピング', {'fields': [
+            ('status_name_reported', 'status_id_reported'),
+            ('status_name_suspicious', 'status_id_suspicious'),
+            ('status_name_confirmed', 'status_id_confirmed'),
+            ('status_name_notaproblem', 'status_id_notaproblem'),
+            ('status_name_remediated', 'status_id_remediated'),
+            ('status_name_fixed', 'status_id_fixed'),
+        ]}),
+        ('優先度マッピング', {'fields': [
+            ('severity_name_critical', 'severity_id_critical'),
+            ('severity_name_high', 'severity_id_high'),
+            ('severity_name_medium', 'severity_id_medium'),
+            ('severity_name_low', 'severity_id_low'),
+            ('severity_name_note', 'severity_id_note'),
+        ]}),
     ]
 
     def vul_count(self, obj):
@@ -142,16 +168,16 @@ class RedmineAdmin(NestedModelAdmin):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
         redmines = Redmine.objects.filter(pk__in=selected)
         for redmine in redmines:
-            url = '%s/api/v4/projects/%s/issues?labels=%s' % (redmine.url, redmine.project_id, 'Any')
-            headers = { 
-                'Content-Type': 'application/json',
-                'PRIVATE-TOKEN': redmine.owner_access_token
-            }   
-            res = requests.get(url, headers=headers)
-            issues_json = res.json()
-            for issue in issues_json:
-                del_url = '%s/api/v4/projects/%s/issues/%s' % (redmine.url, redmine.project_id, issue['iid'])
-                res = requests.delete(del_url, headers=headers)
+            redmine_api = RedmineApi(redmine.url, key=redmine.access_key)
+            for mapping in RedmineVul.objects.all():
+                issue = redmine_api.issue.get(mapping.issue_id)
+                print(issue.subject)
+                try:
+                    issue.delete()
+                except ResourceNotFoundError:
+                    print('Error')
+                except:
+                    traceback.print_exc()
         self.message_user(request, _('Removed all Redmine issues.'), level=messages.INFO)
     delete_all_issues.short_description = _('Delete all Redmine issues')
 

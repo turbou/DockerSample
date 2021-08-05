@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication, BaseJSONWebTokenAuthentication
 from django.utils.translation import gettext_lazy as _
 from redminelib import Redmine as RedmineApi
-from redminelib.exceptions import AuthError, ResourceNotFoundError
+from redminelib.exceptions import AuthError, ResourceNotFoundError, ValidationError
 
 from datetime import datetime as dt
 import json
@@ -51,7 +51,7 @@ def convertMustache(old_str):
     while True:
       tbl_bgn_idx = new_str.find('{{#table}}')
       tbl_end_idx = new_str.find('{{/table}}')
-      print(tbl_bgn_idx, tbl_end_idx)
+      #print(tbl_bgn_idx, tbl_end_idx)
       if tbl_bgn_idx < 0 or tbl_end_idx < 0:
         break
       else:
@@ -584,21 +584,38 @@ def hook(request):
 
             # ---------- Redmine ---------- #
             if ts_config.redmine:
-                redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
-                issue = redmine_api.issue.new()
-                issue.project_id = ts_config.redmine.project_id
-                issue.tracker_id = ts_config.redmine.tracker_id
-                issue.subject = vuln_json['trace']['title']
-                issue.description = convertMustache(''.join(chapters))
-                try:
-                    issue.save()
-                    mapping = RedmineVul(redmine=ts_config.redmine, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
-                    mapping.issue_id = issue.id
-                    mapping.save()
-                except ResourceNotFoundError:
-                    print('Error')
-                except:
-                    traceback.print_exc()
+                if not RedmineVul.objects.filter(contrast_vul_id=vul_id).exists():
+                    redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
+                    issue = redmine_api.issue.new()
+                    issue.project_id = ts_config.redmine.project_id
+                    issue.tracker_id = ts_config.redmine.tracker_id
+                    issue.subject = vuln_json['trace']['title']
+                    issue.description = convertMustache(''.join(chapters))
+                    try:
+                        issue.save()
+                        mapping = RedmineVul(redmine=ts_config.redmine, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                        mapping.issue_id = issue.id
+                        mapping.save()
+                    except AuthError:
+                        print('AuthError')
+                    except ResourceNotFoundError:
+                        print('ResourceNotFoundError')
+                    except ValidationError:
+                        print('ValidationError')
+                    except:
+                        traceback.print_exc()
+                elif event_type == 'VULNERABILITY_DUPLICATE':
+                    mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
+                    redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
+                    issue = redmine_api.issue.get(mapping.issue_id)
+                    print(issue.subject)
+                    issue.description = convertMustache(''.join(chapters))
+                    try:
+                        issue.save()
+                    except ResourceNotFoundError:
+                        print('Error')
+                    except:
+                        traceback.print_exc()
     
             return HttpResponse(status=200)
         elif event_type == 'VULNERABILITY_CHANGESTATUS_OPEN' or event_type == 'VULNERABILITY_CHANGESTATUS_CLOSED':

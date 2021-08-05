@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from .models import Integration
 from relay_django.views import callAPI
+from rest_framework_jwt.settings import api_settings
 
 import json
 import requests
@@ -46,7 +47,7 @@ class IntegrationAdmin(admin.ModelAdmin):
     list_display = ('name', 'url', 'username', 'hook_url')
 
     fieldsets = [
-        (None, {'fields': ['name', 'url', 'org_id', 'api_key', 'username', 'service_key']}),
+        (None, {'fields': ['name', 'url', ('org_id', 'api_key'), ('username', 'service_key')]}),
         ('Backlog', {'fields': ['backlog',]}),
         ('Gitlab', {'fields': ['gitlab',]}),
         ('GoogleChat', {'fields': ['googlechat',]}),
@@ -65,6 +66,11 @@ class IntegrationAdmin(admin.ModelAdmin):
         msg_buffer = []
         msg_buffer.append('TeamServer Generic Webhook => %RELAYAPP_URL%{}/hook/'.format(script_name))
         msg_buffer.append('Gitlab Project Webhook => %RELAYAPP_URL%{}/gitlab/'.format(script_name))
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(self.request.user)
+        token = jwt_encode_handler(payload)
+        msg_buffer.append(token)
         return mark_safe('<br />'.join(msg_buffer))
     hook_url.short_description = 'HOOK URL'
 
