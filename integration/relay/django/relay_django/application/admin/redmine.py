@@ -86,6 +86,7 @@ class RedmineAdminForm(forms.ModelForm):
     severity_id_medium = forms.CharField(widget=forms.HiddenInput(), required=False)
     severity_id_low = forms.CharField(widget=forms.HiddenInput(), required=False)
     severity_id_note = forms.CharField(widget=forms.HiddenInput(), required=False)
+    severity_id_cvelib = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -95,6 +96,7 @@ class RedmineAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if 'url' in cleaned_data and 'project_id' in cleaned_data and 'access_key' in cleaned_data:
+            # Project, Tracker Check
             tracker_id = None
             try:
                 redmine_api = RedmineApi(cleaned_data['url'], key=cleaned_data['access_key'])
@@ -114,6 +116,56 @@ class RedmineAdminForm(forms.ModelForm):
                 raise forms.ValidationError(_('Tracker Not Found.'))
             else:
                 cleaned_data['tracker_id'] = tracker_id
+
+            # Status, Priority Check
+            tmp_statuses = {}
+            for f in self.fields:
+                if f.startswith("status_id_"):
+                    tmp_statuses[f] = -1
+            tmp_priorities = {}
+            for f in self.fields:
+                if f.startswith("severity_id_"):
+                    tmp_priorities[f] = -1
+            error_fields = {}
+            try:
+                redmine_api = RedmineApi(cleaned_data['url'], key=cleaned_data['access_key'])
+
+                statuses = redmine_api.issue_status.all()
+                for f in self.fields:
+                    if f.startswith("status_name_"):
+                        for status in statuses:
+                            if status.name == cleaned_data[f]:
+                                id_field = f.replace('_name_', '_id_')
+                                tmp_statuses[id_field] = status.id
+                                break
+
+                priorities = redmine_api.enumeration.filter(resource='issue_priorities')
+                for f in self.fields:
+                    if f.startswith("severity_name_"):
+                        for priority in priorities:
+                            if priority.name == cleaned_data[f]:
+                                id_field = f.replace('_name_', '_id_')
+                                tmp_priorities[id_field] = priority.id
+                                break
+
+                # 存在しないステータス、優先度を確認してエラーを表示
+                for f in self.fields:
+                    if f.startswith("status_id_"):
+                        if tmp_statuses[f] < 0:
+                            name_field = f.replace('_id_', '_name_')
+                            error_fields[name_field] = ['%s というステータスは存在しません。' % cleaned_data[name_field]]
+                    elif f.startswith("severity_id_"):
+                        if tmp_priorities[f] < 0:
+                            name_field = f.replace('_id_', '_name_')
+                            error_fields[name_field] = ['%s という優先度は存在しません。' % cleaned_data[name_field]]
+            except AuthError:
+                raise forms.ValidationError(_('Authentication Error.'))
+            except ResourceNotFoundError:
+                raise forms.ValidationError(_('Project Not Found.'))
+            except:
+                traceback.print_exc()
+            if len(error_fields) > 0:
+                raise forms.ValidationError(error_fields)
         return cleaned_data
 
 @admin.register(Redmine)
@@ -121,7 +173,8 @@ class RedmineAdmin(NestedModelAdmin):
     save_on_top = True
     form = RedmineAdminForm
     search_fields = ('name', 'url',)
-    actions = ['clear_mappings', 'delete_all_issues']
+    #actions = ['clear_mappings', 'delete_all_issues']
+    actions = ['clear_mappings']
     list_display = ('name', 'url', 'vul_count', 'lib_count')
     inlines = [
         RedmineVulInline,
@@ -144,6 +197,7 @@ class RedmineAdmin(NestedModelAdmin):
             ('severity_name_medium', 'severity_id_medium'),
             ('severity_name_low', 'severity_id_low'),
             ('severity_name_note', 'severity_id_note'),
+            ('severity_name_cvelib', 'severity_id_cvelib'),
         ]}),
     ]
 
@@ -164,22 +218,26 @@ class RedmineAdmin(NestedModelAdmin):
         self.message_user(request, _('Vulnerability, library information cleared.'), level=messages.INFO)
     clear_mappings.short_description = _('Clear Vulnerability and Library Mapping')
 
-    def delete_all_issues(self, request, queryset):
-        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
-        redmines = Redmine.objects.filter(pk__in=selected)
-        for redmine in redmines:
-            redmine_api = RedmineApi(redmine.url, key=redmine.access_key)
-            for mapping in RedmineVul.objects.all():
-                issue = redmine_api.issue.get(mapping.issue_id)
-                print(issue.subject)
-                try:
-                    issue.delete()
-                except ResourceNotFoundError:
-                    print('Error')
-                except:
-                    traceback.print_exc()
-        self.message_user(request, _('Removed all Redmine issues.'), level=messages.INFO)
-    delete_all_issues.short_description = _('Delete all Redmine issues')
+    #def delete_all_issues(self, request, queryset):
+    #    selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+    #    redmines = Redmine.objects.filter(pk__in=selected)
+    #    error_cnt = 0
+    #    for redmine in redmines:
+    #        redmine_api = RedmineApi(redmine.url, key=redmine.access_key)
+    #        for mapping in RedmineVul.objects.all():
+    #            try:
+    #                issue = redmine_api.issue.get(mapping.issue_id)
+    #                issue.delete()
+    #            except ResourceNotFoundError:
+    #                error_cnt = error_cnt + 1
+    #            except:
+    #                error_cnt = error_cnt + 1
+    #                traceback.print_exc()
+    #    if error_cnt > 0:
+    #        self.message_user(request, _('The issue to be deleted was not found or could not be deleted.'), level=messages.WARNING)
+    #    else:
+    #        self.message_user(request, _('Removed all Redmine issues.'), level=messages.INFO)
+    #delete_all_issues.short_description = _('Delete all Redmine issues')
 
     def get_actions(self, request):
         actions = super().get_actions(request)
