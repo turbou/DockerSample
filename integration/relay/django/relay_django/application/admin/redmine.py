@@ -181,7 +181,7 @@ class RedmineAdmin(NestedModelAdmin):
         RedmineLibInline,
     ]
     fieldsets = [ 
-        (None, {'fields': ['name', 'url', ('project_id', 'tracker_name', 'tracker_id')]}),
+        (None, {'fields': ['name', 'url', 'text_format', ('project_id', 'tracker_name', 'tracker_id')]}),
         (_('Report User'), {'fields': ['access_key',]}),
         ('ステータスマッピング', {'fields': [
             ('status_name_reported', 'status_id_reported'),

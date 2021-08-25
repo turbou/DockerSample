@@ -2,11 +2,17 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
+TEXT_FORMAT_CHOICES = (
+    ('textile', 'Textile'),
+    ('markdown', 'Markdown'),
+)
+
 class Redmine(models.Model):
     name = models.CharField(_('Name'), max_length=20, unique=True,
         validators=[RegexValidator(regex='^[A-Za-z0-9_]{4,20}$', message='名前は半角英数字、アンスコ4文字〜20文字です。')]
     )   
     url = models.URLField(_('URL'), help_text='http://redmine.redmine:8085')
+    text_format = models.CharField('テキスト書式', choices=TEXT_FORMAT_CHOICES, max_length=8, default='markdown')
     access_key = models.CharField(_('Access Key'), max_length=50)
     project_id = models.CharField(_('Project ID'), max_length=50, help_text='Project ID, not a Project name.')
     tracker_name = models.CharField(_('Tracker Name'), max_length=50, help_text='Tracker Name, not a Tracker ID.')

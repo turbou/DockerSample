@@ -585,22 +585,49 @@ def hook(request):
             # ---------- Redmine ---------- #
             if ts_config.redmine:
                 if not RedmineVul.objects.filter(contrast_vul_id=vul_id).exists():
+                    severity = vuln_json['trace']['severity']
+                    priority_id = None
+                    if severity == 'Critical':
+                        priority_id = ts_config.redmine.severity_id_critical
+                    elif severity == 'High':
+                        priority_id = ts_config.redmine.severity_id_high
+                    elif severity == 'Medium':
+                        priority_id = ts_config.redmine.severity_id_medium
+                    elif severity == 'Low':
+                        priority_id = ts_config.redmine.severity_id_low
+                    elif severity == 'Note':
+                        priority_id = ts_config.redmine.severity_id_note
                     redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
                     issue = redmine_api.issue.new()
                     issue.project_id = ts_config.redmine.project_id
                     issue.tracker_id = ts_config.redmine.tracker_id
+                    issue.priority_id = priority_id
                     issue.subject = vuln_json['trace']['title']
-                    issue.description = convertMustache(''.join(chapters))
+                    deco_mae = "## "
+                    deco_ato = ""
+                    description = []
+                    description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+                    description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+                    description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
+                    description.append('%s\n\n' %  (convertMustache(story)))
+                    description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
+                    description.append('%s\n\n' %  (convertMustache(howtofix)))
+                    description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
+                    description.append(self_url)
+                    issue.description = ''.join(description)
                     try:
                         issue.save()
                         mapping = RedmineVul(redmine=ts_config.redmine, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
                         mapping.issue_id = issue.id
                         mapping.save()
                     except AuthError:
+                        traceback.print_exc()
                         print('AuthError')
                     except ResourceNotFoundError:
+                        traceback.print_exc()
                         print('ResourceNotFoundError')
                     except ValidationError:
+                        traceback.print_exc()
                         print('ValidationError')
                     except:
                         traceback.print_exc()
@@ -608,8 +635,18 @@ def hook(request):
                     mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
                     redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
                     issue = redmine_api.issue.get(mapping.issue_id)
-                    print(issue.subject)
-                    issue.description = convertMustache(''.join(chapters))
+                    deco_mae = "## "
+                    deco_ato = ""
+                    description = []
+                    description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
+                    description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+                    description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
+                    description.append('%s\n\n' %  (convertMustache(story)))
+                    description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
+                    description.append('%s\n\n' %  (convertMustache(howtofix)))
+                    description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
+                    description.append(self_url)
+                    issue.description = ''.join(description)
                     try:
                         issue.save()
                     except ResourceNotFoundError:
