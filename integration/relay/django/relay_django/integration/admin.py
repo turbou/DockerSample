@@ -16,9 +16,10 @@ class TeamServerAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['name'].widget.attrs = {'size':30}
+        self.fields['url'].widget.attrs = {'size':80, 'placeholder':'https://teamserver-host/Contrast'}
         self.fields['org_id'].widget.attrs = {'size':80}
         self.fields['api_key'].widget.attrs = {'size':80}
-        self.fields['username'].widget.attrs = {'size':80}
+        self.fields['username'].widget.attrs = {'size':80, 'placeholder':_('Login ID (mail address)')}
         self.fields['service_key'].widget.attrs = {'size':80}
 
     def clean(self):

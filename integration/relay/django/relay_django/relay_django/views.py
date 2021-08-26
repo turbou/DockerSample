@@ -257,6 +257,76 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
         res = requests.post(url, json=data, headers=headers)
         print('oyoyo!! ', res.text)
 
+def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
+    print('syncCommentFromContrast2!!')
+    mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
+    redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
+    if mapping is None:
+        return HttpResponse(status=200)
+    # TeamServer側のコメントすべて取得
+    teamserver_url = ts_config.url
+    url = '%s/api/ng/%s/applications/%s/traces/%s/notes?expand=skip_links' % (teamserver_url, org_id, app_id, vul_id)
+    res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+    notes_json = res.json()
+    #print(notes_json)
+    r = re.compile("\(by .+\)")
+    #headers = {
+    #    'Content-Type': 'application/json',
+    #    'PRIVATE-TOKEN': ts_config.gitlab.access_token
+    #}
+    for c_note in notes_json['notes']:
+        if c_note['creator_uid'] == ts_config.username:
+            continue
+        if RedmineNote.objects.filter(contrast_note_id=c_note['id']).exists():
+            continue
+        creator = '(by ' + c_note['creator'] + ')'
+        m = r.search(html.unescape(c_note['note']))
+        if m is not None:
+            creator = ''
+        old_status_str = ''
+        new_status_str = ''
+        status_change_reason_str = ''
+        if 'properties' in c_note:
+            for c_prop in c_note['properties']:
+              if c_prop['name'] == 'status.change.previous.status':
+                pass
+                #status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+                #unless status_obj.nil?
+                #  old_status_str = status_obj.name
+                #end
+              elif c_prop['name'] == 'status.change.status':
+                pass
+                #status_obj = ContrastUtil.get_redmine_status(c_prop['value'])
+                #unless status_obj.nil?
+                #  new_status_str = status_obj.name
+                #end
+              elif c_prop['name'] == 'status.change.substatus' and len(c_prop['value']) > 0:
+                status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
+        note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
+        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
+        print(note_str)
+        issue = redmine_api.issue.get(mapping.issue_id)
+        issue.notes = note_str
+        try:
+            issue.save()
+            redmine_note = RedmineNote(vul=mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
+            #redmine_note.note_id = res.json()['id']
+            redmine_note.created_at = created_at
+            redmine_note.save()
+        except ResourceNotFoundError:
+            print('Error')
+        except:
+            traceback.print_exc()
+        #url = '%s/api/v4/projects/%s/issues/%d/notes' % (ts_config.gitlab.url, ts_config.gitlab.project_id, gitlab_mapping.issue_id)
+        #created_at = dt.fromtimestamp(c_note['creation'] / 1000)
+        #data = {
+        #    'body': note_str,
+        #    'created_at': created_at.isoformat() # required Administrator(project or group owner) only.
+        #}
+        #res = requests.post(url, json=data, headers=headers)
+        #print(res.status_code)
+        #print('oyoyo!! ', res.text)
+
 class JSONWebTokenAuthenticationBacklog(BaseJSONWebTokenAuthentication):
     def get_jwt_value(self, request):
          return request.query_params.get('token')
@@ -404,6 +474,7 @@ def hook(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
         event_type = json_data['event_type']
+        print(event_type)
         if event_type == 'TEST_CONNECTION':
             integration_name = json_data.get('integration_name')
             print(integration_name)
@@ -729,6 +800,31 @@ def hook(request):
                     return HttpResponse(status=200)
                 else:
                     return HttpResponse(status=200)
+            # ---------- Redmine ---------- #
+            if ts_config.redmine:
+                status_id = None
+                if status in ['Reported', '報告済']:
+                    status_id = ts_config.redmine.status_id_reported
+                elif status in ['Suspicious', '疑わしい']:
+                    status_id = ts_config.redmine.status_id_suspicious
+                elif status in ['Confirmed', '確認済']:
+                    status_id = ts_config.redmine.status_id_confirmed
+                elif status in ['NotAProblem', 'Not a Problem', '問題無し']:
+                    status_id = ts_config.redmine.status_id_notaproblem
+                elif status in ['Remediated', '修復済']:
+                    status_id = ts_config.redmine.status_id_remediated
+                elif status in ['Fixed', '修正完了']:
+                    status_id = ts_config.redmine.status_id_fixed
+                mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
+                redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
+                issue = redmine_api.issue.get(mapping.issue_id)
+                issue.status_id = status_id
+                try:
+                    issue.save()
+                except ResourceNotFoundError:
+                    print('Error')
+                except:
+                    traceback.print_exc()
             return HttpResponse(status=200)
         elif event_type == 'NEW_VULNERABILITY_COMMENT':
             print(_('event_new_vulnerability_comment'))
@@ -749,6 +845,9 @@ def hook(request):
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
                 syncCommentFromContrast(ts_config, org_id, app_id, vul_id)
+            # ---------- Redmine ---------- #
+            if ts_config.redmine:
+                syncCommentFromContrast2(ts_config, org_id, app_id, vul_id)
             return HttpResponse(status=200)
         elif event_type == 'NEW_VULNERABLE_LIBRARY':
             print(_('event_new_vulnerable_library'))

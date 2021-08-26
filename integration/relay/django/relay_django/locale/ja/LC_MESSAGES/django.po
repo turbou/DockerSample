@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-07 11:23+0900\n"
+"POT-Creation-Date: 2021-08-27 00:52+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,22 +55,22 @@ msgid "Priority Mapping"
 msgstr "優先度マッピング"
 
 #: application/admin/backlog.py:239 application/admin/gitlab.py:91
-#: application/admin/redmine.py:156
+#: application/admin/redmine.py:206
 msgid "Vulnerability Count"
 msgstr "脆弱性数"
 
 #: application/admin/backlog.py:243 application/admin/gitlab.py:95
-#: application/admin/redmine.py:160
+#: application/admin/redmine.py:210
 msgid "Library Count"
 msgstr "ライブラリ数"
 
 #: application/admin/backlog.py:251 application/admin/gitlab.py:103
-#: application/admin/redmine.py:168
+#: application/admin/redmine.py:218
 msgid "Vulnerability, library information cleared."
 msgstr "脆弱性、ライブラリの関連付け情報をクリアしました。"
 
 #: application/admin/backlog.py:252 application/admin/gitlab.py:104
-#: application/admin/redmine.py:169
+#: application/admin/redmine.py:219
 msgid "Clear Vulnerability and Library Mapping"
 msgstr "脆弱性とライブラリの関連付け情報を削除します。"
 
@@ -82,7 +82,7 @@ msgstr "BacklogのIssueを一括削除しました。"
 msgid "Delete all Backlog issues"
 msgstr "BacklogのIssueを一括削除します。"
 
-#: application/admin/gitlab.py:85 application/admin/redmine.py:133
+#: application/admin/gitlab.py:85 application/admin/redmine.py:185
 msgid "Report User"
 msgstr "API発行ユーザー"
 
@@ -98,42 +98,34 @@ msgstr "GitlabのIssueを一括削除しました。"
 msgid "Delete all Gitlab issues"
 msgstr "GitlabのIssueを一括削除します。"
 
-#: application/admin/redmine.py:108
+#: application/admin/redmine.py:109 application/admin/redmine.py:162
 msgid "Authentication Error."
 msgstr ""
 
-#: application/admin/redmine.py:110
+#: application/admin/redmine.py:111 application/admin/redmine.py:164
 msgid "Project Not Found."
 msgstr ""
 
-#: application/admin/redmine.py:113
+#: application/admin/redmine.py:114
 msgid "An error occurred while processing check project."
 msgstr ""
 
-#: application/admin/redmine.py:115
+#: application/admin/redmine.py:116
 msgid "Tracker Not Found."
 msgstr ""
-
-#: application/admin/redmine.py:185
-msgid "Removed all Redmine issues."
-msgstr "RedmineのIssueを一括削除しました。"
-
-#: application/admin/redmine.py:186
-msgid "Delete all Redmine issues"
-msgstr "RedmineのIssueを一括削除します。"
 
 #: application/apps.py:7
 msgid "application"
 msgstr "アプリケーション"
 
 #: application/models/backlog.py:6 application/models/gitlab.py:6
-#: application/models/googlechat.py:6 application/models/redmine.py:6
+#: application/models/googlechat.py:6 application/models/redmine.py:11
 #: integration/models.py:7
 msgid "Name"
 msgstr "名前"
 
 #: application/models/backlog.py:9 application/models/gitlab.py:9
-#: application/models/redmine.py:9
+#: application/models/redmine.py:14
 msgid "URL"
 msgstr "URL"
 
@@ -146,7 +138,7 @@ msgid "Project Key"
 msgstr "プロジェクトキー"
 
 #: application/models/backlog.py:12 application/models/gitlab.py:13
-#: application/models/redmine.py:11
+#: application/models/redmine.py:17
 msgid "Project ID"
 msgstr "プロジェクトID"
 
@@ -251,7 +243,7 @@ msgid "Low ID"
 msgstr ""
 
 #: application/models/backlog.py:43 application/models/gitlab.py:42
-#: application/models/redmine.py:68
+#: application/models/redmine.py:72
 msgid "Note"
 msgstr "注意"
 
@@ -282,25 +274,25 @@ msgstr "Backlog一覧"
 
 #: application/models/backlog.py:59 application/models/backlog.py:93
 #: application/models/gitlab.py:26 application/models/gitlab.py:60
-#: application/models/redmine.py:52 application/models/redmine.py:86
+#: application/models/redmine.py:56 application/models/redmine.py:90
 #: integration/models.py:12
 msgid "Organization ID"
 msgstr "組織ID"
 
 #: application/models/backlog.py:60 application/models/backlog.py:94
 #: application/models/gitlab.py:27 application/models/gitlab.py:61
-#: application/models/redmine.py:53 application/models/redmine.py:87
+#: application/models/redmine.py:57 application/models/redmine.py:91
 msgid "Application ID"
 msgstr "アプリケーションID"
 
 #: application/models/backlog.py:61 application/models/gitlab.py:28
-#: application/models/redmine.py:54
+#: application/models/redmine.py:58
 msgid "Vulnerability ID"
 msgstr "脆弱性ID"
 
 #: application/models/backlog.py:62 application/models/backlog.py:97
 #: application/models/gitlab.py:29 application/models/gitlab.py:64
-#: application/models/redmine.py:55 application/models/redmine.py:90
+#: application/models/redmine.py:59 application/models/redmine.py:94
 msgid "Issue ID"
 msgstr "課題ID"
 
@@ -317,22 +309,22 @@ msgid "Comment"
 msgstr "コメント"
 
 #: application/models/backlog.py:76 application/models/gitlab.py:43
-#: application/models/redmine.py:69
+#: application/models/redmine.py:73
 msgid "Creator"
 msgstr "報告者"
 
 #: application/models/backlog.py:77 application/models/gitlab.py:44
-#: application/models/redmine.py:70
+#: application/models/redmine.py:74
 msgid "Created"
 msgstr "作成日時"
 
 #: application/models/backlog.py:78 application/models/gitlab.py:45
-#: application/models/redmine.py:71
+#: application/models/redmine.py:75
 msgid "Updated"
 msgstr "更新日時"
 
 #: application/models/backlog.py:79 application/models/gitlab.py:46
-#: application/models/redmine.py:72
+#: application/models/redmine.py:76
 msgid "Contrast Note ID"
 msgstr "ContrastコメントID"
 
@@ -349,12 +341,12 @@ msgid "Backlog Vulnerability Comments"
 msgstr "Backlog脆弱性コメント一覧"
 
 #: application/models/backlog.py:95 application/models/gitlab.py:62
-#: application/models/redmine.py:88
+#: application/models/redmine.py:92
 msgid "Library Language"
 msgstr "ライブラリ言語"
 
 #: application/models/backlog.py:96 application/models/gitlab.py:63
-#: application/models/redmine.py:89
+#: application/models/redmine.py:93
 msgid "Library ID"
 msgstr "ライブラリID"
 
@@ -443,148 +435,148 @@ msgstr "GoogleChat"
 msgid "GoogleChat List"
 msgstr "GoogleChat一覧"
 
-#: application/models/redmine.py:10
+#: application/models/redmine.py:16
 msgid "Access Key"
 msgstr "アクセスキー"
 
-#: application/models/redmine.py:12
+#: application/models/redmine.py:18
 msgid "Tracker Name"
 msgstr ""
 
-#: application/models/redmine.py:13
+#: application/models/redmine.py:19
 msgid "Tracker ID"
 msgstr ""
 
-#: application/models/redmine.py:15
+#: application/models/redmine.py:21
 msgid "Status Reported"
 msgstr "報告済"
 
-#: application/models/redmine.py:16
+#: application/models/redmine.py:22
 msgid "Status Reported ID"
 msgstr "報告済ID"
 
-#: application/models/redmine.py:17
+#: application/models/redmine.py:23
 msgid "Status Suspicious"
 msgstr "疑わしい"
 
-#: application/models/redmine.py:18
+#: application/models/redmine.py:24
 msgid "Status Suspicious ID"
 msgstr "疑わしいID"
 
-#: application/models/redmine.py:19
+#: application/models/redmine.py:25
 msgid "Status Confirmed"
 msgstr "確認済"
 
-#: application/models/redmine.py:20
+#: application/models/redmine.py:26
 msgid "Status Confirmed ID"
 msgstr "確認済ID"
 
-#: application/models/redmine.py:21
+#: application/models/redmine.py:27
 msgid "Status NotAProblem"
 msgstr "問題無し"
 
-#: application/models/redmine.py:22
+#: application/models/redmine.py:28
 msgid "Status NotAProblem ID"
 msgstr "問題無しID"
 
-#: application/models/redmine.py:23
+#: application/models/redmine.py:29
 msgid "Status Remediated"
 msgstr "修復済"
 
-#: application/models/redmine.py:24
+#: application/models/redmine.py:30
 msgid "Status Remediated ID"
 msgstr "修復済ID"
 
-#: application/models/redmine.py:25
+#: application/models/redmine.py:31
 msgid "Status Fixed"
 msgstr "修正完了"
 
-#: application/models/redmine.py:26
+#: application/models/redmine.py:32
 msgid "Status Fixed ID"
 msgstr "修正完了ID"
 
-#: application/models/redmine.py:29
+#: application/models/redmine.py:34
 msgid "Severity Critical"
 msgstr "重大"
 
-#: application/models/redmine.py:30
+#: application/models/redmine.py:35
 msgid "Severity Critical ID"
 msgstr "重大ID"
 
-#: application/models/redmine.py:31
+#: application/models/redmine.py:36
 msgid "Severity High"
 msgstr "高"
 
-#: application/models/redmine.py:32
+#: application/models/redmine.py:37
 msgid "Severity High ID"
 msgstr "高ID"
 
-#: application/models/redmine.py:33
+#: application/models/redmine.py:38
 msgid "Severity Medium"
 msgstr "中"
 
-#: application/models/redmine.py:34
+#: application/models/redmine.py:39
 msgid "Severity Medium ID"
 msgstr "中ID"
 
-#: application/models/redmine.py:35
+#: application/models/redmine.py:40
 msgid "Severity Low"
 msgstr "低"
 
-#: application/models/redmine.py:36
+#: application/models/redmine.py:41
 msgid "Severity Low ID"
 msgstr "低ID"
 
-#: application/models/redmine.py:37
+#: application/models/redmine.py:42
 msgid "Severity Note"
 msgstr "注意"
 
-#: application/models/redmine.py:38
+#: application/models/redmine.py:43
 msgid "Severity Note ID"
 msgstr "注意ID"
 
-#: application/models/redmine.py:39
+#: application/models/redmine.py:44
 msgid "Vulnerable Library"
 msgstr "脆弱なライブラリ"
 
-#: application/models/redmine.py:40
+#: application/models/redmine.py:45
 msgid "Vulnerable Library ID"
 msgstr "脆弱なライブラリID"
 
-#: application/models/redmine.py:47 application/models/redmine.py:51
-#: application/models/redmine.py:85
+#: application/models/redmine.py:51 application/models/redmine.py:55
+#: application/models/redmine.py:89
 msgid "Redmine"
 msgstr "Redmine"
 
-#: application/models/redmine.py:48
+#: application/models/redmine.py:52
 msgid "Redmine List"
 msgstr "Redmine一覧"
 
-#: application/models/redmine.py:63 application/models/redmine.py:67
+#: application/models/redmine.py:67 application/models/redmine.py:71
 msgid "Redmine Vulnerability"
 msgstr "Redmine脆弱性"
 
-#: application/models/redmine.py:64
+#: application/models/redmine.py:68
 msgid "Redmine Vulnerabilities"
 msgstr "Redmine脆弱性一覧"
 
-#: application/models/redmine.py:73
+#: application/models/redmine.py:77
 msgid "Redmine Comment ID"
 msgstr "Redmine コメントID"
 
-#: application/models/redmine.py:81
+#: application/models/redmine.py:85
 msgid "Redmine Vulnerability Note"
 msgstr "Redmine脆弱性コメント"
 
-#: application/models/redmine.py:82
+#: application/models/redmine.py:86
 msgid "Redmine Vulnerability Notes"
 msgstr "Redmine脆弱性コメント一覧"
 
-#: application/models/redmine.py:98
+#: application/models/redmine.py:102
 msgid "Redmine Library"
 msgstr "Redmine脆弱ライブラリ"
 
-#: application/models/redmine.py:99
+#: application/models/redmine.py:103
 msgid "Redmine Libraries"
 msgstr "Redmine脆弱ライブラリ一覧"
 
@@ -599,8 +591,8 @@ msgid "integration"
 msgstr "コントラスト統合"
 
 #: integration/models.py:9
-msgid "Set this name to the TeamServer Generic Webhook Payload."
-msgstr "この名前をTeamServerのGeneric WebhookのPayloadに設定してください。"
+msgid "Set this name to the TeamServer Generic Webhook Payload(integration_name)."
+msgstr "この名前をTeamServerのGeneric WebhookのPayload内integration_nameに設定してください。"
 
 #: integration/models.py:11
 msgid "TeamServer URL"
@@ -611,8 +603,8 @@ msgid "e.g. https://app.contrastsecurity.com/Contrast"
 msgstr "例) https://app.contrastsecurity.com/Contrast"
 
 #: integration/models.py:14
-msgid "Login ID (mail address)"
-msgstr "ログインID (メールアドレス)"
+msgid "Please specify a user who only uses the API."
+msgstr "TeamServerのUIから操作を行わないAPI専用のユーザーを指定してください。"
 
 #: integration/models.py:15
 msgid "Service Key"
@@ -634,23 +626,23 @@ msgstr "コントラスト統合管理"
 msgid "Menu"
 msgstr "コントラスト統合管理"
 
-#: relay_django/views.py:418
+#: relay_django/views.py:489
 msgid "event_new_vulnerability"
 msgstr "[Contrast plugin] 新しい脆弱性を受信"
 
-#: relay_django/views.py:420
+#: relay_django/views.py:491
 msgid "event_dup_vulnerability"
-msgstr "[Contrast plugin] 新しい脆弱性を受信"
+msgstr "[Contrast plugin] 重複する脆弱性を受信"
 
-#: relay_django/views.py:635
+#: relay_django/views.py:743
 msgid "problem_with_customfield"
 msgstr ""
 
-#: relay_django/views.py:697
+#: relay_django/views.py:830
 msgid "event_new_vulnerability_comment"
-msgstr "[Contrast plugin] 新しい脆弱性を受信"
+msgstr "[Contrast plugin] 新しいコメントを受信"
 
-#: relay_django/views.py:717
+#: relay_django/views.py:853
 msgid "event_new_vulnerable_library"
 msgstr "[Contrast plugin] 新しい脆弱性ライブラリを受信"
 
@@ -694,6 +686,15 @@ msgstr ""
 #: templates/admin/index.html:79
 msgid "Unknown content"
 msgstr ""
+
+#~ msgid "Removed all Redmine issues."
+#~ msgstr "RedmineのIssueを一括削除しました。"
+
+#~ msgid "Delete all Redmine issues"
+#~ msgstr "RedmineのIssueを一括削除します。"
+
+msgid "Login ID (mail address)"
+msgstr "ログインID (メールアドレス)"
 
 #~ msgid "Priority Name"
 #~ msgstr "優先度"
