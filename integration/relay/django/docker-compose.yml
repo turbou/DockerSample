@@ -14,7 +14,7 @@ services:
       - django
 
   django:
-    image: django:1.0.4
+    image: django:1.0.5
     build:
       context: ./django
     container_name: relay.django
