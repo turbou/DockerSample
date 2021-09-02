@@ -25,7 +25,7 @@ class BacklogNoteInline(NestedStackedInline):
         (None, {'fields': ['comment', ('creator', 'created_at', 'updated_at'), ('contrast_note_id', 'note_id')]}),
     ]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):
@@ -46,7 +46,7 @@ class BacklogVulInline(NestedTabularInline):
     ]
     readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'issue_id')
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):
@@ -64,7 +64,7 @@ class BacklogLibInline(NestedTabularInline):
     extra = 0
     readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_lib_lg', 'contrast_lib_id', 'issue_id')
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):

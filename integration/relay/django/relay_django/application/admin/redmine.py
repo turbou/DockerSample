@@ -28,7 +28,7 @@ class RedmineNoteInline(NestedStackedInline):
         (None, {'fields': ['note', ('creator', 'created_at', 'updated_at'), ('contrast_note_id', 'note_id')]}),
     ]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):
@@ -49,7 +49,7 @@ class RedmineVulInline(NestedTabularInline):
     ]
     readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'issue_id')
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):
@@ -67,7 +67,7 @@ class RedmineLibInline(NestedTabularInline):
     extra = 0
     readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_lib_lg', 'contrast_lib_id', 'issue_id')
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):
@@ -210,9 +210,9 @@ class RedmineAdmin(NestedModelAdmin):
     lib_count.short_description = _('Library Count')
 
     def clear_mappings(self, request, queryset):
-        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
-        redmines = Redmine.objects.filter(pk__in=selected)
-        for redmine in redmines:
+        #selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        #redmines = Redmine.objects.filter(pk__in=selected)
+        for redmine in queryset:
             redmine.vuls.all().delete()
             redmine.libs.all().delete()
         self.message_user(request, _('Vulnerability, library information cleared.'), level=messages.INFO)
