@@ -1,5 +1,5 @@
 from django import template
-from django.template.base import Node, NodeList, Template, Context, Variable
+from django.template.base import Node, NodeList, Template, Variable
 from django.conf import settings
 from re import sub
 from datetime import datetime
