@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import datetime
 
+from celery.schedules import crontab
+
+import relay_django.tasks
+
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -39,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
+    'django_celery_results',
     'nested_admin',
     'relay_django.apps.ContrastConfig',
     'application.apps.ApplicationConfig',
@@ -148,7 +154,21 @@ USE_L10N = True
 
 USE_TZ = False
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = 'django-db'
+#CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_BEAT_SCHEDULE = {
+    #"sample_task": {
+    #    "task": "relay_django.tasks.sample_task",
+    #    "schedule": crontab(minute="*/5"),
+    #},
+    #"send_email_report": {
+    #    "task": "relay_django.tasks.send_email_report",
+    #    "schedule": crontab(hour="*/1"),
+    #},
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/

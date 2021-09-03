@@ -14,7 +14,7 @@ services:
       - django
 
   django:
-    image: django:1.0.5
+    image: relay-django:1.0.6
     build:
       context: ./django
     container_name: relay.django
@@ -25,7 +25,43 @@ services:
     expose:
       - "8081"
     depends_on:
+      - redis
+
+  redis:
+    image: redis:6.2.5-alpine3.14
+    container_name: relay.redis
+    depends_on:
       - postgres
+
+  celery:
+    image: relay-django:1.0.6
+    build:
+      context: ./django
+    container_name: relay.celery
+    command: celery -A relay_django worker -l info
+    volumes:
+      - ./relay_django/:/project
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dbaa1_i7%*3r9-=z-+_mz4r-!qeed@(-a_r(g@k8jo8y3r27%m
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
+
+  celery-beat:
+    image: relay-django:1.0.6
+    build:
+      context: ./django
+    container_name: relay.celery-beat
+    command: celery -A relay_django beat -l info
+    volumes:
+      - ./relay_django/:/project
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dbaa1_i7%*3r9-=z-+_mz4r-!qeed@(-a_r(g@k8jo8y3r27%m
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
 
   postgres:
     image: postgres:9.4.23
@@ -48,4 +84,6 @@ services:
       - ./pgadmin4:/var/lib/pgadmin
     hostname: pgadmin4
     restart: always
+    depends_on:
+      - postgres
 
