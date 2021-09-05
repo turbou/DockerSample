@@ -30,6 +30,7 @@ services:
   redis:
     image: redis:6.2.5-alpine3.14
     container_name: relay.redis
+    restart: always
     depends_on:
       - postgres
 
@@ -38,6 +39,7 @@ services:
     build:
       context: ./django
     container_name: relay.celery
+    restart: always
     command: celery -A relay_django worker -l info
     volumes:
       - ./relay_django/:/project
@@ -53,6 +55,7 @@ services:
     build:
       context: ./django
     container_name: relay.celery-beat
+    restart: always
     command: celery -A relay_django beat -l info
     volumes:
       - ./relay_django/:/project
@@ -77,6 +80,7 @@ services:
   pgadmin4:
     image: dpage/pgadmin4:4.18
     container_name: relay.pgadmin4
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin
       PGADMIN_DEFAULT_PASSWORD: "password"
