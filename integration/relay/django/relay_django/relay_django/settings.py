@@ -165,7 +165,7 @@ CELERY_BEAT_SCHEDULE = {
     #    "schedule": crontab(minute="*/5"),
     #},
     #"send_email_report": {
-    #    "task": "relay_django.tasks.send_email_report",
+    #    "task": "application.tasks.redmine_sample_task",
     #    "schedule": crontab(hour="*/1"),
     #},
 }
