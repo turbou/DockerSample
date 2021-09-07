@@ -275,12 +275,10 @@ def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
     #    'PRIVATE-TOKEN': ts_config.gitlab.access_token
     #}
     for c_note in notes_json['notes']:
-        print(c_note['creator_uid'])
         if c_note['creator_uid'] == ts_config.username:
             if not RedmineNote.objects.filter(contrast_note_id=c_note['id']).exists():
                 note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
                 created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
-                print(created_at)
                 redmine_note = RedmineNote(vul=mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
                 redmine_note.created_at = created_at
                 redmine_note.save()
@@ -310,18 +308,20 @@ def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
                 #end
               elif c_prop['name'] == 'status.change.substatus' and len(c_prop['value']) > 0:
                 status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
-        note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
+        note = html.unescape(status_change_reason_str + c_note['note'])
+        note_str = '%s%s' % (note, creator)
         created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
         #print(note_str)
         issue = redmine_api.issue.get(mapping.issue_id)
         issue.notes = note_str
         try:
-            issue.save()
-            redmine_note = RedmineNote(vul=mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
-            #redmine_note.note_id = res.json()['id']
-            print(created_at)
-            redmine_note.created_at = created_at
-            redmine_note.save()
+            oyoyo = issue.save()
+            #for journal in oyoyo.journals:
+            #    print(journal.id, journal.user, journal.created_on, journal.notes)
+            if len(list(oyoyo.journals)) > 0:
+                redmine_note = RedmineNote(vul=mapping, note=note, creator=c_note['creator'], contrast_note_id=c_note['id'], note_id=list(oyoyo.journals)[0].id)
+                redmine_note.created_at = created_at
+                redmine_note.save()
         except ResourceNotFoundError:
             print('Error')
         except:
