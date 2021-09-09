@@ -37,6 +37,38 @@ def redmine_sample_task():
         redmine_api = RedmineApi(redmine.url, key=redmine.access_key)
         issues = redmine_api.issue.filter(project_id=redmine.project_id, sort='category:desc')
         for issue in issues:
+            if RedmineVul.objects.filter(issue_id=issue.id).exists():
+                # ステータスの同期
+                status = None
+                if redmine.status_id_reported == issue.status.id:
+                  status = 'Reported'
+                elif redmine.status_id_suspicious == issue.status.id:
+                  status = 'Suspicious'
+                elif redmine.status_id_confirmed == issue.status.id:
+                  status = 'Confirmed'
+                elif redmine.status_id_notaproblem == issue.status.id:
+                  status = 'NotAProblem'
+                elif redmine.status_id_remediated == issue.status.id:
+                  status = 'Remediated'
+                elif redmine.status_id_fixed == issue.status.id:
+                  status = 'Fixed'
+                print(status)
+                if status:
+                    mapping = RedmineVul.objects.filter(issue_id=issue.id).first()
+                    mapping.status_id = issue.status.id
+                    mapping.save()
+                    for ts_config in redmine.integrations.all():
+                        teamserver_url = ts_config.url
+                        #url = sprintf('%s/api/ng/%s/orgtraces/mark', teamserver_url, org_id)
+                        #t_data_dict = {"traces" => [vul_id], "status" => status}
+                        url = '%s/api/ng/%s/orgtraces/mark' % (teamserver_url, mapping.contrast_org_id)
+                        print(url)
+                        t_data = {'traces': [mapping.contrast_vul_id], 'status': status, 'note': 'oyoyo'}
+                        json_data = json.dumps(t_data).encode('utf-8')
+                        print(json_data)
+                        res = callAPI(url, 'PUT', ts_config.api_key, ts_config.username, ts_config.service_key, data=json_data)
+                        print(res.json())
+            # コメントの同期
             for journal in issue.journals:
                 #print(journal.id, journal.user, journal.created_on)
                 #print(issue.subject, journal.notes)

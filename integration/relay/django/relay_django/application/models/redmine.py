@@ -57,6 +57,7 @@ class RedmineVul(models.Model):
     contrast_app_id = models.CharField(_('Application ID'), max_length=36)
     contrast_vul_id = models.CharField(_('Vulnerability ID'), max_length=19)
     issue_id = models.CharField(_('Issue ID'), max_length=100)
+    status_id = models.PositiveIntegerField(_('Status ID'), blank=True, null=True)
 
     def __str__(self):
         if self.id:

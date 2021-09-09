@@ -47,13 +47,32 @@ class RedmineVulInline(NestedTabularInline):
     inlines = [
         RedmineNoteInline,
     ]
-    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'issue_id')
+    readonly_fields = ('contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'issue_id', 'status_disp')
+    fieldsets = [ 
+        (None, {'fields': ['contrast_org_id', 'contrast_app_id', 'contrast_vul_id', 'issue_id', 'status_disp',]}),
+    ]
 
     def has_add_permission(self, request, obj):
         return False
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def status_disp(self, obj):
+        if obj.redmine.status_id_reported == obj.status_id:
+            return obj.redmine.status_name_reported
+        elif obj.redmine.status_id_suspicious == obj.status_id:
+            return obj.redmine.status_name_suspicious
+        elif obj.redmine.status_id_confirmed == obj.status_id:
+            return obj.redmine.status_name_confirmed
+        elif obj.redmine.status_id_notaproblem == obj.status_id:
+            return obj.redmine.status_name_notaproblem
+        elif obj.redmine.status_id_remediated == obj.status_id:
+            return obj.redmine.status_name_remediated
+        elif obj.redmine.status_id_fixed == obj.status_id:
+            return obj.redmine.status_name_fixed
+        return ''
+    status_disp.short_description = _('Status')
 
 class RedmineLibInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

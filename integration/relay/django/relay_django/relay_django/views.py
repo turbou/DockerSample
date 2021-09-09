@@ -665,6 +665,22 @@ def hook(request):
             # ---------- Redmine ---------- #
             if ts_config.redmine:
                 if not RedmineVul.objects.filter(contrast_vul_id=vul_id).exists():
+                    # ステータス
+                    status = vuln_json['trace']['status']
+                    status_id = None
+                    if status in ['Reported', '報告済']:
+                        status_id = ts_config.redmine.status_id_reported
+                    elif status in ['Suspicious', '疑わしい']:
+                        status_id = ts_config.redmine.status_id_suspicious
+                    elif status in ['Confirmed', '確認済']:
+                        status_id = ts_config.redmine.status_id_confirmed
+                    elif status in ['NotAProblem', 'Not a Problem', '問題無し']:
+                        status_id = ts_config.redmine.status_id_notaproblem
+                    elif status in ['Remediated', '修復済']:
+                        status_id = ts_config.redmine.status_id_remediated
+                    elif status in ['Fixed', '修正完了']:
+                        status_id = ts_config.redmine.status_id_fixed
+                    # 優先度
                     severity = vuln_json['trace']['severity']
                     priority_id = None
                     if severity == 'Critical':
@@ -681,6 +697,7 @@ def hook(request):
                     issue = redmine_api.issue.new()
                     issue.project_id = ts_config.redmine.project_id
                     issue.tracker_id = ts_config.redmine.tracker_id
+                    issue.status_id = status_id
                     issue.priority_id = priority_id
                     issue.subject = vuln_json['trace']['title']
                     deco_mae = "## "
@@ -697,7 +714,7 @@ def hook(request):
                     issue.description = ''.join(description)
                     try:
                         issue.save()
-                        mapping = RedmineVul(redmine=ts_config.redmine, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id)
+                        mapping = RedmineVul(redmine=ts_config.redmine, contrast_org_id=org_id, contrast_app_id=app_id, contrast_vul_id=vul_id, status_id=status_id)
                         mapping.issue_id = issue.id
                         mapping.save()
                     except AuthError:
@@ -824,19 +841,22 @@ def hook(request):
                     status_id = ts_config.redmine.status_id_remediated
                 elif status in ['Fixed', '修正完了']:
                     status_id = ts_config.redmine.status_id_fixed
-                mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
-                redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
-                issue = redmine_api.issue.get(mapping.issue_id)
-                issue.status_id = status_id
-                try:
-                    issue.save()
-                except ResourceNotFoundError:
-                    print('Error')
-                except:
-                    traceback.print_exc()
-                org_id = json_data['organization_id']
-                app_id = json_data['application_id']
-                syncCommentFromContrast2(ts_config, org_id, app_id, vul_id)
+                if RedmineVul.objects.filter(contrast_vul_id=vul_id).exists():
+                    mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
+                    redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
+                    issue = redmine_api.issue.get(mapping.issue_id)
+                    issue.status_id = status_id
+                    try:
+                        issue.save()
+                        mapping.status_id = status_id
+                        mapping.save()
+                    except ResourceNotFoundError:
+                        print('Error')
+                    except:
+                        traceback.print_exc()
+                    org_id = json_data['organization_id']
+                    app_id = json_data['application_id']
+                    syncCommentFromContrast2(ts_config, org_id, app_id, vul_id)
             return HttpResponse(status=200)
         elif event_type == 'NEW_VULNERABILITY_COMMENT':
             print(_('event_new_vulnerability_comment'))
