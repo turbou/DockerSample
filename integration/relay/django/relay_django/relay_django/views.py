@@ -257,6 +257,7 @@ def syncComment(ts_config, org_id, app_id, vul_id, kubun=0):
         res = requests.post(url, json=data, headers=headers)
         print('oyoyo!! ', res.text)
 
+# Redmine用のコメント同期
 def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
     print('syncCommentFromContrast2!!')
     mapping = RedmineVul.objects.filter(contrast_vul_id=vul_id).first()
@@ -274,23 +275,30 @@ def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
     #    'Content-Type': 'application/json',
     #    'PRIVATE-TOKEN': ts_config.gitlab.access_token
     #}
+    contrast_note_ids = []
     for c_note in notes_json['notes']:
-        if c_note['creator_uid'] == ts_config.username:
-            if not RedmineNote.objects.filter(contrast_note_id=c_note['id']).exists():
-                note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
-                created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
-                redmine_note = RedmineNote(vul=mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
-                redmine_note.created_at = created_at
-                redmine_note.save()
+        contrast_note_id = c_note['id']
+        contrast_note_ids.append(contrast_note_id)
+        #if c_note['creator_uid'] == ts_config.username:
+        #    # この処理は必要？
+        #    if not RedmineNote.objects.filter(contrast_note_id=c_note['id']).exists():
+        #        note_str = html.unescape(status_change_reason_str + c_note['note']) + creator
+        #        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
+        #        redmine_note = RedmineNote(vul=mapping, note=note_str, creator=creator, contrast_note_id=c_note['id'])
+        #        redmine_note.created_at = created_at
+        #        redmine_note.save()
+        #    continue
+
+        if RedmineNote.objects.filter(contrast_note_id=contrast_note_id).exists():
+            # TeamServerのコメントIDのデータがすでにあれば無視
             continue
-        if RedmineNote.objects.filter(contrast_note_id=c_note['id']).exists():
-            continue
+
         creator = '(by ' + c_note['creator'] + ')'
         m = r.search(html.unescape(c_note['note']))
         if m is not None:
             creator = ''
-        old_status_str = ''
-        new_status_str = ''
+        #old_status_str = ''
+        #new_status_str = ''
         status_change_reason_str = ''
         if 'properties' in c_note:
             for c_prop in c_note['properties']:
@@ -310,16 +318,18 @@ def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
                 status_change_reason_str = '問題無しへの変更理由: %s\n' % c_prop['value']
         note = html.unescape(status_change_reason_str + c_note['note'])
         note_str = '%s%s' % (note, creator)
-        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
         #print(note_str)
+        created_at = dt.fromtimestamp(c_note['creation'] / 1000).isoformat()
+
         issue = redmine_api.issue.get(mapping.issue_id)
         issue.notes = note_str
         try:
-            oyoyo = issue.save()
-            #for journal in oyoyo.journals:
+            issue.save()
+            #for journal in issue.journals:
             #    print(journal.id, journal.user, journal.created_on, journal.notes)
-            if len(list(oyoyo.journals)) > 0:
-                redmine_note = RedmineNote(vul=mapping, note=note, creator=c_note['creator'], contrast_note_id=c_note['id'], note_id=list(oyoyo.journals)[0].id)
+            if len(list(issue.journals)) > 0:
+                redmine_note_id = list(issue.journals)[0].id
+                redmine_note = RedmineNote(vul=mapping, note=note, creator=c_note['creator'], contrast_note_id=contrast_note_id, note_id=redmine_note_id)
                 redmine_note.created_at = created_at
                 redmine_note.save()
         except ResourceNotFoundError:
@@ -335,6 +345,14 @@ def syncCommentFromContrast2(ts_config, org_id, app_id, vul_id):
         #res = requests.post(url, json=data, headers=headers)
         #print(res.status_code)
         #print('oyoyo!! ', res.text)
+
+    # TeamServerで削除されたコメントの処理
+    del_target_ids = []
+    for redmine_note in RedmineNote.objects.filter(vul=mapping):
+        if not redmine_note.contrast_note_id in contrast_note_ids:
+            del_target_ids.append(redmine_note.id)
+    for del_target_id in del_target_ids:
+        RedmineNote.objects.get(pk=del_target_id).delete()
 
 class JSONWebTokenAuthenticationBacklog(BaseJSONWebTokenAuthentication):
     def get_jwt_value(self, request):
@@ -506,7 +524,6 @@ def hook(request):
             else:
                 return HttpResponse(status=404)
             ts_config = Integration.objects.get(name=integration_name)
-            app_name = json_data['application_name']
             org_id = json_data['organization_id']
             app_id = json_data['application_id']
             vul_id = json_data['vulnerability_id']
@@ -520,6 +537,10 @@ def hook(request):
             url = '%s/api/ng/%s/traces/%s/trace/%s?expand=servers,application' % (teamserver_url, org_id, app_id, vul_id)
             res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             vuln_json = res.json()
+            url = '%s/api/ng/%s/applications/%s?expand=skip_links' % (teamserver_url, org_id, app_id)
+            res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+            app_info_json = res.json()
+            app_name = app_info_json['application']['name']
             summary = '[%s] %s' % (app_name, vuln_json['trace']['title'])
             story_url = ''
             howtofix_url = ''
@@ -699,7 +720,7 @@ def hook(request):
                     issue.tracker_id = ts_config.redmine.tracker_id
                     issue.status_id = status_id
                     issue.priority_id = priority_id
-                    issue.subject = vuln_json['trace']['title']
+                    issue.subject = summary
                     deco_mae = "## "
                     deco_ato = ""
                     description = []
@@ -903,7 +924,12 @@ def hook(request):
             url = '%s/api/ng/%s/libraries/%s/%s?expand=vulns' % (teamserver_url, org_id, lib_lang, lib_id)
             res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
             lib_json = res.json()
+            url = '%s/api/ng/%s/applications/%s?expand=skip_links' % (teamserver_url, org_id, app_id)
+            res = callAPI(url, 'GET', ts_config.api_key, ts_config.username, ts_config.service_key)
+            app_info_json = res.json()
+            app_name = app_info_json['application']['name']
             lib_name = lib_json['library']['file_name']
+            summary = '[%s] %s' % (app_name, lib_name)
             file_version = lib_json['library']['file_version']
             latest_version = lib_json['library']['latest_version']
             classes_used = lib_json['library']['classes_used']
@@ -919,7 +945,6 @@ def hook(request):
 
             # ---------- Backlog ---------- #
             if ts_config.backlog:
-                summary = lib_name
                 # description
                 deco_mae = '## '
                 deco_ato = ''
@@ -956,7 +981,6 @@ def hook(request):
 
             # ---------- Gitlab ---------- #
             if ts_config.gitlab:
-                summary = lib_name
                 # description
                 deco_mae = "**"
                 deco_ato = "**"
@@ -993,6 +1017,48 @@ def hook(request):
                 else:
                     pass
                     #return HttpResponse(json.dumps({'messages': res.json()}), content_type='application/json', status=res.status_code)
+
+            # ---------- Redmine ---------- #
+            if ts_config.redmine:
+                if not RedmineLib.objects.filter(contrast_lib_id=lib_id).exists():
+                    deco_mae = "## "
+                    deco_ato = ""
+                    description = []
+                    description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
+                    description.append('%s\n\n' % (file_version))
+                    description.append('%s%s%s\n' % (deco_mae, '最新バージョン', deco_ato))
+                    description.append('%s\n\n' % (latest_version))
+                    description.append('%s%s%s\n' % (deco_mae, 'クラス(使用/全体)', deco_ato))
+                    description.append('%d/%d\n\n' % (classes_used, class_count))
+                    description.append('%s%s%s\n' % (deco_mae, '脆弱性', deco_ato))
+                    description.append('%s\n\n' % ('\n'.join(cve_list)))
+                    description.append('%s%s%s\n' % (deco_mae, 'ライブラリURL', deco_ato))
+                    description.append(self_url)
+
+                    redmine_api = RedmineApi(ts_config.redmine.url, key=ts_config.redmine.access_key)
+                    issue = redmine_api.issue.new()
+                    issue.project_id = ts_config.redmine.project_id
+                    issue.tracker_id = ts_config.redmine.tracker_id
+                    issue.status_id = ts_config.redmine.status_id_reported
+                    issue.priority_id = ts_config.redmine.severity_id_cvelib
+                    issue.subject = summary
+                    issue.description = ''.join(description)
+                    try:
+                        issue.save()
+                        mapping = RedmineLib(redmine=ts_config.redmine, contrast_org_id=org_id, contrast_app_id=app_id, contrast_lib_lg=lib_lang, contrast_lib_id=lib_id)
+                        mapping.issue_id = issue.id
+                        mapping.save()
+                    except AuthError:
+                        traceback.print_exc()
+                        print('AuthError')
+                    except ResourceNotFoundError:
+                        traceback.print_exc()
+                        print('ResourceNotFoundError')
+                    except ValidationError:
+                        traceback.print_exc()
+                        print('ValidationError')
+                    except:
+                        traceback.print_exc()
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=200)
