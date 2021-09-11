@@ -42,7 +42,7 @@ class TeamServerAdminForm(forms.ModelForm):
 class IntegrationAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
-    autocomplete_fields = ['backlog', 'gitlab', 'googlechat']
+    autocomplete_fields = ['backlog', 'gitlab', 'googlechat', 'redmine']
     form = TeamServerAdminForm
     actions = None
     list_display = ('name', 'url', 'username', 'hook_url')
