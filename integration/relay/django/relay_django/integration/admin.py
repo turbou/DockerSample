@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib import messages
 from django.conf import settings
 from django import forms
 from django.utils.safestring import mark_safe
@@ -6,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from .models import Integration
 from relay_django.views import callAPI
 from rest_framework_jwt.settings import api_settings
+from django.contrib.admin.helpers import ActionForm
 
 import json
 import requests
@@ -38,13 +40,21 @@ class TeamServerAdminForm(forms.ModelForm):
                     raise forms.ValidationError(_('Unable to connect to Team Server. Please check the settings.'))
         return cleaned_data
 
+class ApplicationNameForm(ActionForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['app_name'].widget.attrs = {'size':50, 'placeholder':_('Specify the name of the application to import.')}
+    app_name = forms.CharField(label=_("Application Name"), required=False)
+
+@admin.action(description=_('Import Vulnerabilities'))
 @admin.register(Integration)
 class IntegrationAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
     autocomplete_fields = ['backlog', 'gitlab', 'googlechat', 'redmine']
     form = TeamServerAdminForm
-    actions = None
+    actions = ['import_vulnerabilities']
+    action_form = ApplicationNameForm
     list_display = ('name', 'url', 'username', 'hook_url')
 
     fieldsets = [
@@ -54,6 +64,18 @@ class IntegrationAdmin(admin.ModelAdmin):
         ('GoogleChat', {'fields': ['googlechat',]}),
         ('Redmine', {'fields': ['redmine',]}),
     ]
+
+    def import_vulnerabilities(self, request, queryset):
+        app_name = request.POST.get('app_name')
+        if app_name is None or len(app_name) == 0:
+            self.message_user(request, _('Please specify the application name.'), messages.ERROR)
+            return
+        self.message_user(request, _('The vulnerability import was successful.'), messages.SUCCESS)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop('delete_selected')
+        return actions
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

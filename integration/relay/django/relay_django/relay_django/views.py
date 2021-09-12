@@ -41,12 +41,17 @@ def convertMustache(old_str, format_type='markdown'):
         ## Link
         #new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
         #new_str = new_str.gsub(%r{{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{/link}}}, '"\2":\1 ')
+        new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'\2:\1', old_str)
         ## CodeBlock
         #new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>').gsub(%r{{{/[A-Za-z]+Block}}}, '</pre>')
+        new_str = re.sub(r'{{#[A-Za-z]+Block}}', '<pre>', new_str)
+        new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '</pre>', new_str)
         ## Header
         #new_str = new_str.gsub(/{{#header}}/, 'h3. ').gsub(%r{{{/header}}}, "\n")
+        new_str = new_str.replace('{{#header}}', 'h3. ').replace('{{\/header}}', '\n')
         ## List
         #new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(%r{{{/listElement}}}, '')
+        new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
         ## Table
         #while true do
         #  tbl_bgn_idx = new_str.index('{{#table}}')
@@ -64,8 +69,31 @@ def convertMustache(old_str, format_type='markdown'):
         #    new_str[tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10] = tbl_str # 10は{{/table}}の文字数
         #  end
         #end
-        new_str = ''
-    else:
+        while True:
+          tbl_bgn_idx = new_str.find('{{#table}}')
+          tbl_end_idx = new_str.find('{{/table}}')
+          if tbl_bgn_idx < 0 or tbl_end_idx < 0:
+            break
+          else:
+            tbl_str = new_str[tbl_bgn_idx:tbl_end_idx + 10] # 10は{{/table}}の文字数
+            tbl_str = re.sub(r'({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{/tableHeaderRow}})[\s]*{{/tableRow}})', '\\1' + "\n{{#tableRowX}}" + '\\2' + '{{/tableRowX}}', tbl_str)
+            m = r.search(tbl_str)
+            if m is not None:
+              replace_str = m.group(1).replace('tableHeaderRow', 'tableHeaderRowX')
+              tbl_str = re.sub(r'{{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}}', replace_str, tbl_str)
+              tbl_str = re.sub(r'({{#tableHeaderRowX}})(.+?)({{/tableHeaderRowX}})', '\\1---\\3', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}', '|', tbl_str)
+            tbl_str = re.sub(r'{{/tableHeaderRow}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}', '|', tbl_str)
+            tbl_str = re.sub(r'{{/tableHeaderRowX}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableCell}}', '|', tbl_str)
+            tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}', '\n|', tbl_str)
+            tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'{{{nl}}}', '<br>', tbl_str)
+            tbl_str = re.sub(r'{{(#|/)[A-Za-z]+}}', '', tbl_str) # ここで残ったmustacheを全削除
+            new_str = '%s%s%s' % (new_str[:tbl_bgn_idx], tbl_str, new_str[tbl_end_idx + 10:])
+    elif format_type == 'markdown':
         # Link
         new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
         # CodeBlock
@@ -102,21 +130,24 @@ def convertMustache(old_str, format_type='markdown'):
             tbl_str = re.sub(r'{{{nl}}}', '<br>', tbl_str)
             tbl_str = re.sub(r'{{(#|/)[A-Za-z]+}}', '', tbl_str) # ここで残ったmustacheを全削除
             new_str = '%s%s%s' % (new_str[:tbl_bgn_idx], tbl_str, new_str[tbl_end_idx + 10:])
-    
-        # New line
-        new_str = re.sub(r'{{{nl}}}', '\n', new_str)
-        # Other
-        new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
-        # Comment
-        new_str = re.sub(r'{{!.+}}', '', new_str)
-        # <, >
-        new_str = new_str.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ')
-        # Quot
-        new_str = new_str.replace('&quot;', '"')
-        # Tab
-        new_str = new_str.replace('\t', '    ')
-        # Character Reference
-        new_str = re.sub(r'&#[^;]+;', '', new_str)
+    else:
+        # Link
+        #new_str = str.gsub(/\$\$LINK_DELIM\$\$/, ' ')
+        new_str = re.sub(r'\$\$LINK_DELIM\$\$', r' ', old_str)
+    # New line
+    new_str = re.sub(r'{{{nl}}}', '\n', new_str)
+    # Other
+    new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
+    # Comment
+    new_str = re.sub(r'{{!.+}}', '', new_str)
+    # <, >
+    new_str = new_str.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ')
+    # Quot
+    new_str = new_str.replace('&quot;', '"')
+    # Tab
+    new_str = new_str.replace('\t', '    ')
+    # Character Reference
+    new_str = re.sub(r'&#[^;]+;', '', new_str)
     return new_str
 
 def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
