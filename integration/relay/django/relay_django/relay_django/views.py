@@ -36,58 +36,87 @@ def callAPI(url, method, api_key, username, service_key, data=None):
         res = requests.put(url, data=data, headers=headers)
     return res
 
-def convertMustache(old_str):
-    # Link
-    new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
-    # CodeBlock
-    new_str = re.sub(r'{{#[A-Za-z]+Block}}', '~~~\n', new_str)
-    new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n~~~', new_str)
-    # Header
-    new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
-    # List
-    new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
-    # Table
-    r = re.compile('({{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}})')
-    while True:
-      tbl_bgn_idx = new_str.find('{{#table}}')
-      tbl_end_idx = new_str.find('{{/table}}')
-      #print(tbl_bgn_idx, tbl_end_idx)
-      if tbl_bgn_idx < 0 or tbl_end_idx < 0:
-        break
-      else:
-        tbl_str = new_str[tbl_bgn_idx:tbl_end_idx + 10] # 10は{{/table}}の文字数
-        tbl_str = re.sub(r'({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{/tableHeaderRow}})[\s]*{{/tableRow}})', '\\1' + "\n{{#tableRowX}}" + '\\2' + '{{/tableRowX}}', tbl_str)
-        m = r.search(tbl_str)
-        if m is not None:
-          replace_str = m.group(1).replace('tableHeaderRow', 'tableHeaderRowX')
-          tbl_str = re.sub(r'{{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}}', replace_str, tbl_str)
-          tbl_str = re.sub(r'({{#tableHeaderRowX}})(.+?)({{/tableHeaderRowX}})', '\\1---\\3', tbl_str)
-        tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}', '|', tbl_str)
-        tbl_str = re.sub(r'{{/tableHeaderRow}}[\s]*', '|', tbl_str)
-        tbl_str = re.sub(r'[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}', '|', tbl_str)
-        tbl_str = re.sub(r'{{/tableHeaderRowX}}[\s]*', '|', tbl_str)
-        tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableCell}}', '|', tbl_str)
-        tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
-        tbl_str = re.sub(r'[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}', '\n|', tbl_str)
-        tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
-        tbl_str = re.sub(r'{{{nl}}}', '<br>', tbl_str)
-        tbl_str = re.sub(r'{{(#|/)[A-Za-z]+}}', '', tbl_str) # ここで残ったmustacheを全削除
-        new_str = '%s%s%s' % (new_str[:tbl_bgn_idx], tbl_str, new_str[tbl_end_idx + 10:])
-
-    # New line
-    new_str = re.sub(r'{{{nl}}}', '\n', new_str)
-    # Other
-    new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
-    # Comment
-    new_str = re.sub(r'{{!.+}}', '', new_str)
-    # <, >
-    new_str = new_str.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ')
-    # Quot
-    new_str = new_str.replace('&quot;', '"')
-    # Tab
-    new_str = new_str.replace('\t', '    ')
-    # Character Reference
-    new_str = re.sub(r'&#[^;]+;', '', new_str)
+def convertMustache(old_str, format_type='markdown'):
+    if format_type == 'textile':
+        ## Link
+        #new_str = str.gsub(/({{#link}}[^\[]+?)\[\](.+?\$\$LINK_DELIM\$\$)/, '\1%5B%5D\2')
+        #new_str = new_str.gsub(%r{{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{/link}}}, '"\2":\1 ')
+        ## CodeBlock
+        #new_str = new_str.gsub(/{{#[A-Za-z]+Block}}/, '<pre>').gsub(%r{{{/[A-Za-z]+Block}}}, '</pre>')
+        ## Header
+        #new_str = new_str.gsub(/{{#header}}/, 'h3. ').gsub(%r{{{/header}}}, "\n")
+        ## List
+        #new_str = new_str.gsub(/[ \t]*{{#listElement}}/, '* ').gsub(%r{{{/listElement}}}, '')
+        ## Table
+        #while true do
+        #  tbl_bgn_idx = new_str.index('{{#table}}')
+        #  tbl_end_idx = new_str.index('{{/table}}')
+        #  if tbl_bgn_idx.nil? || tbl_end_idx.nil?
+        #    break
+        #  else
+        #    # logger.info(sprintf('%s - %s', tbl_bgn_idx, tbl_end_idx))
+        #    tbl_str = new_str.slice(tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10) # 10は{{/table}}の文字数
+        #    tbl_str = tbl_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}/, '|').gsub(%r{{{/tableHeaderRow}}[\s]*}, '|')
+        #    tbl_str = tbl_str.gsub(/[ \t]*{{#tableRow}}[\s]*{{#tableCell}}/, '|').gsub(%r{{{/tableCell}}[\s]*}, '|')
+        #    tbl_str = tbl_str.gsub(/[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}/, "\n|").gsub(%r{{{/tableCell}}[\s]*}, '|')
+        #    tbl_str = tbl_str.gsub(/{{{nl}}}/, '<br>')
+        #    tbl_str = tbl_str.gsub(%r{{{(#|/)[A-Za-z]+}}}, '') # ここで残ったmustacheを全削除
+        #    new_str[tbl_bgn_idx, tbl_end_idx - tbl_bgn_idx + 10] = tbl_str # 10は{{/table}}の文字数
+        #  end
+        #end
+        new_str = ''
+    else:
+        # Link
+        new_str = re.sub(r'{{#link}}(.+?)\$\$LINK_DELIM\$\$(.+?){{\/link}}', r'[\2](\1)', old_str)
+        # CodeBlock
+        new_str = re.sub(r'{{#[A-Za-z]+Block}}', '~~~\n', new_str)
+        new_str = re.sub(r'{{\/[A-Za-z]+Block}}', '\n~~~', new_str)
+        # Header
+        new_str = new_str.replace('{{#header}}', '### ').replace('{{\/header}}', '')
+        # List
+        new_str = new_str.replace('{{#listElement}}', '* ').replace('{{\/listElement}}', '')
+        # Table
+        r = re.compile('({{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}})')
+        while True:
+          tbl_bgn_idx = new_str.find('{{#table}}')
+          tbl_end_idx = new_str.find('{{/table}}')
+          #print(tbl_bgn_idx, tbl_end_idx)
+          if tbl_bgn_idx < 0 or tbl_end_idx < 0:
+            break
+          else:
+            tbl_str = new_str[tbl_bgn_idx:tbl_end_idx + 10] # 10は{{/table}}の文字数
+            tbl_str = re.sub(r'({{#tableRow}}[\s]*({{#tableHeaderRow}}.+{{/tableHeaderRow}})[\s]*{{/tableRow}})', '\\1' + "\n{{#tableRowX}}" + '\\2' + '{{/tableRowX}}', tbl_str)
+            m = r.search(tbl_str)
+            if m is not None:
+              replace_str = m.group(1).replace('tableHeaderRow', 'tableHeaderRowX')
+              tbl_str = re.sub(r'{{#tableRowX}}[\s]*.+[\s]*{{/tableRowX}}', replace_str, tbl_str)
+              tbl_str = re.sub(r'({{#tableHeaderRowX}})(.+?)({{/tableHeaderRowX}})', '\\1---\\3', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableHeaderRow}}', '|', tbl_str)
+            tbl_str = re.sub(r'{{/tableHeaderRow}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#tableRowX}}[\s]*{{#tableHeaderRowX}}', '|', tbl_str)
+            tbl_str = re.sub(r'{{/tableHeaderRowX}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#tableRow}}[\s]*{{#tableCell}}', '|', tbl_str)
+            tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'[ \t]*{{#badTableRow}}[\s]*{{#tableCell}}', '\n|', tbl_str)
+            tbl_str = re.sub(r'{{/tableCell}}[\s]*', '|', tbl_str)
+            tbl_str = re.sub(r'{{{nl}}}', '<br>', tbl_str)
+            tbl_str = re.sub(r'{{(#|/)[A-Za-z]+}}', '', tbl_str) # ここで残ったmustacheを全削除
+            new_str = '%s%s%s' % (new_str[:tbl_bgn_idx], tbl_str, new_str[tbl_end_idx + 10:])
+    
+        # New line
+        new_str = re.sub(r'{{{nl}}}', '\n', new_str)
+        # Other
+        new_str = re.sub(r'{{(#|\/)[A-Za-z]+}}', '', new_str)
+        # Comment
+        new_str = re.sub(r'{{!.+}}', '', new_str)
+        # <, >
+        new_str = new_str.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ')
+        # Quot
+        new_str = new_str.replace('&quot;', '"')
+        # Tab
+        new_str = new_str.replace('\t', '    ')
+        # Character Reference
+        new_str = re.sub(r'&#[^;]+;', '', new_str)
     return new_str
 
 def syncCommentFromContrast(ts_config, org_id, app_id, vul_id):
@@ -721,15 +750,18 @@ def hook(request):
                     issue.status_id = status_id
                     issue.priority_id = priority_id
                     issue.subject = summary
-                    deco_mae = "## "
-                    deco_ato = ""
+                    deco_mae = '## '
+                    deco_ato = ''
+                    if ts_config.redmine.text_format == 'textile':
+                        deco_mae = 'h2. '
+                        deco_ato = '\n'
                     description = []
                     description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-                    description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+                    description.append('%s\n\n' %  (convertMustache(''.join(chapters), ts_config.redmine.text_format)))
                     description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-                    description.append('%s\n\n' %  (convertMustache(story)))
+                    description.append('%s\n\n' %  (convertMustache(story, ts_config.redmine.text_format)))
                     description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-                    description.append('%s\n\n' %  (convertMustache(howtofix)))
+                    description.append('%s\n\n' %  (convertMustache(howtofix, ts_config.redmine.text_format)))
                     description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
                     description.append(self_url)
                     issue.description = ''.join(description)
@@ -755,13 +787,16 @@ def hook(request):
                     issue = redmine_api.issue.get(mapping.issue_id)
                     deco_mae = "## "
                     deco_ato = ""
+                    if ts_config.redmine.text_format == 'textile':
+                        deco_mae = 'h2. '
+                        deco_ato = '\n'
                     description = []
                     description.append('%s%s%s\n' % (deco_mae, '何が起こったか？', deco_ato))
-                    description.append('%s\n\n' %  (convertMustache(''.join(chapters))))
+                    description.append('%s\n\n' %  (convertMustache(''.join(chapters), ts_config.redmine.text_format)))
                     description.append('%s%s%s\n' % (deco_mae, 'どんなリスクであるか？', deco_ato))
-                    description.append('%s\n\n' %  (convertMustache(story)))
+                    description.append('%s\n\n' %  (convertMustache(story, ts_config.redmine.text_format)))
                     description.append('%s%s%s\n' % (deco_mae, '修正方法', deco_ato))
-                    description.append('%s\n\n' %  (convertMustache(howtofix)))
+                    description.append('%s\n\n' %  (convertMustache(howtofix, ts_config.redmine.text_format)))
                     description.append('%s%s%s\n' % (deco_mae, '脆弱性URL', deco_ato))
                     description.append(self_url)
                     issue.description = ''.join(description)
@@ -1021,8 +1056,11 @@ def hook(request):
             # ---------- Redmine ---------- #
             if ts_config.redmine:
                 if not RedmineLib.objects.filter(contrast_lib_id=lib_id).exists():
-                    deco_mae = "## "
-                    deco_ato = ""
+                    deco_mae = "**"
+                    deco_ato = "**"
+                    if ts_config.redmine.text_format == 'textile':
+                        deco_mae = '*'
+                        deco_ato = '*'
                     description = []
                     description.append('%s%s%s\n' % (deco_mae, '現在バージョン', deco_ato))
                     description.append('%s\n\n' % (file_version))
