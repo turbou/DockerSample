@@ -43,10 +43,9 @@ class TeamServerAdminForm(forms.ModelForm):
 class ApplicationNameForm(ActionForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['app_name'].widget.attrs = {'size':50, 'placeholder':_('Specify the name of the application to import.')}
+        self.fields['app_name'].widget.attrs = {'size':60, 'placeholder':_('Specify the name of the application to import.')}
     app_name = forms.CharField(label=_("Application Name"), required=False)
 
-@admin.action(description=_('Import Vulnerabilities'))
 @admin.register(Integration)
 class IntegrationAdmin(admin.ModelAdmin):
     save_on_top = True
@@ -71,6 +70,7 @@ class IntegrationAdmin(admin.ModelAdmin):
             self.message_user(request, _('Please specify the application name.'), messages.ERROR)
             return
         self.message_user(request, _('The vulnerability import was successful.'), messages.SUCCESS)
+    import_vulnerabilities.short_description = _('Import Vulnerabilities')
 
     def get_actions(self, request):
         actions = super().get_actions(request)

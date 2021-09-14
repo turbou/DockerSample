@@ -14,8 +14,8 @@ class Redmine(models.Model):
     url = models.URLField(_('URL'), help_text='http://redmine.redmine:8085')
     text_format = models.CharField('テキスト書式', choices=TEXT_FORMAT_CHOICES, max_length=8, default='markdown')
     access_key = models.CharField(_('Access Key'), max_length=50)
-    project_id = models.CharField(_('Project ID'), max_length=50, help_text='Project ID, not a Project name.')
-    tracker_name = models.CharField(_('Tracker Name'), max_length=50, help_text='Tracker Name, not a Tracker ID.')
+    project_id = models.CharField(_('Project ID'), max_length=50, help_text=_('Project ID, not a Project name.'))
+    tracker_name = models.CharField(_('Tracker Name'), max_length=50, help_text=_('Tracker Name, not a Tracker ID.'))
     tracker_id = models.PositiveIntegerField(_('Tracker ID'), blank=True, null=True)
     # ステータスマッピング
     status_name_reported = models.CharField(_('Status Reported'), max_length=50, default='報告済')
