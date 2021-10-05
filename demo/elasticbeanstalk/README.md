@@ -1,6 +1,11 @@
 # Elastic BeanstalkでPetClinicを動かしてみる
 
+warのWEB-INF/libにエージェントを入れる方法や.ebextensionsのconfigでmavenからエージェントを取得して配置する方法は
+
+すでにオンラインでありますが、DLしたエージェントを組み込む方法をEB CLIでやった手順です。
+
 ## 前提条件
+
 - この手順ではEB CLIを使います。事前にインストールと設定を済ませてください。
 
 ## このフォルダの位置と初期ファイル
