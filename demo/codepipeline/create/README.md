@@ -10,7 +10,18 @@ Settings -> Developer Settings -> Personal access tokensでアクセストーク
 ```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
 生成したアクセストークンで置換してください。
 
-#### 3. サンプルアプリの中の簡単な説明
+#### 3. AWSのアカウントIDの書き換え
+以下のファイルについて、AWSのアカウントIDを書き換える箇所があります。
+```
+create//s3/readme.txt
+create//iam/policy_codebuild.json
+create//codebuild/codebuild_build.json
+create//codebuild/codebuild_test.json
+create//codedeploy/readme.txt
+create//codepipeline/pipeline.json
+```
+
+#### 4. サンプルアプリの中の簡単な説明
 - buildspec.yml  
   CodeBuildのビルドアクションで使用されるbuildspecファイルです。
 - testspec.yml  
