@@ -20,6 +20,11 @@ create//codebuild/codebuild_test.json
 create//codedeploy/readme.txt
 create//codepipeline/pipeline.json
 ```
+以下のコマンドで一括して変更してください。
+```
+# Macの場合
+find . -type f -print | xargs sed  -i "" -e "s/\[ACCOUNT_ID\]/XXXXXXXXXXXX/g"
+```
 
 #### 4. サンプルアプリの中の簡単な説明
 - buildspec.yml  
