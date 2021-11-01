@@ -22,7 +22,7 @@ create//codepipeline/pipeline.json
 ```
 以下のコマンドで一括して変更してください。
 ```
-# Macの場合
+# Macの場合（XXXXXXXXXXXXをAWSのアカウントIDにして実行してください）
 find . -type f -print | xargs sed  -i "" -e "s/\[ACCOUNT_ID\]/XXXXXXXXXXXX/g"
 ```
 
