@@ -6,7 +6,7 @@
 https://github.com/turbou/PetClinicDemo を自身のGithubなどにフォークします。
 
 #### 2. Githubのアクセストークンの準備
-Personal access tokensでアクセストークンを生成します。  
+Settings -> Developer Settings -> Personal access tokensでアクセストークンを生成します。  
 ```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
 生成したアクセストークンで置換してください。
 
