@@ -10,6 +10,13 @@ Settings -> Developer Settings -> Personal access tokensでアクセストーク
 ```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
 生成したアクセストークンで置換してください。
 
+1ファイルのみですが、以下のコマンドで一括して変更してもよいです。
+```
+# ghp_XXXXXXXXXXXXをAWSのアカウントIDにして実行してください。
+# Macの場合
+find . -type f -print | xargs sed  -i "" -e "s/\[YOUR-ACCESS-TOKEN\]/ghp_XXXXXXXXXXXX/g"
+```
+
 #### 3. AWSのアカウントIDの書き換え
 以下のファイルについて、AWSのアカウントIDを書き換える箇所があります。
 ```
@@ -22,9 +29,9 @@ create//codepipeline/pipeline.json
 ```
 以下のコマンドで一括して変更してください。
 ```
-# XXXXXXXXXXXXをAWSのアカウントIDにして実行してください。
+# YYYYYYYYYYYYをAWSのアカウントIDにして実行してください。
 # Macの場合
-find . -type f -print | xargs sed  -i "" -e "s/\[ACCOUNT_ID\]/XXXXXXXXXXXX/g"
+find . -type f -print | xargs sed  -i "" -e "s/\[ACCOUNT_ID\]/YYYYYYYYYYYY/g"
 ```
 
 #### 4. サンプルアプリの中の簡単な説明
