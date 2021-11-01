@@ -14,7 +14,7 @@ Settings -> Developer Settings -> Personal access tokensでアクセストーク
 ```
 # ghp_XXXXXXXXXXXXをAWSのアカウントIDにして実行してください。
 # Macの場合
-find . -type f -print | xargs sed  -i "" -e "s/\[YOUR-ACCESS-TOKEN\]/ghp_XXXXXXXXXXXX/g"
+find . -type f -name '*.json' -print | xargs sed  -i "" -e "s/\[YOUR-ACCESS-TOKEN\]/ghp_XXXXXXXXXXXX/g"
 ```
 
 #### 3. AWSのアカウントIDの書き換え
