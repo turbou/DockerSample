@@ -10,7 +10,7 @@ Settings -> Developer Settings -> Personal access tokensでアクセストーク
 ```./create/codepipeline/pipeline.json``` 内の```[YOUR-ACCESS-TOKEN]```を  
 生成したアクセストークンで置換してください。
 
-1ファイルのみですが、以下のコマンドで一括して変更してもよいです。
+1ファイルのみですが、以下のコマンドで変更してもよいです。
 ```
 # ghp_XXXXXXXXXXXXをAWSのアカウントIDにして実行してください。
 # Macの場合
