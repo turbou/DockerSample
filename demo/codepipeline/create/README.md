@@ -20,12 +20,12 @@ find . -type f -name '*.json' -print | xargs sed  -i "" -e "s/\[YOUR-ACCESS-TOKE
 #### 3. AWSのアカウントIDの書き換え
 以下のファイルについて、AWSのアカウントIDを書き換える箇所があります。
 ```
-create//s3/readme.txt
-create//iam/policy_codebuild.json
-create//codebuild/codebuild_build.json
-create//codebuild/codebuild_test.json
-create//codedeploy/readme.txt
-create//codepipeline/pipeline.json
+./create//s3/readme.txt
+./create//iam/policy_codebuild.json
+./create//codebuild/codebuild_build.json
+./create//codebuild/codebuild_test.json
+./create//codedeploy/readme.txt
+./create//codepipeline/pipeline.json
 ```
 以下のコマンドで一括して変更してください。
 ```
