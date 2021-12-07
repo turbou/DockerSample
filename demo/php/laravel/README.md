@@ -16,6 +16,8 @@ https://github.com/bagisto/bagisto
 起動させたいサンプルのDockerfileのほうを有効にしてください。
 
 ## Dockerビルド
+注意点として、contrast_security.yamlの内容に問題がある場合、Dockerビルドの際にAbortしたりします。  
+その場合は、一番シンプルな構成のcontrast_security.yamlに戻してから試してみてください。
 ```bash
 docker-compose build --no-cache
 ```
