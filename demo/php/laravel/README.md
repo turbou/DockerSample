@@ -16,12 +16,12 @@ https://github.com/bagisto/bagisto
 起動させたいサンプルのDockerfileのほうを有効にしてください。
 
 ## Dockerビルド
-```
+```bash
 docker-compose build --no-cache
 ```
 
 ## 起動
-```
+```bash
 docker-compose up -d
 # Basic Task Listの場合
 docker-compose exec app php artisan migrate
@@ -36,7 +36,7 @@ TeamServerでオンボード確認
 ※ サーバ、アプリのオンボードとライブラリ情報まで確認できます。ルートカバレッジの情報はまだ取れていません。
 
 ## アプリを入れ替えるなどで、クリアする場合
-```
+```bash
 docker-compose down
 rm -fr ./data
 # Dockerfileを入れ替えて
