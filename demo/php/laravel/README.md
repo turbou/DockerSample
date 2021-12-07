@@ -34,3 +34,11 @@ http://xxx.xxx.xxx.xxx:8089/
 にアクセスして、サンプルアプリにアクセス
 TeamServerでオンボード確認
 ※ サーバ、アプリのオンボードとライブラリ情報まで確認できます。ルートカバレッジの情報はまだ取れていません。
+
+## アプリを入れ替えるなどで、クリアする場合
+```
+docker-compose down
+rm -fr ./data
+# Dockerfileを入れ替えて
+docker-compose build --no-cache
+```
