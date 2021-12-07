@@ -1,0 +1,12 @@
+api: 
+  url: https://eval.contrastsecurity.com/Contrast
+  api_key: 
+  service_key: 
+  user_name: 
+
+application:
+  name: laravel_bagisto
+
+server:
+  name: docker_php7.4
+
