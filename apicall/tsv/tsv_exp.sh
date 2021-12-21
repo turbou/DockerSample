@@ -22,11 +22,11 @@ ROLE_NAME=admin
 # 既存のグループを取得します。
 rm -f ./groups.json
 curl -X GET -sS -G \
-     ${API_URL}/superadmin/ac/groups \
-     -d expand=scopes,skip_links -d q=${GROUP_NAME} -d quickFilter=CUSTOM \
-     -H "Authorization: ${AUTHORIZATION}" \
-     -H "API-Key: ${API_KEY}" \
-     -H 'Accept: application/json' -J -o groups.json
+    ${API_URL}/superadmin/ac/groups \
+    -d expand=scopes,skip_links -d q=${GROUP_NAME} -d quickFilter=CUSTOM \
+    -H "Authorization: ${AUTHORIZATION}" \
+    -H "API-Key: ${API_KEY}" \
+    -H 'Accept: application/json' -J -o groups.json
 GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
 # 組織一覧を取得します。
@@ -68,11 +68,11 @@ fi
 # 改めてグループを取得します。
 rm -f ./groups.json
 curl -X GET -sS -G \
-     ${API_URL}/superadmin/ac/groups \
-     -d expand=scopes,skip_links -d q=${GROUP_NAME} -d quickFilter=CUSTOM \
-     -H "Authorization: ${AUTHORIZATION}" \
-     -H "API-Key: ${API_KEY}" \
-     -H 'Accept: application/json' -J -o groups.json
+    ${API_URL}/superadmin/ac/groups \
+    -d expand=scopes,skip_links -d q=${GROUP_NAME} -d quickFilter=CUSTOM \
+    -H "Authorization: ${AUTHORIZATION}" \
+    -H "API-Key: ${API_KEY}" \
+    -H 'Accept: application/json' -J -o groups.json
 GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
 # 組織ごとのAPIキーを取得します。
@@ -107,7 +107,7 @@ while read -r ORG_ID; do
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
 
 # 一時的に作ったグループの削除
-curl -X DELETE -sS -G \
+curl -X DELETE -sS \
     ${API_URL}/superadmin/ac/groups/${GRP_ID}?expand=skip_links \
     -H "Authorization: ${AUTHORIZATION}" \
     -H "API-Key: ${ORG_API_KEY}" \
