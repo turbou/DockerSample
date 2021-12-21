@@ -1,3 +1,7 @@
+### スクリプト概要
+EOPのSuperAdminユーザーで、EOP内の全組織の2段階認証の設定状態の取得するスクリプトと  
+指定した組織への2段階認証の一括設定を行うスクリプトの2本です。
+
 ### 前提条件
 本スクリプトはMacおよびLinuxで動作を確認しています。  
 動作にはjqが必要となります。
@@ -16,7 +20,6 @@
     ```
 
 ### 環境変数をセット
-エクスポートでもインポートでもスクリプト実行時に必要です。
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
 export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -24,36 +27,24 @@ export CONTRAST_USERNAME=xxxxx.yyyyy@contrastsecurity.com
 export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
+CONTRAST_USERNAMEとCONTRAST_SERVICE_KEYはSuperAdminユーザーの情報が必要です。
 
-### 組織のASSESSルールの設定をエクスポート
+### 各組織の2段階認証の設定状態をエクスポート
 ```bash
-./severity_exp.sh
+./tsv_exp.sh
 ```
-rules.jsonが出力されます。
+tsv.txtが出力されます。tsv.txtをcatするなどして、各組織の2段階認証の設定状態を確認してください。
 
-### エクスポートしたASSESSルールの設定ファイル（rules.json）をインポート
-インポート先の組織に合わせて、環境変数はセットし直してください。
+### 特定の組織（複数可）に対して、2段階認証の設定を設定します。
+上記のエクスポートの際に出力された```orgid_apikey_map.txt```を編集して、2段階認証を設定する  
+組織だけ残して、不要な行を削除します。
 ```bash
-./severity_imp.sh
+./tsv_set.sh -e true -r false
 ```
+スクリプトの引数について
+- -e は2段階認証の有効/無効を指定します。
+- -r は2段階認証を各ユーザー必須とするか任意とするかを指定します。
 
-### エクスポートしたASSESSルールの設定ファイル（rules.json）をEOP配下の全組織にインポート
-- 上のexp, impと異なり、こちらでは組織ID（CONTRAST_ORG_ID）のセットは不要です。環境変数が残っていても問題はありません。
-- この処理は全組織に対しての操作となるので、EOPの**SuperAdmin権限を持つユーザー**のUSERNAME, SERVICE_KEYを再セットしてください。  
-```
-EOP（オンプレ）版TeamServerでデフォルトで提供されるcontrast_superadmin@XXXXXX.xxxユーザーを指定しても良いですが  
-別途、本処理専用のSuperAdmin権限を持つユーザーの作成をお勧めします。  
-この処理によって、このユーザーは全組織に対してRulesAdmin組織権限が付与されるため、ある組織にログインして操作を行う
-ユーザーの場合、TeamServerの操作に影響があります。
-```
-処理の流れとしては以下のとおりです。
-- RulesAdminGroupという名前のグループを作成し、そこに今回接続するユーザーをメンバーとして紐付けます。  
-さらに存在する全組織をこのグループにRulesAdmin組織権限メンバーとして紐付けます。
-- そして、組織ごとにrules.jsonの内容を反映していきます。
-```bash
-./all_org_severity_imp.sh
-```
-
-処理終了後、EOP配下の各組織のASSESSルール画面にて、反映結果をご確認ください。
+処理終了後、再度、```tsv_exp.sh```を実行するか、EOP配下の各組織の2段階認証の設定画面にて、反映結果をご確認ください。
 
 以上
