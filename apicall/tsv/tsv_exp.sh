@@ -16,7 +16,19 @@ USERNAME=$CONTRAST_USERNAME       # SuperAdminユーザー
 SERVICE_KEY=$CONTRAST_SERVICE_KEY # SuperAdminユーザー
 AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 API_URL="${BASEURL}/api/ng"
-GROUP_NAME=RulesAdminGroup
+GROUP_NAME=TempAdminGroup
+ROLE_NAME=admin
+
+# 既存のグループを取得します。
+rm -f ./groups.json
+curl -X GET -sS -G \
+     ${API_URL}/superadmin/ac/groups \
+     -d expand=scopes,skip_links -d q=${GROUP_NAME} -d quickFilter=CUSTOM \
+     -H "Authorization: ${AUTHORIZATION}" \
+     -H "API-Key: ${API_KEY}" \
+     -H 'Accept: application/json' -J -o groups.json
+
+GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
 # 組織一覧を取得します。
 rm -f ./organizaions.json
@@ -27,12 +39,38 @@ curl -X GET -sS -G \
     -H "API-Key: ${API_KEY}" \
     -H 'Accept: application/json' -J -o organizations.json
 
+# 組織IDからjson配列を生成します。
+SCOPES=
+while read -r ORG_ID; do
+    SCOPES=$SCOPES'{"org":{"id":"'$ORG_ID'","role":"'$ROLE_NAME'"},"app":{"exceptions":[]}},'
+done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
+SCOPES=`echo $SCOPES | sed "s/,$//"`
+SCOPES="["$SCOPES"]"
+
+# グループがない場合は作成、ある場合は組織の割当を更新します。
+if [ "${GRP_ID}" = "" ]; then
+    curl -X POST -sS \
+        ${API_URL}/superadmin/ac/groups/organizational?expand=skip_links \
+        -H "Authorization: ${AUTHORIZATION}" \
+        -H "API-Key: ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H 'Accept: application/json' \
+        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}' -o group_add.json
+else
+    curl -X PUT -sS \
+        ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID}?expand=skip_links \
+        -H "Authorization: ${AUTHORIZATION}" \
+        -H "API-Key: ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H 'Accept: application/json' \
+        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}' -o group_upd.json
+fi
+
 # 組織ごとのAPIキーを取得します。
 rm -f orgid_apikey_map.txt
 while read -r ORG_ID; do
     curl -X GET -sS -G \
         ${API_URL}/superadmin/users/${ORG_ID}/keys/apikey?expand=skip_links \
-        -d base=base -d expand=skip_links \
         -H "Authorization: ${AUTHORIZATION}" \
         -H "API-Key: ${API_KEY}" \
         -H 'Accept: application/json' -J -o apikey.json
@@ -48,7 +86,6 @@ while read -r ORG_ID; do
     ORG_NAME=`grep ${ORG_ID} ./orgid_apikey_map.txt | awk -F: '{print $3}'`
     curl -X GET -sS -G \
         ${API_URL}/${ORG_ID}/tsv/organization?expand=skip_links \
-        -d base=base -d expand=skip_links \
         -H "Authorization: ${AUTHORIZATION}" \
         -H "API-Key: ${ORG_API_KEY}" \
         -H 'Accept: application/json' -J -o tsv.json
