@@ -27,7 +27,6 @@ curl -X GET -sS -G \
      -H "Authorization: ${AUTHORIZATION}" \
      -H "API-Key: ${API_KEY}" \
      -H 'Accept: application/json' -J -o groups.json
-
 GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
 # 組織一覧を取得します。
@@ -55,7 +54,7 @@ if [ "${GRP_ID}" = "" ]; then
         -H "API-Key: ${API_KEY}" \
         -H "Content-Type: application/json" \
         -H 'Accept: application/json' \
-        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}' -o group_add.json
+        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}' -J -o group_add.json
 else
     curl -X PUT -sS \
         ${API_URL}/superadmin/ac/groups/organizational/${GRP_ID}?expand=skip_links \
@@ -63,8 +62,18 @@ else
         -H "API-Key: ${API_KEY}" \
         -H "Content-Type: application/json" \
         -H 'Accept: application/json' \
-        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}' -o group_upd.json
+        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}' -J -o group_upd.json
 fi
+
+# 改めてグループを取得します。
+rm -f ./groups.json
+curl -X GET -sS -G \
+     ${API_URL}/superadmin/ac/groups \
+     -d expand=scopes,skip_links -d q=${GROUP_NAME} -d quickFilter=CUSTOM \
+     -H "Authorization: ${AUTHORIZATION}" \
+     -H "API-Key: ${API_KEY}" \
+     -H 'Accept: application/json' -J -o groups.json
+GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GROUP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
 
 # 組織ごとのAPIキーを取得します。
 rm -f orgid_apikey_map.txt
@@ -96,6 +105,13 @@ while read -r ORG_ID; do
     echo "  2段階認証: $TSV_ENABLED" >> tsv.txt
     echo "  使用必須: $TSV_REQUIRED" >> tsv.txt
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
+
+# 一時的に作ったグループの削除
+curl -X DELETE -sS -G \
+    ${API_URL}/superadmin/ac/groups/${GRP_ID}?expand=skip_links \
+    -H "Authorization: ${AUTHORIZATION}" \
+    -H "API-Key: ${ORG_API_KEY}" \
+    -H 'Accept: application/json' -J -o group_del.json
 
 rm -f ./*.json
 
