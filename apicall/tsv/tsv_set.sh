@@ -16,7 +16,7 @@ USERNAME=$CONTRAST_USERNAME       # SuperAdminユーザー
 SERVICE_KEY=$CONTRAST_SERVICE_KEY # SuperAdminユーザー
 AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 API_URL="${BASEURL}/api/ng"
-GROUP_NAME=TempAdminGroup
+GROUP_NAME_SUFFIX=TempAdmin
 ROLE_NAME=admin
 
 # 引数処理
@@ -29,6 +29,7 @@ if [ $# != 4 ]; then
     echo ""
     exit 1
 fi
+
 ENABLED=
 REQUIRED=
 while getopts e:r: OPTION; do
@@ -37,6 +38,10 @@ while getopts e:r: OPTION; do
         r) REQUIRED=$OPTARG;;
     esac
 done
+
+# 一時グループの名前を生成
+GROUP_NAME_PREFIX=`echo $RANDOM | md5sum | head -c 8`
+GROUP_NAME=${GROUP_NAME_PREFIX}_${GROUP_NAME_SUFFIX}
 
 # 既存のグループを取得します。
 rm -f ./groups.json
