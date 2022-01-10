@@ -70,7 +70,11 @@ https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operati
 
 #### 3. AWS CLIの実行
 
-以下の順番で各ディレクトリにあるreadme.txtにあるコマンドを実行していきます。
+以下の順番で各ディレクトリにあるreadme.txtにあるコマンドを実行していきます。  
+awsのプロファイルが複数ある場合は、下記コマンドで設定しておくと楽です。  
+```bash
+export AWS_PROFILE=contrastsecurity
+```
 
 1. s3
 2. iam
