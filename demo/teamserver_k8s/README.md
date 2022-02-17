@@ -3,6 +3,10 @@
 ### 動作確認済み環境
 macOS 12.2  
 docker desktop 4.5.0 (Kubernetes v1.22.5)
+#### リソース設定
+- cpu: 4
+- memory: 8.00GB
+- swap: 1GB
 
 ### 各ファイル、ディレクトリの説明
 - k8s-PS-EMEA.yml  
