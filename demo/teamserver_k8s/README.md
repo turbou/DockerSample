@@ -98,7 +98,7 @@ http://localhost:28000/Contrast
     kubectl get secrets
     kubectl delete secret contrast-database
     kubectl delete secret contrast-license
-    kubectl get kubectl get configmap
+    kubectl get configmap
     kubectl delete configmaps contrast-config
     ```
 4. pvc, pvの削除
