@@ -113,6 +113,8 @@ http://localhost:28000/Contrast
     ```bash
     cd mysql/
     docker-compose down
+    # 必要に応じて
+    rm -fr ./data
     ```
   
 以上
