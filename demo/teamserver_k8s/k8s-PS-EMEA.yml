@@ -1,0 +1,169 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: contrast
+  labels:
+    app: contrast
+  annotations:
+    traefik.ingress.kubernetes.io/affinity: "true"
+    traefik.ingress.kubernetes.io/session-cookie-name: sticky
+spec:
+  selector:
+    app: contrast
+  ports:
+    - protocol: TCP
+      port: 28000
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: contrast
+  labels:
+    app: contrast
+spec:
+  selector:
+    matchLabels:
+      app: contrast
+  serviceName: "contrast"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: contrast
+    spec:
+      containers:
+        - name: contrast
+          image: ghcr.io/contrast-security-inc/contrast:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: CONTRAST_JDBC_URL
+              value: "jdbc:mysql://<URL>/<DATABASE>"
+            - name: CONTRAST_JDBC_USER
+              value: "contrast"
+              #kubectl create secret generic contrast-database --from-literal=password="<pasword>"
+            - name: CONTRAST_JDBC_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-database
+                  key: password
+              #kubectl create secret generic contrast-license --from-file=license=<contrast.lic>
+            - name: CONTRAST_LICENSE
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-license
+                  key: license
+            # ---------------SSO (optinnal)--------------------
+            - name: CONTRAST_AUTHENTICATOR_SAML_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-sso
+                  key: password
+            - name: CONTRAST_AUTHENTICATOR_SAML_KEYSTORE_PASSWORDMAP
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-sso
+                  key: password-map
+            # -------------------------------------------------------
+            # ---------------ActiveMQ (optional)--------------------
+            - name: CONTRAST_USE_EXTERNAL_ACTIVEMQ
+              value: "true"
+            - name: CONTRAST_JMS_BROKER_URL
+              value: "ssl://<URL>:<port>"
+            # Optional for authenticated access
+            - name: CONTRAST_JMS_BROKER_USERNAME
+              value: "contrast"
+            - name: CONTRAST_JMS_BROKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-jms
+                  key: password
+            # -------------------------------------------------------
+                
+            - name: JAVA_OPTS
+              value: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=50.0 -XX:MinRAMPercentage=30.0"
+          livenessProbe:
+            httpGet:
+              path: /Contrast/api/public/ng/health/status/live
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            failureThreshold: 10
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /Contrast/api/public/ng/health/status/ready
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            failureThreshold: 10
+            timeoutSeconds: 10
+          volumeMounts:
+            - name: contrast-config-volume
+              mountPath: /opt/contrast/conf
+            - name: contrast-sso
+              mountPath: /opt/contrast/data/saml
+              readOnly: true
+            - name: data
+              mountPath: /opt/contrast/data
+            - name: agents
+              mountPath: /opt/contrast/data/agents
+          resources:
+            requests:
+              cpu: 1.0
+              memory: 2Gi
+            limits:
+              cpu: 2.0
+              memory: 4Gi
+      initContainers:
+        - name: init-migrations
+          image: ghcr.io/contrast-security-inc/contrast:latest
+          env:
+            - name: CONTRAST_JDBC_URL
+              value: "jdbc:mysql://<URL>/<DATABASE>"
+            - name: CONTRAST_JDBC_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-database
+                  key: password
+            - name: CONTRAST_JDBC_USER
+              value: "contrast"
+            - name: CONTRAST_LICENSE
+              valueFrom:
+                secretKeyRef:
+                  name: contrast-license
+                  key: license
+          args: ['run-migrations.sh']
+        - name: init-agents
+          image: ghcr.io/contrast-security-inc/contrast:latest
+          command: ["/bin/sh", "-c"]
+          args: ["cp -rf /opt/contrast/data/agents/. /mnt/agents/"]
+          volumeMounts:
+            - name: agents
+              mountPath: /mnt/agents
+      volumes:
+        # kubectl create configmap contrast-config --from-file=<path>/contrast.properties
+        - name: contrast-config-volume
+          configMap:
+            name: contrast-config
+            optional: true
+        - name: contrast-sso
+          secret:
+            secretName: contrast-sso-keystore
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
+  - metadata:
+      name: agents
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
