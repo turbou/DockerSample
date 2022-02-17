@@ -101,7 +101,15 @@ http://localhost:28000/Contrast
     kubectl get kubectl get configmap
     kubectl delete configmaps contrast-config
     ```
-4. MySQLコンテナの停止
+4. pvc, pvの削除
+    ```bash
+    kubectl get pvc
+    delete pvc agents-contrast-0
+    kubectl delete pvc data-contrast-0
+    # pvcの削除でpvも自動的に消されるみたいですが、一応確認
+    kubectl get pv
+    ```    
+6. MySQLコンテナの停止
     ```bash
     cd mysql/
     docker-compose down
