@@ -57,14 +57,20 @@ kubectl describe pods contrast-0
 # エラーが起きた場合はこのログで該当する処理のコンテナIDを指定して、エラー内容を確認してください。
 kubectl logs -f --timestamps=true contrast-0 -c <コンテナID>
 ```
+以下のようになったらOKです。10分かからないぐらいです。
+```bash
+NAME         READY   STATUS    RESTARTS        AGE
+contrast-0   1/1     Running   2 (5m16s ago)   9m22s
+```
 #### ローカルPCからアクセスできるようにポートフォワードさせる。
 ```bash
 # 一応、ポートとか確認する場合
 kubectl describe services contrast
-# ポートフォワード
+# ポートフォワード (ポートフォワードしている間、接続可能です)
 kubectl port-forward service/contrast 28000:28000
 ```
 #### 接続してみる。
+SuperAdminアカウントと例のパスワードでログインしてみてください。
 ```
 http://localhost:28000/Contrast
 ```
