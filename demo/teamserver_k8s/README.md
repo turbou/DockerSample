@@ -22,7 +22,7 @@ docker-compose ps
 #### PodのDB接続先のIPアドレスを修正する。
 ```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストのIPアドレスに合わせて修正します。
 
-#### kubectlにSecretを登録する。
+#### kubectlにSecretとConfigMapを登録する。
 このREADME.mdの配置されているディレクトリに戻ります。  
 ```bash
 # とりあえず今のSecretsを確認
@@ -40,4 +40,31 @@ kubectl get configmaps
 kubectl create configmap contrast-config --from-file=./contrast.properties
 # 登録された中身を確認
 kubectl describe configmaps contrast-config
+```
+
+### サービスの起動
+#### サービスの起動
+```bash
+kubectl apply -f k8s-simple.yml
+```
+#### Podの状態確認いろいろ
+```bash
+# Podのステータス確認
+kubectl get pods
+# Podの詳細確認
+kubectl describe pods contrast-0
+# Podのログを確認 (コンテナIDはinit-migrations、init-agents、contrastとかです。describeの結果で確認できます)
+# エラーが起きた場合はこのログで該当する処理のコンテナIDを指定して、エラー内容を確認してください。
+kubectl logs -f --timestamps=true contrast-0 -c <コンテナID>
+```
+#### ローカルPCからアクセスできるようにポートフォワードさせる。
+```bash
+# 一応、ポートとか確認する場合
+kubectl describe services contrast
+# ポートフォワード
+kubectl port-forward service/contrast 28000:28000
+```
+#### 接続してみる。
+```
+http://localhost:28000/Contrast
 ```
