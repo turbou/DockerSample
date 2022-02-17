@@ -1,8 +1,20 @@
 ## Contrast TeamServerのコンテナをk8sで動かしてみる
 
 ### 動作確認済み環境
-macOS 12.2
+macOS 12.2  
 docker desktop 4.5.0 (Kubernetes v1.22.5)
+
+### 各ファイル、ディレクトリの説明
+- k8s-PS-EMEA.yml  
+  オリジナルの定義ファイルです。
+- k8s-simple.yml  
+  こちらが今回使用するシンプルバージョンです。SSOとActiveMQの辺りを削っています。
+- mysql  
+  MySQLコンテナのDocker定義です。
+- contrast-12-31-2022.lic  
+  EOPのライセンスファイルのダミーファイルです。実際のライセンスファイルと入れ替えてから実行してください。
+- contrast.properties  
+  なんとなくな設定ファイルです。無くても動くかもしれませんが、一応配置しています。
 
 ### 前準備
 #### Contrastのライセンスファイルを取得
