@@ -77,21 +77,21 @@ http://localhost:28000/Contrast
 ### 後片付け
 1. ポートフォワードをCtrl+Cで停止します。
 2. サービスを停止します。
-  ```bash
-  kubectl delete -f k8s-simple.yml 
-  ```
+    ```bash
+    kubectl delete -f k8s-simple.yml 
+    ```
 3. kubectlのSecretとConfigMapを削除します。 (残していても問題ないです)
-  ```bash
-  kubectl get secrets
-  kubectl delete secret contrast-database
-  kubectl delete secret contrast-license
-  kubectl get kubectl get configmap
-  kubectl delete configmaps contrast-config
-  ```
+    ```bash
+    kubectl get secrets
+    kubectl delete secret contrast-database
+    kubectl delete secret contrast-license
+    kubectl get kubectl get configmap
+    kubectl delete configmaps contrast-config
+    ```
 4. MySQLコンテナの停止
-  ```bash
-  cd mysql/
-  docker-compose down
-  ```
+    ```bash
+    cd mysql/
+    docker-compose down
+    ```
   
 以上
