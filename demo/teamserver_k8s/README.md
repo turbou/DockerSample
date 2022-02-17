@@ -74,7 +74,7 @@ kubectl describe pods contrast-0
 kubectl logs -f --timestamps=true contrast-0 -c <コンテナID>
 ```
 **もしも、PodがPendingのままだった場合は、docker desktopの設定のリソースのメモリを大きくしてみてください。**  
-以下のようになったらOKです。10分かからないぐらいです。
+以下のようになったらOKです。6分かからないぐらいです。
 ```bash
 NAME         READY   STATUS    RESTARTS        AGE
 contrast-0   1/1     Running   2 (5m16s ago)   9m22s
