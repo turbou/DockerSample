@@ -44,13 +44,11 @@ spec:
               value: "jdbc:mysql://192.168.11.5/contrast"
             - name: CONTRAST_JDBC_USER
               value: "contrast"
-              #kubectl create secret generic contrast-database --from-literal=password="<pasword>"
             - name: CONTRAST_JDBC_PASS
               valueFrom:
                 secretKeyRef:
                   name: contrast-database
                   key: password
-              #kubectl create secret generic contrast-license --from-file=license=<contrast.lic>
             - name: CONTRAST_LICENSE
               valueFrom:
                 secretKeyRef:
@@ -116,7 +114,6 @@ spec:
             - name: agents
               mountPath: /mnt/agents
       volumes:
-        # kubectl create configmap contrast-config --from-file=<path>/contrast.properties
         - name: contrast-config-volume
           configMap:
             name: contrast-config
