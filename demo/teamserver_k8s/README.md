@@ -108,7 +108,7 @@ http://localhost:28000/Contrast
 4. pvc, pvの削除
     ```bash
     kubectl get pvc
-    delete pvc agents-contrast-0
+    kubectl delete pvc agents-contrast-0
     kubectl delete pvc data-contrast-0
     # pvcの削除でpvも自動的に消されるみたいですが、一応確認
     kubectl get pv
