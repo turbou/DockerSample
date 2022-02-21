@@ -100,16 +100,14 @@ http://localhost:28000/Contrast
 3. kubectlのSecretとConfigMapを削除します。 (残していても問題ないです)
     ```bash
     kubectl get secrets
-    kubectl delete secret contrast-database
-    kubectl delete secret contrast-license
+    kubectl delete secret contrast-database contrast-license
     kubectl get configmap
     kubectl delete configmaps contrast-config
     ```
 4. pvc, pvの削除
     ```bash
     kubectl get pvc
-    kubectl delete pvc agents-contrast-0
-    kubectl delete pvc data-contrast-0
+    kubectl delete pvc agents-contrast-0 data-contrast-0
     # pvcの削除でpvも自動的に消されるみたいですが、一応確認
     kubectl get pv
     ```    
