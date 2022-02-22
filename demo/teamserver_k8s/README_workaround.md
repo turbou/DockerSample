@@ -10,13 +10,13 @@
 pv-data.yml
 ```yaml
   hostPath:
-    path: /tmp/k8s/data # ここです。
+    path: /Users/turbou/Documents/git/ContrastSecurity/demo/teamserver_k8s/k8s/data # ここです。
     type: DirectoryOrCreate
 ```
 pv-agents.yml
 ```yaml
   hostPath:
-    path: /tmp/k8s/data/agents # ここです。
+    path: /Users/turbou/Documents/git/ContrastSecurity/demo/teamserver_k8s/k8s/data/agents # ここです。
     type: DirectoryOrCreate
 ```
 #### PersistentVolumeとPersistentVolumeClaimを手動で作成する。
