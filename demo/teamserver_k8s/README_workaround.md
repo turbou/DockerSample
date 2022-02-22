@@ -74,6 +74,7 @@ kubectl get pvc,pv
 
 ### サービスの起動
 #### サービスの起動
+VolumeClaimTemplateの定義のないymlを実行します。
 ```bash
 kubectl apply -f k8s-simple_without_pv.yml
 ```
@@ -109,7 +110,7 @@ http://localhost:28000/Contrast
 1. ポートフォワードをCtrl+Cで停止します。
 2. サービスを停止します。
     ```bash
-    kubectl delete -f k8s-simple.yml 
+    kubectl delete -f k8s-simple_without_pv.yml 
     ```
 3. kubectlのSecretとConfigMapを削除します。 (残していても問題ないです)
     ```bash
