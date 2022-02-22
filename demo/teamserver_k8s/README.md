@@ -79,6 +79,13 @@ kubectl logs -f --timestamps=true contrast-0 -c <コンテナID>
 NAME         READY   STATUS    RESTARTS        AGE
 contrast-0   1/1     Running   2 (5m16s ago)   9m22s
 ```
+もしもPodがPendingのままで、PersistentVolumeClaimのエラーメッセージが出ている場合は  
+以下のコマンドで、pvcとpvの状態を確認してください。
+```bash
+kubectl get pvc
+kubectl get pv
+```
+Persistent Volumeがnot foundとなっている場合は、回避方法の[手順](./README_workaround.md)を実行してみてください。
 #### ローカルPCからアクセスできるようにポートフォワードさせる。
 ```bash
 # 一応、ポートとか確認する場合
