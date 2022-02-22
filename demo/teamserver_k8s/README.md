@@ -1,14 +1,14 @@
-## Contrast TeamServerのコンテナをk8sで動かしてみる
+# Contrast TeamServerのコンテナをk8sで動かしてみる
 
-### 動作確認済み環境
+## 動作確認済み環境
 macOS 12.2  
 docker desktop 4.5.0 (Kubernetes v1.22.5)
-#### リソース設定
+### リソース設定
 - cpu: 4
 - memory: 8.00GB
 - swap: 1GB
 
-### 各ファイル、ディレクトリの説明
+## 各ファイル、ディレクトリの説明
 - k8s-PS-EMEA.yml  
   オリジナルの定義ファイルです。
 - k8s-simple.yml  
@@ -20,25 +20,22 @@ docker desktop 4.5.0 (Kubernetes v1.22.5)
 - contrast.properties  
   なんとなくな設定ファイルです。無くても動くかもしれませんが、一応配置しています。
 
-### 前準備
-#### Contrastのライセンスファイルを取得
+## 前準備
+### Contrastのライセンスファイルを取得
 すでにあるダミーライセンスファイルのcontrast-12-31-2022.licと入れ替えます。
 
-#### Kubernetesを有効化
+### Kubernetesを有効化
 docker desktopの設定画面でKubernetesを有効化してください。  
 Show system containersはオフのままでも動きました。
 
-#### MySQLコンテナを稼働させます。
+### MySQLコンテナを稼働させます。
 ```bash
 cd mysql/
 docker-compose up -d
 docker-compose ps
 ```
 
-#### PodのDB接続先のIPアドレスを修正
-```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストOSのIPアドレスに合わせて修正します。
-
-#### kubectlにSecretとConfigMapを登録
+### kubectlにSecretとConfigMapを登録
 このREADME.mdの配置されているディレクトリに戻ります。  
 ```bash
 # とりあえず今のSecretsを確認
@@ -57,13 +54,16 @@ kubectl create configmap contrast-config --from-file=./contrast.properties
 # 登録された中身を確認
 kubectl describe configmaps contrast-config
 ```
+### 各ファイルの設定を一部修正
+#### PodのDB接続先のIPアドレスを修正
+```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストOSのIPアドレスに合わせて修正します。
 
+## サービスの起動
 ### サービスの起動
-#### サービスの起動
 ```bash
 kubectl apply -f k8s-simple.yml
 ```
-#### Podの状態確認いろいろ
+### Podの状態確認いろいろ
 ```bash
 # Podのステータス確認
 kubectl get pods
@@ -85,19 +85,19 @@ contrast-0   1/1     Running   2 (5m16s ago)   9m22s
 kubectl get pvc,pv
 ```
 PersistentVolumeがresource not foundとなっている場合は、回避方法の[手順](./README_workaround.md)を実行してみてください。
-#### ローカルPCからアクセスできるようにポートフォワードさせる。
+### ローカルPCからアクセスできるようにポートフォワードさせる。
 ```bash
 # 一応、ポートとか確認する場合
 kubectl describe services contrast
 # ポートフォワード (ポートフォワードしている間、接続可能です)
 kubectl port-forward service/contrast 28000:28000
 ```
-#### 接続してみる。
+## 接続してみる。
 SuperAdminアカウントと例のパスワードでログインしてみてください。
 ```
 http://localhost:28000/Contrast
 ```
-### 後片付け
+## 後片付け
 1. ポートフォワードをCtrl+Cで停止します。
 2. サービスを停止します。
     ```bash
