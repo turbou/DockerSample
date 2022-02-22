@@ -6,10 +6,17 @@
 ```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストOSのIPアドレスに合わせて修正します。
 
 #### Persistent Volumeのhostpathを自身の環境に合わせて修正します。
-```pv-data.yml```, ```pv-agents.yml```の*spec.hostPath.path*を権限のあるディレクトリパスに変更します。
+```pv-data.yml```, ```pv-agents.yml```の*spec.hostPath.path*を権限のあるディレクトリパスに変更します。  
+pv-data.yml
 ```yaml
   hostPath:
-    path: /Users/turbou/Documents/git/ContrastSecurity/demo/teamserver_k8s/k8s/data # ここです。
+    path: /tmp/k8s/data # ここです。
+    type: DirectoryOrCreate
+```
+pv-agents.yml
+```yaml
+  hostPath:
+    path: /tmp/k8s/data/agents # ここです。
     type: DirectoryOrCreate
 ```
 #### PersistentVolumeとPersistentVolumeClaimを手動で作成する。
