@@ -82,10 +82,9 @@ contrast-0   1/1     Running   2 (5m16s ago)   9m22s
 もしもPodがPendingのままで、PersistentVolumeClaimのエラーメッセージが出ている場合は  
 以下のコマンドで、pvcとpvの状態を確認してください。
 ```bash
-kubectl get pvc
-kubectl get pv
+kubectl get pvc,pv
 ```
-Persistent Volumeがnot foundとなっている場合は、回避方法の[手順](./README_workaround.md)を実行してみてください。
+PersistentVolumeがresource not foundとなっている場合は、回避方法の[手順](./README_workaround.md)を実行してみてください。
 #### ローカルPCからアクセスできるようにポートフォワードさせる。
 ```bash
 # 一応、ポートとか確認する場合
@@ -113,10 +112,8 @@ http://localhost:28000/Contrast
     ```
 4. pvc, pvの削除
     ```bash
-    kubectl get pvc
+    kubectl get pvc,pv
     kubectl delete pvc agents-contrast-0 data-contrast-0
-    # pvcの削除でpvも自動的に消されるみたいですが、一応確認
-    kubectl get pv
     ```    
 6. MySQLコンテナの停止
     ```bash
