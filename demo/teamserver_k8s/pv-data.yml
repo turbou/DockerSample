@@ -11,5 +11,5 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   storageClassName: hostpath
   hostPath:
-    path: /Users/turbou/Documents/git/ContrastSecurity/demo/teamserver_k8s/k8s/data
+    path: /tmp/k8s/data
     type: DirectoryOrCreate
