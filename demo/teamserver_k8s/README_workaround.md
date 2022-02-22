@@ -7,7 +7,11 @@
 
 #### Persistent Volumeのhostpathを自身の環境に合わせて修正します。
 ```pv-data.yml```, ```pv-agents.yml```の*spec.hostPath.path*を権限のあるディレクトリパスに変更します。
-
+```yaml
+  hostPath:
+    path: /Users/turbou/Documents/git/ContrastSecurity/demo/teamserver_k8s/k8s/data # ここです。
+    type: DirectoryOrCreate
+```
 #### PersistentVolumeとPersistentVolumeClaimを手動で作成する。
 ```bash
 # PersistentVolumeの作成
