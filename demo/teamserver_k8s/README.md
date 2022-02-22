@@ -35,10 +35,10 @@ docker-compose up -d
 docker-compose ps
 ```
 
-#### PodのDB接続先のIPアドレスを修正する。
+#### PodのDB接続先のIPアドレスを修正
 ```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストOSのIPアドレスに合わせて修正します。
 
-#### kubectlにSecretとConfigMapを登録する。
+#### kubectlにSecretとConfigMapを登録
 このREADME.mdの配置されているディレクトリに戻ります。  
 ```bash
 # とりあえず今のSecretsを確認
