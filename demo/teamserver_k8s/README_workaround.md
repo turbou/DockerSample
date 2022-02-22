@@ -1,4 +1,4 @@
-## Contrast TeamServerのコンテナをk8sで動かしてみる
+## Contrast TeamServerのコンテナをk8sで動かしてみる（PVが作成されない場合の回避手順）
 
 ### 動作確認済み環境
 macOS 12.2  
@@ -35,8 +35,11 @@ docker-compose up -d
 docker-compose ps
 ```
 
-#### PodのDB接続先のIPアドレスを修正する。
+#### PodのDB接続先のIPアドレスを修正します。
 ```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストOSのIPアドレスに合わせて修正します。
+
+#### Persistent Volumeのhostpathを自身の環境に合わせて修正します。
+```pv-data.yml```, ```pv-agents.yml```の*spec.hostPath.path*を権限のあるディレクトリパスに変更します。
 
 #### kubectlにSecretとConfigMapを登録する。
 このREADME.mdの配置されているディレクトリに戻ります。  
@@ -57,11 +60,22 @@ kubectl create configmap contrast-config --from-file=./contrast.properties
 # 登録された中身を確認
 kubectl describe configmaps contrast-config
 ```
+#### PersistentVolumeとPersistentVolumeClaimを手動で作成する。
+```bash
+# PersistentVolumeの作成
+kubectl apply -f pv-data.yml
+kubectl apply -f pv-agents.yml
+# PersistentVolumeClaimの作成
+kubectl apply -f pvc-data.yml
+kubectl apply -f pvc-agents.yml
+# 確認
+kubectl get pvc,pv
+```
 
 ### サービスの起動
 #### サービスの起動
 ```bash
-kubectl apply -f k8s-simple.yml
+kubectl apply -f k8s-simple_without_pv.yml
 ```
 #### Podの状態確認いろいろ
 ```bash
@@ -106,10 +120,9 @@ http://localhost:28000/Contrast
     ```
 4. pvc, pvの削除
     ```bash
-    kubectl get pvc
-    kubectl delete pvc agents-contrast-0 data-contrast-0
-    # pvcの削除でpvも自動的に消されるみたいですが、一応確認
-    kubectl get pv
+    kubectl get pvc,pv
+    kubectl delete pvc agents-pvc data-pvc
+    kubectl delete pv agents-pv data-pv
     ```    
 6. MySQLコンテナの停止
     ```bash
