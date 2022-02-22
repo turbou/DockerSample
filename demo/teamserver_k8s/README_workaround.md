@@ -1,65 +1,13 @@
-## Contrast TeamServerのコンテナをk8sで動かしてみる（PVが作成されない場合の回避手順）
+# PersistentVolumeが作成されない場合の回避手順
 
-### 動作確認済み環境
-macOS 12.2  
-docker desktop 4.5.0 (Kubernetes v1.22.5)
-#### リソース設定
-- cpu: 4
-- memory: 8.00GB
-- swap: 1GB
-
-### 各ファイル、ディレクトリの説明
-- k8s-PS-EMEA.yml  
-  オリジナルの定義ファイルです。
-- k8s-simple.yml  
-  こちらが今回使用するシンプルバージョンです。SSOとActiveMQの辺りを削っています。
-- mysql  
-  MySQLコンテナのDocker定義です。
-- contrast-12-31-2022.lic  
-  EOPのライセンスファイルのダミーファイルです。実際のライセンスファイルと入れ替えてから実行してください。
-- contrast.properties  
-  なんとなくな設定ファイルです。無くても動くかもしれませんが、一応配置しています。
-
-### 前準備
-#### Contrastのライセンスファイルを取得
-すでにあるダミーライセンスファイルのcontrast-12-31-2022.licと入れ替えます。
-
-#### Kubernetesを有効化
-docker desktopの設定画面でKubernetesを有効化してください。  
-Show system containersはオフのままでも動きました。
-
-#### MySQLコンテナを稼働させます。
-```bash
-cd mysql/
-docker-compose up -d
-docker-compose ps
-```
-
+## 前準備
+### 各ファイルの設定を一部修正
 #### PodのDB接続先のIPアドレスを修正
 ```k8s-simple.yml``` 内の**CONTRAST_JDBC_URL**のIPアドレスをホストOSのIPアドレスに合わせて修正します。
 
 #### Persistent Volumeのhostpathを自身の環境に合わせて修正します。
 ```pv-data.yml```, ```pv-agents.yml```の*spec.hostPath.path*を権限のあるディレクトリパスに変更します。
 
-#### kubectlにSecretとConfigMapを登録
-このREADME.mdの配置されているディレクトリに戻ります。  
-```bash
-# とりあえず今のSecretsを確認
-kubectl get secrets
-# DBパスワードを登録このパスワードはmysql/docker-compose.yml内と合わせます。
-kubectl create secret generic contrast-database --from-literal=password="password"
-kubectl create secret generic contrast-license --from-file=license=contrast-12-31-2022.lic
-# 登録後のSecretsを確認
-kubectl get secrets
-```
-
-```bash
-# とりあえず今のConfigMapを確認
-kubectl get configmaps
-kubectl create configmap contrast-config --from-file=./contrast.properties
-# 登録された中身を確認
-kubectl describe configmaps contrast-config
-```
 #### PersistentVolumeとPersistentVolumeClaimを手動で作成する。
 ```bash
 # PersistentVolumeの作成
@@ -72,13 +20,13 @@ kubectl apply -f pvc-agents.yml
 kubectl get pvc,pv
 ```
 
+## サービスの起動
 ### サービスの起動
-#### サービスの起動
 VolumeClaimTemplateの定義のないymlを実行します。
 ```bash
 kubectl apply -f k8s-simple_without_pv.yml
 ```
-#### Podの状態確認いろいろ
+### Podの状態確認いろいろ
 ```bash
 # Podのステータス確認
 kubectl get pods
@@ -94,19 +42,19 @@ kubectl logs -f --timestamps=true contrast-0 -c <コンテナID>
 NAME         READY   STATUS    RESTARTS        AGE
 contrast-0   1/1     Running   2 (5m16s ago)   9m22s
 ```
-#### ローカルPCからアクセスできるようにポートフォワードさせる。
+### ローカルPCからアクセスできるようにポートフォワードさせる。
 ```bash
 # 一応、ポートとか確認する場合
 kubectl describe services contrast
 # ポートフォワード (ポートフォワードしている間、接続可能です)
 kubectl port-forward service/contrast 28000:28000
 ```
-#### 接続してみる。
+## 接続してみる。
 SuperAdminアカウントと例のパスワードでログインしてみてください。
 ```
 http://localhost:28000/Contrast
 ```
-### 後片付け
+## 後片付け
 1. ポートフォワードをCtrl+Cで停止します。
 2. サービスを停止します。
     ```bash
