@@ -8,12 +8,14 @@ metadata:
     traefik.ingress.kubernetes.io/affinity: "true"
     traefik.ingress.kubernetes.io/session-cookie-name: sticky
 spec:
+  type: NodePort
   selector:
     app: contrast
   ports:
     - protocol: TCP
       port: 28000
       targetPort: 8080
+      nodePort: 30000
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -41,7 +43,7 @@ spec:
               containerPort: 8080
           env:
             - name: CONTRAST_JDBC_URL
-              value: "jdbc:mysql://192.168.11.5/contrast"
+              value: "jdbc:mysql://192.168.100.16/contrast"
             - name: CONTRAST_JDBC_USER
               value: "contrast"
             - name: CONTRAST_JDBC_PASS
@@ -92,7 +94,7 @@ spec:
           image: ghcr.io/contrast-security-inc/contrast:latest
           env:
             - name: CONTRAST_JDBC_URL
-              value: "jdbc:mysql://192.168.11.5/contrast"
+              value: "jdbc:mysql://192.168.100.16/contrast"
             - name: CONTRAST_JDBC_PASS
               valueFrom:
                 secretKeyRef:
