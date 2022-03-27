@@ -53,7 +53,7 @@ kubectl logs -f --timestamps=true contrast-0 -c <コンテナID>
 NAME         READY   STATUS    RESTARTS        AGE
 contrast-0   1/1     Running   2 (5m16s ago)   9m22s
 ```
-### ローカルPCからアクセスできるようにポートフォワードさせる。
+### ~~ローカルPCからアクセスできるようにポートフォワードさせる。~~ 不要になりました。
 ```bash
 # 一応、ポートとか確認する場合
 kubectl describe services contrast
@@ -63,10 +63,11 @@ kubectl port-forward service/contrast 28000:28000
 ## 接続してみる。
 SuperAdminアカウントと例のパスワードでログインしてみてください。
 ```
-http://localhost:28000/Contrast
+http://localhost:30000/Contrast
 ```
+30000番ポートはk8s-simple_without_pv.yml内で変更可能です。（30000〜32767の範囲で）
 ## 後片付け
-1. ポートフォワードをCtrl+Cで停止します。
+1. ~~ポートフォワードをCtrl+Cで停止します。~~
 2. サービスを停止します。
     ```bash
     kubectl delete -f k8s-simple_without_pv.yml 
