@@ -156,7 +156,6 @@ if [ ${DEL_FLG} -gt 0 ]; then
       name=`echo ${SANI_JSON_FILE} | jq -r .controls[${i}].name`
       if [ "${PREFIX}" != "" ]; then
         if [[ "${name}" =~ ^${PREFIX}* ]]; then
-          echo "match" ${name}
           continue
         fi
       fi
