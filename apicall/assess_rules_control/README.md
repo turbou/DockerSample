@@ -1,6 +1,5 @@
-### スクリプト概要
-EOPのSuperAdminユーザーで、EOP内の全組織の2段階認証の設定状態を取得するスクリプトと  
-指定した組織への2段階認証の一括設定を行うスクリプトの2本です。
+### 概要
+組織内のアプリケーションごとのASSESSルールのon/offを一括処理で設定できます。  
 
 ### 前提条件
 本スクリプトはMacおよびLinuxで動作を確認しています。  
@@ -27,31 +26,12 @@ export CONTRAST_USERNAME=xxxxx.yyyyy@contrastsecurity.com
 export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
-CONTRAST_USERNAMEとCONTRAST_SERVICE_KEYはSuperAdminユーザーの情報が必要です。
 
-### 各組織の2段階認証の設定状態をエクスポート
+### 組織内のアプリケーションごとのASSESSルールのon/offを一括処理で設定
 ```bash
-./tsv_exp.sh
-```
-tsv.txtが出力されます。tsv.txtをcatするなどして、各組織の2段階認証の設定状態を確認してください。
-
-### 特定の組織（複数可）に対して、2段階認証の設定を設定します。
-```
-（注意事項）
-各組織の2段階認証の設定を変更する場合は、SuperAdminでログインして、システム設定->セキュリティ画面にて  
-2段階認証を有効にし、さらに「組織の上書きを許可」にチェックを入れておいてください。
-この状態にしておかないと、各組織ごとに2段階認証の設定を変更することができません。
-```
-
-上記のエクスポートの際に出力された```orgid_apikey_map.txt```を編集して、2段階認証を設定する  
-組織だけ残して、不要な行を削除します。
-```bash
-./tsv_set.sh -e true -r false
+./assess_rules_bulk_on.sh -m on
 ```
 スクリプトの引数について
-- -e は2段階認証の有効/無効を指定します。
-- -r は2段階認証を各ユーザー必須とするか任意とするかを指定します。
-
-処理終了後、再度、```tsv_exp.sh```を実行するか、EOP配下の各組織の2段階認証の設定画面にて、反映結果をご確認ください。
+- -m または --mode で、on/offを指定します。
 
 以上
