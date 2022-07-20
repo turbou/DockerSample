@@ -4,7 +4,7 @@ usage() {
   cat <<EOF
   Usage: $0 [options]
 
-  -a|--aut h      認証情報json
+  -a|--auth       認証情報json
   -i|--input      一括登録例外json
   -d|--delete     既存のセキュリティ制御をインポート前にクリア
   -p|--prefix     インポート前クリアで残すルール名の接頭辞
