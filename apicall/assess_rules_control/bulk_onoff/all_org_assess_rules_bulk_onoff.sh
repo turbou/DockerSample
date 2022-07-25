@@ -116,7 +116,7 @@ while read -r ORG_ID; do
     echo "$ORG_ID:$GET_API_KEY" >> orgid_apikey_map.txt
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
 
-# 組織ごとにルールの重大度を反映していきます。
+# 組織ごとにルールのon/offを反映していきます。
 while read -r ORG_ID; do
     echo ""
     echo ${ORG_ID}
