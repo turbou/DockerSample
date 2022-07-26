@@ -1,9 +1,11 @@
 ## 概要
-アプリケーションごとに設定されているASSESSルールのon/offを一括処理で設定できます。  
-- 特定の組織（のアプリケーションすべて）に対して一括処理を行う場合  
-  *assess_rules_bulk_onoff.sh* を使用します。
-- SuperAdminとして、全組織（のアプリケーションすべて）に対して一括処理を行う場合  
-  *all_org_assess_rules_bulk_onoff.sh* を使用します。
+あるアプリケーションに設定されているASSESSルールのon/off設定を他のアプリ（組織単位）に一括処理で設定できます。  
+- まず最初にベースとなるASSESSルールのon/off設定をエクスポートします。  
+  *assess_rules_exp.sh* を使用します。
+- 特定の組織（のアプリケーションすべて）に対してエクスポートしたASSESSルールの設定内容を反映する場合  
+  *assess_rules_imp.sh* を使用します。
+- SuperAdminとして、全組織（のアプリケーションすべて）に対して対してエクスポートしたASSESSルールの設定内容を反映する場合  
+  *all_org_assess_rules_imp.sh* を使用します。
 
 それぞれ目的に応じて使用するスクリプトを選択してください。  
 
@@ -25,7 +27,29 @@
     ```
 
 ## 使い方
-### 特定の組織（のアプリケーションすべて）に対して一括on/off設定を行う場合
+### ベースとなるASSESSルールのon/off設定をエクスポートする場合
+#### 環境変数をセット
+```bash
+export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
+export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+export CONTRAST_USERNAME=xxxxx.yyyyy@contrastsecurity.com
+export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+export CONTRAST_APP_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+```
+CONTRAST_APP_IDはアプリケーションIDとなります。アプリケーションIDの情報はTeamServerで対象のアプリケーションの  
+詳細画面を表示した上でURLから情報を取得してください。  
+```
+[TeamServerのURL]/442311fd-c9d6-44a9-a00b-2b03db2d816c/applications/d3fc9a48-dfe3-4063-8294-c750caa7ec89
+```
+*d3fc9a48-dfe3-4063-8294-c750caa7ec89* がアプリケーションIDとなります。
+#### スクリプトの実行
+```bash
+./assess_rules_exp.sh
+```
+スクリプトと同じ場所に *rules.json* が出力されます。  
+このファイルがASSESSルールのon/off設定のベースファイルとなるので削除しないでください。  
+### 特定の組織（のアプリケーションすべて）に対してエクスポートしたASSESSルールの設定内容を反映する場合
 #### 環境変数をセット
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
@@ -37,14 +61,9 @@ export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 #### スクリプトの実行
 ```bash
 # すべてのルールを有効にする場合
-./assess_rules_bulk_on.sh --mode on
-# すべてのルールを無効にする場合
-./assess_rules_bulk_on.sh --mode off
+./assess_rules_imp.sh
 ```
-スクリプトの引数について
-- -m または --mode で、on/offを指定します。
-
-#### SuperAdminとして、全組織（のアプリケーションすべて）に対して一括on/off設定を行う。
+#### SuperAdminとして、全組織（のアプリケーションすべて）に対して対してエクスポートしたASSESSルールの設定内容を反映する場合
 #### 環境変数をセット
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
@@ -56,9 +75,5 @@ export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #### スクリプトの実行
 ```bash
 # すべてのルールを有効にする場合
-./all_org_assess_rules_bulk_onoff.sh --mode on
-# すべてのルールを無効にする場合
-./all_org_assess_rules_bulk_onoff.sh --mode off
+./all_org_assess_rules_imp.sh
 ```
-スクリプトの引数について
-- -m または --mode で、on/offを指定します。
