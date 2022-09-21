@@ -18,12 +18,12 @@ AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 ORG_ID=$CONTRAST_ORG_ID
 API_URL="${BASEURL}/api/ng/${ORG_ID}"
 
-rm -f ./rules.json
+rm -f ./default_rules.json
 curl -X GET -sS \
      ${API_URL}/rules?expand=references,customization,skip_links\&limit=1000\&offset=0\&quickFilter=ALL\&sort=title \
      -H "Authorization: ${AUTHORIZATION}" \
      -H "API-Key: ${API_KEY}" \
-     -H 'Accept: application/json' -J -o rules.json
+     -H 'Accept: application/json' -J -o default_rules.json
 
 exit 0
 
