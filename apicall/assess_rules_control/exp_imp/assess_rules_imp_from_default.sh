@@ -61,14 +61,14 @@ fi
 rm -f ./configs_org.csv
 rm -f ./configs_app.csv
 while read -r RULE_NAME; do
-    DEV_FLG=`cat ./rules.json | jq -r --arg rule_name "$RULE_NAME" '.configs[] | select(.rule_name==$rule_name) | .dev_enabled'`
-    QA_FLG=`cat ./rules.json | jq -r --arg rule_name "$RULE_NAME" '.configs[] | select(.rule_name==$rule_name) | .qa_enabled'`
-    PROD_FLG=`cat ./rules.json | jq -r --arg rule_name "$RULE_NAME" '.configs[] | select(.rule_name==$rule_name) | .prod_enabled'`
+    DEV_FLG=`cat ./default_rules.json | jq -r --arg rule_name "$RULE_NAME" '.rules[] | select(.name==$rule_name) | .enabled_dev'`
+    QA_FLG=`cat ./default_rules.json | jq -r --arg rule_name "$RULE_NAME" '.rules[] | select(.name==$rule_name) | .enabled_qa'`
+    PROD_FLG=`cat ./default_rules.json | jq -r --arg rule_name "$RULE_NAME" '.rules[] | select(.name==$rule_name) | .enabled_prod'`
     echo "${RULE_NAME},${DEV_FLG},DEVELOPMENT" >> ./configs_org.csv
     echo "${RULE_NAME},${QA_FLG},QA" >> ./configs_org.csv
     echo "${RULE_NAME},${PROD_FLG},PRODUCTION" >> ./configs_org.csv
     echo "${RULE_NAME},${DEV_FLG},${QA_FLG},${PROD_FLG}" >> ./configs_app.csv
-done < <(cat ./rules.json | jq -r '.configs[].name')
+done < <(cat ./default_rules.json | jq -r '.rules[].name')
 
 if [ "${TARGET}" = "ALL" -o "${TARGET}" = "ORG" ]; then
     while read -r LINE; do
