@@ -39,7 +39,8 @@ rm -f ./organization.json
 
 rm -f ./default_rules.json
 curl -X GET -sS \
-     ${API_URL}/${ORG_ID}/rules?expand=references,customization,skip_links\&limit=1000\&offset=0\&quickFilter=ALL\&sort=title \
+     ${API_URL}/${ORG_ID}/rules \
+     -d expand=references,customization,skip_links -d limit=1000 -d offset=0 -d quickFilter=ALL -d sort=title \
      -H "Authorization: ${AUTHORIZATION}" \
      -H "API-Key: ${API_KEY}" \
      -H 'Accept: application/json' -J -o default_rules.json

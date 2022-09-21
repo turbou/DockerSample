@@ -41,7 +41,8 @@ rm -f ./organization.json
 
 rm -f ./rules.json
 curl -X GET -sS \
-     ${API_URL}/${ORG_ID}/assess/rules/configs/app/${APP_ID}?expand=skip_links \
+     ${API_URL}/${ORG_ID}/assess/rules/configs/app/${APP_ID} \
+     -d expand=skip_links \
      -H "Authorization: ${AUTHORIZATION}" \
      -H "API-Key: ${API_KEY}" \
      -H 'Accept: application/json' -J -o rules.json
