@@ -16,7 +16,7 @@ USERNAME=$CONTRAST_USERNAME
 SERVICE_KEY=$CONTRAST_SERVICE_KEY
 AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 ORG_ID=$CONTRAST_ORG_ID
-API_URL="${BASEURL}/api/ng/"
+API_URL="${BASEURL}/api/ng"
 
 rm -f ./organization.json
 curl -X GET -sS \
@@ -35,6 +35,7 @@ fi
 echo ""
 echo "  対象組織: $ORG_NAME"
 echo ""
+rm -f ./organization.json
 
 rm -f ./default_rules.json
 curl -X GET -sS \
