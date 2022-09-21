@@ -16,7 +16,7 @@ USERNAME=$CONTRAST_USERNAME
 SERVICE_KEY=$CONTRAST_SERVICE_KEY
 AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 ORG_ID=$CONTRAST_ORG_ID
-API_URL="${BASEURL}/api/ng/${ORG_ID}"
+API_URL="${BASEURL}/api/ng"
 
 usage() {
   cat <<EOF
@@ -58,6 +58,25 @@ else
     exit 1
 fi
 
+rm -f ./organization.json
+curl -X GET -sS \
+     ${API_URL}/profile/organizations/${ORG_ID}?expand=freemium,skip_links \
+     -H "Authorization: ${AUTHORIZATION}" \
+     -H "API-Key: ${API_KEY}" \
+     -H 'Accept: application/json' -J -o organization.json
+
+ORG_NAME=`cat ./organization.json | jq -r '.organization.name'`
+if [ -z $ORG_NAME ]; then
+    echo ""
+    echo "  APIの実行に失敗しました。環境変数の値が正しいか、ご確認ください。"
+    echo ""
+    exit 1
+fi
+echo ""
+echo "  対象組織: $ORG_NAME"
+echo ""
+rm -f ./organization.json
+
 rm -f ./configs_org.csv
 rm -f ./configs_app.csv
 while read -r RULE_NAME; do
@@ -79,7 +98,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "ORG" ]; then
         echo ""
         echo "$NAME $DATA"
         curl -X PUT -sS \
-            ${API_URL}/rules/${NAME}/status?expand=skip_links \
+            ${API_URL}/${ORG_ID}/rules/${NAME}/status?expand=skip_links \
             -H "Authorization: ${AUTHORIZATION}" \
             -H "API-Key: ${API_KEY}" \
             -H "Content-Type: application/json" \
@@ -92,7 +111,7 @@ fi
 if [ "${TARGET}" = "ALL" -o "${TARGET}" = "APP" ]; then
     rm -f ./applications.json
     curl -X GET -sS \
-         ${API_URL}/applications?expand=skip_links \
+         ${API_URL}/${ORG_ID}/applications?expand=skip_links \
          -H "Authorization: ${AUTHORIZATION}" \
          -H "API-Key: ${API_KEY}" \
          -H 'Accept: application/json' -J -o applications.json
@@ -110,7 +129,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "APP" ]; then
             echo ""
             echo "$NAME $DATA"
             curl -X PUT -sS \
-                ${API_URL}/assess/rules/configs/app/${APP_ID}/bulk?expand=skip_links \
+                ${API_URL}/${ORG_ID}/assess/rules/configs/app/${APP_ID}/bulk?expand=skip_links \
                 -H "Authorization: ${AUTHORIZATION}" \
                 -H "API-Key: ${API_KEY}" \
                 -H "Content-Type: application/json" \
