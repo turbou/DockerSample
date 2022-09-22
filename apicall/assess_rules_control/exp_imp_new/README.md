@@ -66,7 +66,7 @@ export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 (補足事項)  
 - このスクリプトの実行の際に一時的に各組織へのRULES ADMIN権限をツールに設定したユーザーに与えるための  
   一時グループを作成することができます。デフォルトではオフとなっていますが、スクリプトのオプションによって  
-  有効にすることができます。
+  有効にすることができます。（後述）
 #### 環境変数をセット
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
