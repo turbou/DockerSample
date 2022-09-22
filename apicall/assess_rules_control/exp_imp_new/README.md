@@ -64,9 +64,9 @@ export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 ### SuperAdminとして、全組織（のアプリケーションすべて）に対して対してエクスポートしたASSESSルールの設定内容を反映する場合
 (補足事項)  
-- このスクリプトを実行すると一時的に各組織へのRULES ADMIN権限をツールに設定したユーザーに与えるため  
-  一時的にグループを作成します。一時グループは処理終了後に削除しますが、万が一残ってしまっている場合は  
-  TeamServer上で手動にて削除してください。（オプションにて一時グループの作成on/offに対応する予定です）
+- このスクリプトの実行の際に一時的に各組織へのRULES ADMIN権限をツールに設定したユーザーに与えるための  
+  一時グループを作成することができます。デフォルトではオフとなっていますが、スクリプトのオプションによって  
+  有効にすることができます。
 #### 環境変数をセット
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
@@ -85,4 +85,7 @@ export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # 全組織のデフォルトASSESSルールおよびオンボード済みのアプリケーションに反映させる場合
 ./all_org_assess_rules_imp.sh --target all
+
+# RulesAdmin権限を一時的に持たせるための一時グループを作る場合
+./all_org_assess_rules_imp.sh --target all --group
 ```
