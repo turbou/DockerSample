@@ -96,7 +96,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "ORG" ]; then
         ENVIRONMENT=`echo $LINE | awk -F, '{print $3}'`
         DATA=`jq --argjson flg "${FLG}" --arg environment "${ENVIRONMENT}" -nc '{"enabled":$flg,"environment":$environment}'`
         echo ""
-        echo "$NAME $DATA"
+        echo "${ORG_ID}:${NAME} ${DATA}"
         curl -X PUT -sS \
             ${API_URL}/${ORG_ID}/rules/${NAME}/status?expand=skip_links \
             -H "Authorization: ${AUTHORIZATION}" \
@@ -104,7 +104,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "ORG" ]; then
             -H "Content-Type: application/json" \
             -H 'Accept: application/json' \
             -d "${DATA}"
-        sleep 1
+        sleep 0.5
     done < ./configs_org.csv
 fi
 
@@ -119,7 +119,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "APP" ]; then
     while read -r APP_ID; do
         echo ""
         APP_NAME=`cat ./applications.json | jq -r --arg app_id "$APP_ID" '.applications[] | select(.app_id==$app_id) | .name'`
-        echo "${APP_ID} - ${APP_NAME}"
+        echo "${ORG_ID}:${APP_ID} - ${APP_NAME}"
         while read -r LINE; do
             NAME=`echo $LINE | awk -F, '{print $1}'`
             DEV=`echo $LINE | awk -F, '{print $2}'`
@@ -127,7 +127,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "APP" ]; then
             PROD=`echo $LINE | awk -F, '{print $4}'`
             DATA=`jq --arg name "${NAME}" --argjson dev "${DEV}" --argjson qa "${QA}" --argjson prod "${PROD}" -nc '{rule_names:[$name],"dev_enabled":$dev,"qa_enabled":$qa,"prod_enabled":$prod}'`
             echo ""
-            echo "$NAME $DATA"
+            echo "${ORG_ID}:${APP_ID} - ${APP_NAME} ${NAME} ${DATA}"
             curl -X PUT -sS \
                 ${API_URL}/${ORG_ID}/assess/rules/configs/app/${APP_ID}/bulk?expand=skip_links \
                 -H "Authorization: ${AUTHORIZATION}" \
@@ -135,7 +135,7 @@ if [ "${TARGET}" = "ALL" -o "${TARGET}" = "APP" ]; then
                 -H "Content-Type: application/json" \
                 -H 'Accept: application/json' \
                 -d "${DATA}"
-            sleep 1
+            sleep 0.5
         done < ./configs_app.csv
         sleep 1
     done < <(cat ./applications.json | jq -r '.applications[].app_id')
