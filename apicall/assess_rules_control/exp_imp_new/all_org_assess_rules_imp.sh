@@ -60,6 +60,13 @@ else
     exit 1
 fi
 
+if [ ! -f ./rules.json ]; then
+    echo ""
+    echo "  ./rules.json ファイルが見つかりません。事前にエクスポートを行ってください。"
+    echo ""
+    exit 1
+fi
+
 rm -f ./organizations.json
 curl -X GET -sS \
      ${API_URL}/superadmin/organizations?limit=${ORGS_LIMIT}\&offset=0 \

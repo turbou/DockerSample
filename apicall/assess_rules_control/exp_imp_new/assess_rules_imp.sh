@@ -58,6 +58,13 @@ else
     exit 1
 fi
 
+if [ ! -f ./rules.json ]; then
+    echo ""
+    echo "  ./rules.json ファイルが見つかりません。事前にエクスポートを行ってください。"
+    echo ""
+    exit 1
+fi
+
 rm -f ./organization.json
 curl -X GET -sS \
      ${API_URL}/profile/organizations/${ORG_ID}?expand=freemium,skip_links \
