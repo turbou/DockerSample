@@ -53,20 +53,36 @@ export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 #### スクリプトの実行
 ```bash
-# すべてのルールを有効にする場合
-./assess_rules_imp.sh
+# 特定の組織のデフォルトASSESSルールに反映させる場合
+./assess_rules_imp.sh --target org
+
+# 特定の組織のオンボード済みのアプリケーションに反映させる場合（組織のデフォルトASSESSルールへは反映しません）
+./assess_rules_imp.sh --target app
+
+# 特定の組織のデフォルトASSESSルールおよびオンボード済みのアプリケーションに反映させる場合
+./assess_rules_imp.sh --target all
 ```
-#### SuperAdminとして、全組織（のアプリケーションすべて）に対して対してエクスポートしたASSESSルールの設定内容を反映する場合
+### SuperAdminとして、全組織（のアプリケーションすべて）に対して対してエクスポートしたASSESSルールの設定内容を反映する場合
+(補足事項)  
+- このスクリプトを実行すると一時的に各組織へのRULES ADMIN権限をツールに設定したユーザーに与えるため  
+  一時的にグループを作成します。一時グループは処理終了後に削除しますが、万が一残ってしまっている場合は  
+  TeamServer上で手動にて削除してください。（オプションにて一時グループの作成on/offに対応する予定です）
 #### 環境変数をセット
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
-export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_USERNAME=xxxxx.yyyyy@contrastsecurity.com
 export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # !!注意!!CONTRAST_USERNAME, CONTRAST_SERVICE_KEYはSuperAdmin権限を持つユーザーとしてください。
 ```
 #### スクリプトの実行
 ```bash
-# すべてのルールを有効にする場合
-./all_org_assess_rules_imp.sh
+# 全組織のデフォルトASSESSルールに反映させる場合
+./all_org_assess_rules_imp.sh --target org
+
+# 全組織のオンボード済みのアプリケーションに反映させる場合（組織のデフォルトASSESSルールへは反映しません）
+./all_org_assess_rules_imp.sh --target app
+
+# 全組織のデフォルトASSESSルールおよびオンボード済みのアプリケーションに反映させる場合
+./all_org_assess_rules_imp.sh --target all
 ```
