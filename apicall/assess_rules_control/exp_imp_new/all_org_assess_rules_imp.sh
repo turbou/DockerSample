@@ -167,7 +167,7 @@ if [ $GRP_FOUND -ne 0 ]; then
         -H 'Accept: application/json' \
         -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}'
 else
-    echo "既にグループが存在しています。"
+    echo "既にグループが存在しています。一時グループ名: ${GROUP_NAME}"
     exit 1
 fi
 
