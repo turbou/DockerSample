@@ -285,5 +285,12 @@ while read -r ORG_ID; do
     fi
 done < <(cat ./org_ids.txt)
 
+curl -X DELETE -sS \
+    ${API_URL}/superadmin/ac/groups/${GRP_ID}?expand=skip_links \
+    -H "Authorization: ${AUTHORIZATION}" \
+    -H "API-Key: ${API_KEY}" \
+    -H "Content-Type: application/json" \
+    -H 'Accept: application/json'
+
 exit 0
 
