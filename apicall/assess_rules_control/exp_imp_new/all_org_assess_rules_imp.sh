@@ -28,13 +28,17 @@ EOF
 }
 
 TARGET=
-while getopts t-: opt; do
+CREATE_GROUP=
+while getopts tg-: opt; do
   optarg="${!OPTIND}"
   [[ "$opt" = - ]] && opt="-$OPTARG"
   case "-$opt" in
     -t|--target)
       TARGET="$optarg"
       shift
+      ;;  
+    -g|--group)
+      CREATE_GROUP="ON"
       ;;  
     --) 
       break
@@ -58,6 +62,12 @@ elif [ "${TARGET}" = "app" ]; then
 else
     usage
     exit 1
+fi
+
+if [ "${CREATE_GROUP}" = "ON" ]; then
+    CREATE_GROUP="ON"
+else
+    CREATE_GROUP="OFF"
 fi
 
 if [ ! -f ./rules.json ]; then
@@ -86,36 +96,39 @@ echo "  対象組織数: $ORG_CNT"
 echo ""
 rm -f ./organizations.json
 
-# 既存のグループを取得します。
-rm -f ./groups.json
-rm -f ./grp_names.txt
-curl -X GET -sS -G \
-     ${API_URL}/superadmin/ac/groups \
-     -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=0 \
-     -H "Authorization: ${AUTHORIZATION}" \
-     -H "API-Key: ${API_KEY}" \
-     -H 'Accept: application/json' -J -o groups.json
-while read -r GRP_NAME; do
-    echo $GRP_NAME >> ./grp_names.txt
-done < <(cat ./groups.json | jq -r '.groups[].name')
-GRP_CNT=`cat ./groups.json | jq -r '.count'`
-CURRENT_GRP_CNT=`wc -l ./grp_names.txt | awk '{print $1}'`
-while [ $GRP_CNT -gt $CURRENT_GRP_CNT ]
-do
+GRP_FOUND=
+if [ "${CREATE_GROUP}" = "ON" ]; then
+    # 既存のグループを取得します。
+    rm -f ./groups.json
+    rm -f ./grp_names.txt
     curl -X GET -sS -G \
          ${API_URL}/superadmin/ac/groups \
-         -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=$CURRENT_GRP_CNT \
+         -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=0 \
          -H "Authorization: ${AUTHORIZATION}" \
          -H "API-Key: ${API_KEY}" \
          -H 'Accept: application/json' -J -o groups.json
     while read -r GRP_NAME; do
         echo $GRP_NAME >> ./grp_names.txt
     done < <(cat ./groups.json | jq -r '.groups[].name')
+    GRP_CNT=`cat ./groups.json | jq -r '.count'`
     CURRENT_GRP_CNT=`wc -l ./grp_names.txt | awk '{print $1}'`
-done
-
-grep ${GROUP_NAME} ./grp_names.txt > /dev/null
-GRP_FOUND=$?
+    while [ $GRP_CNT -gt $CURRENT_GRP_CNT ]
+    do
+        curl -X GET -sS -G \
+             ${API_URL}/superadmin/ac/groups \
+             -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=$CURRENT_GRP_CNT \
+             -H "Authorization: ${AUTHORIZATION}" \
+             -H "API-Key: ${API_KEY}" \
+             -H 'Accept: application/json' -J -o groups.json
+        while read -r GRP_NAME; do
+            echo $GRP_NAME >> ./grp_names.txt
+        done < <(cat ./groups.json | jq -r '.groups[].name')
+        CURRENT_GRP_CNT=`wc -l ./grp_names.txt | awk '{print $1}'`
+    done
+    
+    grep ${GROUP_NAME} ./grp_names.txt > /dev/null
+    GRP_FOUND=$?
+fi
 
 # 組織一覧を取得します。
 rm -f ./organizaions.json
@@ -156,47 +169,35 @@ do
     CURRENT_ORG_CNT=`wc -l ./org_ids.txt | awk '{print $1}'`
 done
 
-# 組織IDからjson配列を生成します。
-SCOPES=
-while read -r ORG_ID; do
-    SCOPES=$SCOPES'{"org":{"id":"'$ORG_ID'","role":"rules_admin"},"app":{"exceptions":[],"role":"rules_admin"}},'
-done < <(cat ./org_ids.txt)
-SCOPES=`echo $SCOPES | sed "s/,$//"`
-SCOPES="["$SCOPES"]"
-
-# グループがない場合は作成します。
-if [ $GRP_FOUND -ne 0 ]; then
-    curl -X POST -sS \
-        ${API_URL}/superadmin/ac/groups/organizational?expand=skip_links \
-        -H "Authorization: ${AUTHORIZATION}" \
-        -H "API-Key: ${API_KEY}" \
-        -H "Content-Type: application/json" \
-        -H 'Accept: application/json' \
-        -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}'
-else
-    echo "既にグループが存在しています。一時グループ名: ${GROUP_NAME}"
-    exit 1
-fi
-
-rm -f ./groups.json
-rm -f ./grp_idnames.txt
-curl -X GET -sS -G \
-     ${API_URL}/superadmin/ac/groups \
-     -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=0 \
-     -H "Authorization: ${AUTHORIZATION}" \
-     -H "API-Key: ${API_KEY}" \
-     -H 'Accept: application/json' -J -o groups.json
-while read -r GRP_NAME; do
-    GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GRP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
-    echo "$GRP_NAME,$GRP_ID" >> ./grp_idnames.txt
-done < <(cat ./groups.json | jq -r '.groups[].name')
-GRP_CNT=`cat ./groups.json | jq -r '.count'`
-CURRENT_GRP_CNT=`wc -l ./grp_idnames.txt | awk '{print $1}'`
-while [ $GRP_CNT -gt $CURRENT_GRP_CNT ]
-do
+GRP_ID=
+if [ "${CREATE_GROUP}" = "ON" ]; then
+    # 組織IDからjson配列を生成します。
+    SCOPES=
+    while read -r ORG_ID; do
+        SCOPES=$SCOPES'{"org":{"id":"'$ORG_ID'","role":"rules_admin"},"app":{"exceptions":[],"role":"rules_admin"}},'
+    done < <(cat ./org_ids.txt)
+    SCOPES=`echo $SCOPES | sed "s/,$//"`
+    SCOPES="["$SCOPES"]"
+    
+    # グループがない場合は作成します。
+    if [ $GRP_FOUND -ne 0 ]; then
+        curl -X POST -sS \
+            ${API_URL}/superadmin/ac/groups/organizational?expand=skip_links \
+            -H "Authorization: ${AUTHORIZATION}" \
+            -H "API-Key: ${API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H 'Accept: application/json' \
+            -d '{"name":"'$GROUP_NAME'","users":["'$USERNAME'"],"scopes":'$SCOPES'}'
+    else
+        echo "既にグループが存在しています。一時グループ名: ${GROUP_NAME}"
+        exit 1
+    fi
+    
+    rm -f ./groups.json
+    rm -f ./grp_idnames.txt
     curl -X GET -sS -G \
          ${API_URL}/superadmin/ac/groups \
-         -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=$CURRENT_GRP_CNT \
+         -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=0 \
          -H "Authorization: ${AUTHORIZATION}" \
          -H "API-Key: ${API_KEY}" \
          -H 'Accept: application/json' -J -o groups.json
@@ -204,9 +205,24 @@ do
         GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GRP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
         echo "$GRP_NAME,$GRP_ID" >> ./grp_idnames.txt
     done < <(cat ./groups.json | jq -r '.groups[].name')
+    GRP_CNT=`cat ./groups.json | jq -r '.count'`
     CURRENT_GRP_CNT=`wc -l ./grp_idnames.txt | awk '{print $1}'`
-done
-GRP_ID=`grep ${GROUP_NAME} ./grp_idnames.txt /dev/null | awk -F, '{print $2}'`
+    while [ $GRP_CNT -gt $CURRENT_GRP_CNT ]
+    do
+        curl -X GET -sS -G \
+             ${API_URL}/superadmin/ac/groups \
+             -d expand=scopes,skip_links -d quickFilter=CUSTOM -d limit=${GRPS_LIMIT} -d offset=$CURRENT_GRP_CNT \
+             -H "Authorization: ${AUTHORIZATION}" \
+             -H "API-Key: ${API_KEY}" \
+             -H 'Accept: application/json' -J -o groups.json
+        while read -r GRP_NAME; do
+            GRP_ID=`cat ./groups.json | jq -r --arg grp_name "${GRP_NAME}" '.groups[] | select(.name==$grp_name) | .group_id'`
+            echo "$GRP_NAME,$GRP_ID" >> ./grp_idnames.txt
+        done < <(cat ./groups.json | jq -r '.groups[].name')
+        CURRENT_GRP_CNT=`wc -l ./grp_idnames.txt | awk '{print $1}'`
+    done
+    GRP_ID=`grep ${GROUP_NAME} ./grp_idnames.txt /dev/null | awk -F, '{print $2}'`
+fi
 
 # 組織ごとのAPIキーを取得します。
 rm -f orgid_apikey_map.txt
@@ -292,12 +308,15 @@ while read -r ORG_ID; do
     fi
 done < <(cat ./org_ids.txt)
 
-curl -X DELETE -sS \
-    ${API_URL}/superadmin/ac/groups/${GRP_ID}?expand=skip_links \
-    -H "Authorization: ${AUTHORIZATION}" \
-    -H "API-Key: ${API_KEY}" \
-    -H "Content-Type: application/json" \
-    -H 'Accept: application/json'
+if [ "${CREATE_GROUP}" = "ON" ]; then
+    echo "一時グループを削除します。"
+    curl -X DELETE -sS \
+        ${API_URL}/superadmin/ac/groups/${GRP_ID}?expand=skip_links \
+        -H "Authorization: ${AUTHORIZATION}" \
+        -H "API-Key: ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H 'Accept: application/json'
+fi
 
 exit 0
 
