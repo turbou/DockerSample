@@ -25,4 +25,4 @@ RUN cd /root/quickstart && composer install
 RUN chmod -R 777 /root/quickstart/storage
 
 WORKDIR /root/quickstart
-CMD ["php", "artisan", "serve", "--host", "0.0.0.0"]
+CMD ["php", "artisan", "serve", "--host", "0.0.0.0", "--port", "8000"]
