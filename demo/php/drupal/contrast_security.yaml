@@ -1,0 +1,8 @@
+api: 
+  url: https://eval.contrastsecurity.com/Contrast
+  api_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  service_key: YYYYYYYYYYYYYYYY
+  user_name: agent_442999xx-c9d6-44a9-a00b-2b03db2d816c@Oyoyo
+agent:
+  logger:
+    path: /var/log/apache2/contrast-agent.log
