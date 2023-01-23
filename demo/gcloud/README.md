@@ -29,8 +29,10 @@
 
 - プロジェクトへのAPIの有効化
   ```bash
-  gcloud services enable artifactregistry.googleapis.com 
+  gcloud services enable artifactregistry.googleapis.com
+  gcloud services enable run.googleapis.com
   ```
+  APIの有効化でエラーがでる場合は、ロールの割り当てを適切に設定し直してください。
 
 - アーティファクト（新しいタイプのDockerイメージレジストリのこと）
   ```bash
@@ -50,6 +52,6 @@
   ```
 - デプロイ
   ```bash
-  gcloud run deploy juice-shop --image=us-docker.pkg.dev/project/image --port=3000
+  gcloud run deploy juice-shop --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0 --port=3000 --region=asia-northeast1 --allow-unauthenticated
   ```
   
