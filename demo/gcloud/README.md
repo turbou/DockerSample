@@ -72,6 +72,14 @@ docker_juice-shop:1.0.0
   ```bash
   gcloud run deploy juice-shop --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0 --port=3000 --region=asia-northeast1 --allow-unauthenticated --memory=2048Mi --min-instances=0 --max-instances=1
   ```
+  （オプションの補足）
+  - --port=3000  
+    juice-shopを3000ポートで起動しているので、3000を指定しています。指定しないと8080になります。  
+  - --allow-unauthenticated  
+    juice-shopアプリを公開URLで起動するようにしています。
+  - --min-instances=0  
+    アクセスが無いときは停止状態になるらしく、お金がかからないみたいです。  
+  
   数分ほどでデプロイが完了して、それからさらに2, 3分でJuice Shopを閲覧することができます。  
   URLは上記CLIコマンドの応答でも確認できますし、コンソールのCroud Runでも確認することができます。
 
