@@ -59,6 +59,6 @@ docker_juice-shop:1.0.0
   ```
 - デプロイ
   ```bash
-  gcloud run deploy juice-shop --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0 --port=3000 --region=asia-northeast1 --allow-unauthenticated --memory=1024Mi --min-instances=0 --max-instances=1
+  gcloud run deploy juice-shop --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0 --port=3000 --region=asia-northeast1 --allow-unauthenticated --memory=2048Mi --min-instances=0 --max-instances=1
   ```
   
