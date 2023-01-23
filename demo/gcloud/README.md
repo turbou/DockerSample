@@ -1,4 +1,4 @@
-## Contrastエージェント付きのDockerコンテナをCroud Runにデプロイしてオンボード
+## Contrastエージェント付きのDockerコンテナをCloud Runにデプロイしてオンボード
 
 ### 前準備
 - gcloud アカウントの作成、課金設定、組織設定などは済ませておいてください。
