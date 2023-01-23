@@ -4,6 +4,13 @@
 - gcloud アカウントの作成、課金設定、組織設定などは済ませておいてください。
 - gcloud CLIをインストールと初期化まで済ませておいてください。  
 
+### 使用するアプリケーション（Dockerイメージ）について
+[Juice ShopのDockerサンプル](../../agent/nodejs/juice-shop) で、Juice ShopのDockerイメージをビルドしてください。  
+```docker images```で以下のDockerイメージが存在する前提で手順を進めます。  
+```
+docker_juice-shop:1.0.0
+```
+
 ### デプロイ
 - 組織の確認
   ```bash
