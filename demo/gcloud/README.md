@@ -43,9 +43,10 @@
   # Artifact Registry認証情報付与
   gcloud auth configure-docker asia-northeast1-docker.pkg.dev
   # Dockerイメージのアップロード
-  
+  docker tag docker_juice-shop:1.0.0 asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0
+  docker push asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0
   # push済みDockerイメージの一覧
-  gcloud artifacts docker images list asia-northeast1-docker.pkg.dev/{YOUR_PROJECT}/docker-repo/hello-image
+  gcloud artifacts docker images list asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo
   ```
 - デプロイ
   ```bash
