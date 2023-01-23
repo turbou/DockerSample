@@ -1,8 +1,8 @@
 ## Contrastエージェント付きのDockerコンテナをCroud Runにデプロイしてオンボード
 
 ### 前準備
-- gcloud CLIをインストールしておいてください。  
-- gcloud CLIの初期化まで済ませておいてください。
+- gcloud アカウントの作成、課金設定、組織設定などは済ませておいてください。
+- gcloud CLIをインストールと初期化まで済ませておいてください。  
 
 ### デプロイ
 - 組織の確認
@@ -12,16 +12,26 @@
 - プロジェクトの作成または確認
   ```bash
   # プロジェクトを作成する場合
-  gcloud projects create tabocom-nodejs-juiceshop --name="Juice Shop"
+  gcloud projects create tabocom-demo --name="Demo" --set-as-default
   # プロジェクト一覧の確認
   gcloud projects list
   # プロジェクトの詳細確認
-  gcloud projects describe tabocom-nodejs-juiceshop
-  # デフォルトプロジェクトの設定
-  gcloud config set project tabocom-nodejs-juiceshop
+  gcloud projects describe tabocom-demo
+  # 作業プロジェクトを設定
+  gcloud config set project tabocom-demo
   # 確認
   gcloud config list project
   ```
+- プロジェクトへの課金の有効化  
+  プロジェクトに請求先アカウントをリンクする必要があります。  
+  下記のドキュメントを参考にプロジェクトへの課金の有効化を行ってください。  
+  https://cloud.google.com/billing/docs/how-to/modify-project?hl=ja  
+
+- プロジェクトへのAPIの有効化
+  ```bash
+  gcloud services enable artifactregistry.googleapis.com 
+  ```
+
 - アーティファクト（新しいタイプのDockerイメージレジストリのこと）
   ```bash
   # リポジトリの一覧
