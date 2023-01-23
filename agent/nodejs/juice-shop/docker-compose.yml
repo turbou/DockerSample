@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+  juice_shop:
+    container_name: "docker_juice-shop"
+    image: docker_juice-shop:1.0.0
+    build: .
+    ports: 
+      - '3000:3000'
+
