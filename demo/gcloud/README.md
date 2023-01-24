@@ -1,26 +1,33 @@
-## Contrastエージェント付きのDockerコンテナをCloud Runにデプロイしてオンボード
+# Cloud Run上のアプリをContrastサーバにオンボード
+Contrastエージェント付きのDockerコンテナをCloud Runにデプロイして、Contrastサーバにオンボードするまでの手順です。
 
-### 前準備
+## 事前準備
+### Google Cloudを使うための前準備
 - gcloud アカウントの作成、課金設定、組織設定などは済ませておいてください。
 - gcloud CLIをインストールと初期化まで済ませておいてください。  
 
-### 使用するアプリケーション（Dockerイメージ）について
+### 使用するアプリケーション（Dockerイメージ）の準備について
 [Juice ShopのDockerサンプル](../../agent/nodejs/juice-shop) で、Juice ShopのDockerイメージをビルドしてください。  
 ```docker images```で以下のDockerイメージが存在する前提で手順を進めます。  
 ```
 docker_juice-shop:1.0.0
 ```
 
-### デプロイ
+## 実際の手順
+### 組織
+組織については事前準備で既に作成済みだと思うので、ここでは確認のみです。
 - 組織の確認
   ```bash
   gcloud organizations list
   ```
-- プロジェクトの作成または確認
+### プロジェクト
+- プロジェクトの作成
   ```bash
   # プロジェクトを作成する場合
   gcloud projects create tabocom-demo --name="Demo" --set-as-default
-
+  ```
+- 作成したプロジェクトの確認
+  ```bash
   # プロジェクト一覧の確認
   gcloud projects list
 
@@ -45,7 +52,9 @@ docker_juice-shop:1.0.0
   ```
   APIの有効化でエラーがでる場合は、ロールの割り当てを適切に設定し直してください。
 
-- アーティファクト（新しいタイプのDockerイメージレジストリのこと）
+### アーティファクト
+アーティファクトはいろんなタイプのバイナリを保管できるもので、その一部でコンテナレジストリの機能が提供されています。
+- アーティファクト
   ```bash
   # リポジトリの一覧
   gcloud artifacts repositories list
@@ -68,6 +77,8 @@ docker_juice-shop:1.0.0
   # push済みDockerイメージの一覧
   gcloud artifacts docker images list asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo
   ```
+
+### サービス
 - デプロイ
   ```bash
   # デプロイ
@@ -90,7 +101,8 @@ docker_juice-shop:1.0.0
   gcloud run services list
   ```
 
-### 後片付け
+## 後片付け
+### サービス
 - デプロイしたサービスの削除
   ```bash
   gcloud run services delete juice-shop --region=asia-northeast1
