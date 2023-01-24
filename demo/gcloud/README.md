@@ -105,7 +105,10 @@ docker_juice-shop:1.0.0
 ### サービス
 - デプロイしたサービスの削除
   ```bash
+  # サービスの削除
   gcloud run services delete juice-shop --region=asia-northeast1
+  # サービス一覧の確認
+  gcloud run services list
   ```
 
 以上
