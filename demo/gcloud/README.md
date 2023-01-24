@@ -70,6 +70,7 @@ docker_juice-shop:1.0.0
   ```
 - デプロイ
   ```bash
+  # デプロイ
   gcloud run deploy juice-shop --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0 --port=3000 --region=asia-northeast1 --allow-unauthenticated --memory=2048Mi --min-instances=0 --max-instances=1
   ```
   （オプションの補足）
@@ -83,7 +84,17 @@ docker_juice-shop:1.0.0
   数分ほどでデプロイが完了して、それからさらに2, 3分でJuice Shopを閲覧することができます。  
   URLは上記CLIコマンドの応答でも確認できますし、コンソールのCloud Runでも確認することができます。
 
-**後片付けについては追記予定**
+- サービス一覧の確認
+  ```bash
+  # サービス一覧の確認
+  gcloud run services list
+  ```
+
+### 後片付け
+- デプロイしたサービスの削除
+  ```bash
+  gcloud run services delete juice-shop --region=asia-northeast1
+  ```
 
 以上
 
