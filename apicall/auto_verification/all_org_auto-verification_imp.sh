@@ -78,7 +78,7 @@ while read -r ORG_ID; do
     echo "$ORG_ID:$GET_API_KEY" >> orgid_apikey_map.txt
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
 
-# 組織ごとにルールの重大度を反映していきます。
+# 組織ごとに自動検証ポリシーの設定を反映していきます。
 while read -r ORG_ID; do
     ORG_API_KEY=`grep ${ORG_ID} ./orgid_apikey_map.txt | awk -F: '{print $2}'`
     while read -r POLICY_NAME; do
