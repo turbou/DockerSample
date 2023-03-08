@@ -107,7 +107,7 @@ while read -r ORG_ID; do
         #echo "  rules: $RULES_ARRAY"
         #echo "  server_environments: $SERVER_ENVIRONMENTS_ARRAY"
         curl -X POST -sS \
-            ${API_URL}/policy/remediation \
+            ${API_URL}/${ORG_ID}/policy/remediation \
             -H "Authorization: ${AUTHORIZATION}" \
             -H "API-Key: ${ORG_API_KEY}" \
             -H "Content-Type: application/json" \
