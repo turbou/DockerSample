@@ -25,19 +25,19 @@ export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
 
-### 組織のASSESSルールの設定をエクスポート
+### 組織の自動検証ポリシーの設定をエクスポート
 ```bash
-./severity_exp.sh
+./auto-verification_exp.sh
 ```
-rules.jsonが出力されます。
+remediation.jsonが出力されます。
 
-### エクスポートしたASSESSルールの設定ファイル（rules.json）をインポート
+### エクスポートした自動検証ポリシーの設定ファイル（remediation.json）をインポート
 インポート先の組織に合わせて、環境変数はセットし直してください。
 ```bash
-./severity_imp.sh
+./auto-verification_imp.sh
 ```
 
-### エクスポートしたASSESSルールの設定ファイル（rules.json）をEOP配下の全組織にインポート
+### エクスポートした自動検証ポリシーの設定ファイル（remediation.json）をEOP配下の全組織にインポート
 - 上のexp, impと異なり、こちらでは組織ID（CONTRAST_ORG_ID）のセットは不要です。環境変数が残っていても問題はありません。
 - この処理は全組織に対しての操作となるので、EOPの**SuperAdmin権限を持つユーザー**のUSERNAME, SERVICE_KEYを再セットしてください。  
 ```
@@ -49,11 +49,11 @@ EOP（オンプレ）版TeamServerでデフォルトで提供されるcontrast_s
 処理の流れとしては以下のとおりです。
 - RulesAdminGroupという名前のグループを作成し、そこに今回接続するユーザーをメンバーとして紐付けます。  
 さらに存在する全組織をこのグループにRulesAdmin組織権限メンバーとして紐付けます。
-- そして、組織ごとにrules.jsonの内容を反映していきます。
+- そして、組織ごとにremediation.jsonの内容を反映していきます。
 ```bash
-./all_org_severity_imp.sh
+./all_org_auto-verification_imp.sh
 ```
 
-処理終了後、EOP配下の各組織のASSESSルール画面にて、反映結果をご確認ください。
+処理終了後、EOP配下の各組織の自動検証ポリシー画面にて、反映結果をご確認ください。
 
 以上
