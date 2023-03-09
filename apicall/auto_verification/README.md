@@ -1,4 +1,6 @@
-## 雛形組織の自動検証ポリシーの設定をエクスポート、インポートするスクリプト
+# 雛形組織の自動検証ポリシーの設定をエクスポート、インポートするスクリプト
+
+## 事前準備
 
 ### 前提条件
 本スクリプトはMacおよびLinuxで動作を確認しています。  
@@ -18,7 +20,8 @@
     ```
 
 ### 環境変数をセット
-エクスポートでもインポートでもスクリプト実行時に必要です。
+エクスポートでもインポートでもスクリプト実行時に必要です。  
+環境変数を何も設定していない状態でスクリプトを実行すると必要な環境変数が表示されます。  
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
 export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -27,11 +30,18 @@ export CONTRAST_SERVICE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
 
+## エクスポート
+
 ### 組織の自動検証ポリシーの設定をエクスポート
 ```bash
 ./auto-verification_exp.sh
 ```
 remediation.jsonが出力されます。
+
+## インポート
+**（注意事項）**  
+エクスポートされた同じファイルで繰り返しインポートを行うと、同名のポリシーは書き換えではなく  
+どんどん重複して追加されていきますので、ご注意ください。
 
 ### エクスポートした自動検証ポリシーの設定ファイル（remediation.json）をインポート
 インポート先の組織に合わせて、環境変数はセットし直してください。
