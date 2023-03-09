@@ -18,6 +18,25 @@ AUTHORIZATION=`echo "$(echo -n $USERNAME:$SERVICE_KEY | base64)"`
 API_URL="${BASEURL}/api/ng"
 GROUP_NAME=RulesAdminGroup
 
+VERSION_THRESHOLD="3.10.0"
+
+# Contrastサーバのバージョンを取得
+VERSION_310X="false"
+rm -f ./properties.json
+curl -X GET -sS \
+     "${BASEURL}/api/ng/global/properties?expand=skip_links" \
+     -H "Authorization: ${AUTHORIZATION}" \
+     -H "API-Key: ${API_KEY}" \
+     -H 'Accept: application/json' -J -o properties.json
+
+CONTRAST_VERSION=`cat ./properties.json | jq -r '.internal_version'`
+echo $CONTRAST_VERSION > ./version_chk.txt
+echo $VERSION_THRESHOLD >> ./version_chk.txt
+CHK_VERSION=`cat ./version_chk.txt | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | tail -n 1`
+if [ "$CONTRAST_VERSION" = "$CHK_VERSION" ]; then
+    VERSION_310X="true"
+fi
+
 # 既存のグループを取得します。
 rm -f ./groups.json
 curl -X GET -sS -G \
@@ -100,19 +119,31 @@ while read -r ORG_ID; do
         SERVER_ENVIRONMENTS_ARRAY=`echo $SERVER_ENVIRONMENTS | sed "s/ /,/g" | sed "s/^/[/" | sed "s/$/]/"`
         ROUTE_BASED_ENABLED=`cat ./remediation.json | jq -r --arg title "$POLICY_NAME" '.policies[] | select(.name==$title) | .route_based_enabled'`
         ACTION=`cat ./remediation.json | jq -r --arg title "$POLICY_NAME" '.policies[] | select(.name==$title) | .action'`
-        AUTO_VERIFICATION_TYPE=`cat ./remediation.json | jq -r --arg title "$POLICY_NAME" '.policies[] | select(.name==$title) | .auto_verification_type'`
+        if [ "$VERSION_310X" = "true" ]; then
+            AUTO_VERIFICATION_TYPE=`cat ./remediation.json | jq -r --arg title "$POLICY_NAME" '.policies[] | select(.name==$title) | .auto_verification_type'`
+        fi
         #echo "  application_importance: $APPLICATION_IMPORTANCE_ARRAY"
         #echo "  applications: $APPLICATIONS_ARRAY"
         #echo "  rule_severities: $RULE_SEVERITIES_ARRAY"
         #echo "  rules: $RULES_ARRAY"
         #echo "  server_environments: $SERVER_ENVIRONMENTS_ARRAY"
-        curl -X POST -sS \
-            ${API_URL}/${ORG_ID}/policy/remediation \
-            -H "Authorization: ${AUTHORIZATION}" \
-            -H "API-Key: ${ORG_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -H 'Accept: application/json' \
-            -d '{"name": "'$POLICY_NAME'", "remediation_days": '$REMEDIATION_DAYS', "all_applications": '$ALL_APPLICATIONS', "application_importance": '$APPLICATION_IMPORTANCE_ARRAY', "applications": '$APPLICATIONS_ARRAY', "all_rules": '$ALL_RULES', "rule_severities": '$RULE_SEVERITIES_ARRAY', "rules": '$RULES_ARRAY', "all_server_environments": '$ALL_SERVER_ENVIRONMENTS', "server_environments": '$SERVER_ENVIRONMENTS_ARRAY', "route_based_enabled": '$ROUTE_BASED_ENABLED', "action": "'$ACTION'", "auto_verification_type": "'$AUTO_VERIFICATION_TYPE'"}'
+        if [ "$VERSION_310X" = "true" ]; then
+            curl -X POST -sS \
+                ${API_URL}/${ORG_ID}/policy/remediation \
+                -H "Authorization: ${AUTHORIZATION}" \
+                -H "API-Key: ${ORG_API_KEY}" \
+                -H "Content-Type: application/json" \
+                -H 'Accept: application/json' \
+                -d '{"name": "'$POLICY_NAME'", "remediation_days": '$REMEDIATION_DAYS', "all_applications": '$ALL_APPLICATIONS', "application_importance": '$APPLICATION_IMPORTANCE_ARRAY', "applications": '$APPLICATIONS_ARRAY', "all_rules": '$ALL_RULES', "rule_severities": '$RULE_SEVERITIES_ARRAY', "rules": '$RULES_ARRAY', "all_server_environments": '$ALL_SERVER_ENVIRONMENTS', "server_environments": '$SERVER_ENVIRONMENTS_ARRAY', "route_based_enabled": '$ROUTE_BASED_ENABLED', "action": "'$ACTION'", "auto_verification_type": "'$AUTO_VERIFICATION_TYPE'"}'
+        else
+            curl -X POST -sS \
+                ${API_URL}/${ORG_ID}/policy/remediation \
+                -H "Authorization: ${AUTHORIZATION}" \
+                -H "API-Key: ${ORG_API_KEY}" \
+                -H "Content-Type: application/json" \
+                -H 'Accept: application/json' \
+                -d '{"name": "'$POLICY_NAME'", "remediation_days": '$REMEDIATION_DAYS', "all_applications": '$ALL_APPLICATIONS', "application_importance": '$APPLICATION_IMPORTANCE_ARRAY', "applications": '$APPLICATIONS_ARRAY', "all_rules": '$ALL_RULES', "rule_severities": '$RULE_SEVERITIES_ARRAY', "rules": '$RULES_ARRAY', "all_server_environments": '$ALL_SERVER_ENVIRONMENTS', "server_environments": '$SERVER_ENVIRONMENTS_ARRAY', "route_based_enabled": '$ROUTE_BASED_ENABLED', "action": "'$ACTION'"}'
+        fi
         sleep 1
     done < <(cat ./remediation.json | jq -r '.policies[].name')
 done < <(cat ./organizations.json | jq -r '.organizations[].organization_uuid')
