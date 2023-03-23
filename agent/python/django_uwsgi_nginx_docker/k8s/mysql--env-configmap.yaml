@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  MYSQL_DATABASE: db
+  MYSQL_PASSWORD: password
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_USER: db-user
+  TZ: Asia/Tokyo
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mysql-mysql--env
+  name: mysql--env

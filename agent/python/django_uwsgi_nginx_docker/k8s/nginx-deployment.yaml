@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert --volumes hostPath -o k8s_new
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nginx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert --volumes hostPath -o k8s_new
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: nginx
+    spec:
+      containers:
+        - image: nginx:1.13
+          name: django-uwsgi-nginx
+          ports:
+            - containerPort: 8000
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: nginx-hostpath0
+            - mountPath: /etc/nginx/uwsgi_params
+              name: nginx-hostpath1
+            - mountPath: /static
+              name: nginx-hostpath2
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /Users/turbou/Documents/git/ContrastSecurity/agent/python/django_uwsgi_nginx_docker/nginx/nginx.conf
+          name: nginx-hostpath0
+        - hostPath:
+            path: /Users/turbou/Documents/git/ContrastSecurity/agent/python/django_uwsgi_nginx_docker/nginx/uwsgi_params
+          name: nginx-hostpath1
+        - hostPath:
+            path: /Users/turbou/Documents/git/ContrastSecurity/agent/python/django_uwsgi_nginx_docker/static
+          name: nginx-hostpath2
+status: {}
