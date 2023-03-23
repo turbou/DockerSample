@@ -72,4 +72,20 @@ src/contrast_security.yaml
   http://localhost:8001 で確認（管理サイトは http://localhost:8001/admin ）
 5. Contrastサーバでオンボード確認
 
+## EKSで動かしてみる.
+### DockerイメージをECRにpush
+リポジトリはdjango_uwsgiという名前で作成済みとします。
+1. docker login
+    ```bash
+    aws ecr get-login-password --region ap-northeast-1 --profile contrastsecurity | docker login --username AWS --password-stdin XXXXXXXXXXXX.dkr.ecr.ap-    northeast-1.amazonaws.com
+    ```
+2. タグ付け
+    ```bash
+    docker tag django_uwsgi:1.0.0 XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi:1.0.0
+    ```
+3. docker push
+    ```bash
+    docker push XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi:1.0.0
+    ```
+
 以上
