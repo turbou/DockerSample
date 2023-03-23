@@ -38,4 +38,22 @@ src/contrast_security.yaml
   http://localhost:8000 で確認（管理サイトは http://localhost:8000/admin ）
 7. Contrastサーバでオンボード確認
 
+## DockerDesktopのk8sで起動、オンボードしてみる
+### k8sのファイル生成について
+既にk8sフォルダにyamlファイルがありますが、komposeを使ったコマンドを記しておきます。
+1. kompose
+    ```bash
+    # docker-compose.ymlのある場所で
+    kompose convert --volumes hostPath -o k8s
+    ```
+### デプロイ
+1. apply
+    ```bash
+    kubectl apply -f k8s/
+    ```
+2. 確認
+    ```bash
+    kubectl get pods
+    ```
+
 以上
