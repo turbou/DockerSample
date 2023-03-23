@@ -1,0 +1,14 @@
+api: 
+  url: https://eval.contrastsecurity.com/Contrast
+  api_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  service_key: YYYYYYYYYYYYYYYY
+  user_name: agent_ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+agent: 
+  service: 
+    host: 127.0.0.1
+    port: 30555
+server:
+  environment: development
+  name: DockerDesktop_k8s
+application:
+  name: Django-uWSGI_k8s
