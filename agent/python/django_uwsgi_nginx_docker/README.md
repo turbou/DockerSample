@@ -53,7 +53,15 @@ src/contrast_security.yaml
     ```
 2. 確認
     ```bash
+    kubectl get svc
     kubectl get pods
     ```
+3. ポートフォワード
+    ```bash
+    kubectl port-forward svc/nginx 8000:8001
+    ```
+4. Djangoアプリ接続確認
+  http://localhost:8001 で確認（管理サイトは http://localhost:8001/admin ）
+5. Contrastサーバでオンボード確認
 
 以上
