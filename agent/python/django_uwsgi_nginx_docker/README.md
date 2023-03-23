@@ -75,7 +75,8 @@ src/contrast_security.yaml
 ## EKSで動かしてみる.
 ### DockerイメージをECRにpush
 リポジトリはdjango_uwsgiという名前で作成済みとします。
-1. docker login
+1. docker login  
+    profileの指定に注意してください。
     ```bash
     aws ecr get-login-password --region ap-northeast-1 --profile contrastsecurity | docker login --username AWS --password-stdin XXXXXXXXXXXX.dkr.ecr.ap-    northeast-1.amazonaws.com
     ```
