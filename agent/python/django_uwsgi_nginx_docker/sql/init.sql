@@ -1,3 +1,3 @@
-GRANT ALL PRIVILEGES ON db.* TO 'user'@'%';
+GRANT ALL PRIVILEGES ON django.* TO 'user'@'%';
 
 FLUSH PRIVILEGES;

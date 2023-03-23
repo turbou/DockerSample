@@ -19,8 +19,12 @@ services:
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - "3306:3306"
-    env_file:
-      - ./mysql/.env
+    environment:
+     - TZ=Asia/Tokyo
+     - MYSQL_ROOT_PASSWORD=root
+     - MYSQL_DATABASE=django
+     - MYSQL_USER=db-user
+     - MYSQL_PASSWORD=password
     volumes:
       - ./mysql:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d
@@ -35,8 +39,12 @@ services:
       - ./static:/static
     expose:
       - "8001"
-    env_file:
-      - ./django/.env
+    environment:
+     - TZ=Asia/Tokyo
+     - MYSQL_ROOT_PASSWORD=root
+     - MYSQL_DATABASE=django
+     - MYSQL_USER=db-user
+     - MYSQL_PASSWORD=password
     depends_on:
       - mysql
 
