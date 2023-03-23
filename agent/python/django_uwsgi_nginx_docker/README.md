@@ -1,4 +1,4 @@
-## OWASP Juice Shop をContrastエージェント付きのDockerコンテナで起動
+## Django, uWSGI, nginxをDocker, k8s, EKSで動かしてみる
 
 ### Dockerビルド
 1. contrast_security.yamlを本物と入れ替えてください。  
