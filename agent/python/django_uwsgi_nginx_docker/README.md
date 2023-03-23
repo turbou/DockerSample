@@ -19,8 +19,23 @@ src/contrast_security.yaml
     ```bash
     docker-compose up -d
     ```
-2. Djangoアプリ接続確認
+2. DBマイグレート
+    ```bash
+    docker-compose exec django ./manage.py makemigrations
+    docker-compose exec django ./manage.py migrate
+    ```
+4. 管理ユーザーの作成
+    ```bash
+    docker-compose exec django ./manage.py createsuperuser
+    ```
+    ユーザ名、メールアドレス、パスワードは適当に設定してください。
+5. 静的コンテンツの格納
+    ```bash
+    docker-compose exec django ./manage.py collectstatic
+    ```
+    static/ディレクトリに静的コンテンツがコピーされます。
+6. Djangoアプリ接続確認
   http://localhost:8000 で確認（管理サイトは http://localhost:8000/admin ）
-3. Contrastサーバでオンボード確認
+7. Contrastサーバでオンボード確認
 
 以上
