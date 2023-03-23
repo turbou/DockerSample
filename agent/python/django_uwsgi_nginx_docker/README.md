@@ -53,12 +53,20 @@ src/contrast_security.yaml
     ```
 2. 確認
     ```bash
-    kubectl get svc
     kubectl get pods
     ```
 3. ポートフォワード
     ```bash
-    kubectl port-forward svc/nginx 8000:8001
+    kubectl get svc
+    ```
+    ```
+    NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+    django       ClusterIP   10.107.23.39     <none>        8001/TCP   6m53s
+    kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP    96m
+    nginx        ClusterIP   10.103.222.187   <none>        8000/TCP   6m53s
+    ```
+    ```bash
+    kubectl port-forward svc/nginx 8001:8000
     ```
 4. Djangoアプリ接続確認
   http://localhost:8001 で確認（管理サイトは http://localhost:8001/admin ）
