@@ -13,22 +13,6 @@ services:
     depends_on:
       - django
 
-  mysql:
-    image: mysql:5.7
-    container_name: django_uwsgi_mysql
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    ports:
-      - "3306:3306"
-    environment:
-     - TZ=Asia/Tokyo
-     - MYSQL_ROOT_PASSWORD=root
-     - MYSQL_DATABASE=django
-     - MYSQL_USER=db-user
-     - MYSQL_PASSWORD=password
-    volumes:
-      - ./mysql:/var/lib/mysql
-      - ./sql:/docker-entrypoint-initdb.d
-
   django:
     image: django_uwsgi:1.0.0
     build: ./django
@@ -41,10 +25,4 @@ services:
       - "8001"
     environment:
      - TZ=Asia/Tokyo
-     - MYSQL_ROOT_PASSWORD=root
-     - MYSQL_DATABASE=django
-     - MYSQL_USER=db-user
-     - MYSQL_PASSWORD=password
-    depends_on:
-      - mysql
 
