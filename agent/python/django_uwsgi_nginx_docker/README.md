@@ -89,7 +89,13 @@ src/contrast_security.yaml
     ```
 4. docker push
     ```bash
+    # push
     docker push XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi:1.0.0
+    # 確認
+    aws ecr list-images --repository-name django_uwsgi --profile contrastsecurity
     ```
+
+### デプロイのための準備
+作業するPCにeksctlがインストールされていること
 
 以上
