@@ -74,14 +74,17 @@ src/contrast_security.yaml
 
 ## EKSで動かしてみる.
 ### DockerイメージをECRにpush
+1. 作業プロファイルを指定（任意）
+    ```bash
+    export AWS_PROFILE=contrastsecurity
+    ```
 1. リポジトリ作成
     ```bash
-    aws ecr create-repository --repository-name django_uwsgi --region ap-northeast-1 --profile contrastsecurity
+    aws ecr create-repository --repository-name django_uwsgi --region ap-northeast-1
     ```
 2. docker login  
-    profileの指定に注意してください。
     ```bash
-    aws ecr get-login-password --region ap-northeast-1 --profile contrastsecurity | docker login --username AWS --password-stdin XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com
+    aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com
     ```
 3. タグ付け
     ```bash
@@ -92,7 +95,7 @@ src/contrast_security.yaml
     # push
     docker push XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi:1.0.0
     # 確認
-    aws ecr list-images --repository-name django_uwsgi --profile contrastsecurity
+    aws ecr list-images --repository-name django_uwsgi
     ```
 
 ### デプロイのための準備
