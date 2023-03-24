@@ -100,5 +100,7 @@ src/contrast_security.yaml
 
 ### デプロイのための準備
 作業するPCにeksctlがインストールされていること
+1. VPC、サブネットの作成
+    コンソールで
 
 以上
