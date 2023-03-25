@@ -80,7 +80,10 @@ src/contrast_security.yaml
     ```
 1. リポジトリ作成
     ```bash
-    aws ecr create-repository --repository-name django_uwsgi --region ap-northeast-1
+    # nginx
+    aws ecr create-repository --repository-name django_uwsgi_nginx --region ap-northeast-1
+    # django
+    aws ecr create-repository --repository-name django_uwsgi_django --region ap-northeast-1
     ```
 2. docker login  
     ```bash
@@ -88,14 +91,19 @@ src/contrast_security.yaml
     ```
 3. タグ付け
     ```bash
-    docker tag django_uwsgi:1.0.0 XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi:1.0.0
+    # django
+    docker tag django_uwsgi_nginx:1.0.0 XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi_nginx:1.0.0
+    # django
+    docker tag django_uwsgi_django:1.0.0 XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi_django:1.0.0
     ```
 4. docker push
     ```bash
     # push
-    docker push XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi:1.0.0
+    docker push XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi_nginx:1.0.0
+    docker push XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi_django:1.0.0
     # 確認
-    aws ecr list-images --repository-name django_uwsgi
+    aws ecr list-images --repository-name django_uwsgi_nginx
+    aws ecr list-images --repository-name django_uwsgi_django
     ```
 
 ### デプロイのための準備
