@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: kompose convert --volumes hostPath -o k8s_new
+    kompose.cmd: kompose convert --volumes hostPath -o k8s
     kompose.version: 1.26.0 (40646f47)
   creationTimestamp: null
   labels:
@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        kompose.cmd: kompose convert --volumes hostPath -o k8s_new
+        kompose.cmd: kompose convert --volumes hostPath -o k8s
         kompose.version: 1.26.0 (40646f47)
       creationTimestamp: null
       labels:
@@ -40,42 +40,20 @@ spec:
             - --master
             - --lazy-apps
           env:
-            - name: MYSQL_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  key: MYSQL_DATABASE
-                  name: django--env
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  key: MYSQL_PASSWORD
-                  name: django--env
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  key: MYSQL_ROOT_PASSWORD
-                  name: django--env
-            - name: MYSQL_USER
-              valueFrom:
-                configMapKeyRef:
-                  key: MYSQL_USER
-                  name: django--env
-          image: django_uwsgi:1.0.0
+            - name: TZ
+              value: Asia/Tokyo
+          image: XXXXXXXXXXXX.dkr.ecr.ap-northeast-1.amazonaws.com/django_uwsgi_django:1.0.0
+          imagePullPolicy: Always
           name: django-uwsgi-django
           ports:
             - containerPort: 8001
           resources: {}
           volumeMounts:
-            - mountPath: /code
-              name: django-hostpath0
             - mountPath: /static
-              name: django-hostpath1
+              name: django-hostpath0
       restartPolicy: Always
       volumes:
         - hostPath:
-            path: /Users/turbou/Documents/git/ContrastSecurity/agent/python/django_uwsgi_nginx_docker/src
+            path: /tmp/static
           name: django-hostpath0
-        - hostPath:
-            path: /Users/turbou/Documents/git/ContrastSecurity/agent/python/django_uwsgi_nginx_docker/static
-          name: django-hostpath1
 status: {}
