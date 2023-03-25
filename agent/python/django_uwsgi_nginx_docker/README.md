@@ -138,20 +138,20 @@ application:
 
 ### デプロイのための準備
 作業するPCにeksctlがインストールされていること
-1. VPC、サブネットの作成
+1. VPC、サブネットの作成  
     作成中
-2. ロールの作成
+2. ロールの作成  
     作成中
-3. クラスタの作成
+3. クラスタの作成  
     ```bash
     aws eks create-cluster --region ap-northeast-1 \
         --name django-uwsgi-demo-cluster \
         --kubernetes-version 1.25 \
-        --role-arn arn:aws:iam::771960604435:role/djangoUwsgiEKSClusterRole \
+        --role-arn arn:aws:iam::XXXXXXXXXXXX:role/djangoUwsgiEKSClusterRole \
         --resources-vpc-config \
         subnetIds=subnet-03a0f83c73fb09cef,subnet-02e6085aee74f166b
     ```
-4. ノードグループの作成
+4. ノードグループの作成  
     ```bash
     aws eks create-nodegroup \
         --cluster-name django-uwsgi-demo-cluster \
@@ -162,7 +162,7 @@ application:
         --instance-types t3.medium \
         --ami-type AL2_x86_64 \
         --remote-access ec2SshKey=Taka \
-        --node-role arn:aws:iam::771960604435:role/djangoUwsgiEKSNodeRole 
+        --node-role arn:aws:iam::XXXXXXXXXXXX:role/djangoUwsgiEKSNodeRole
     ```
 
 ### デプロイ
