@@ -77,9 +77,20 @@ application:
     kubectl get pods
     kubectl get svc
     ```
-3. Djangoアプリ接続確認
+3. 管理ユーザーの作成
+    ```bash
+    kubectl exec -it [POD名] -- ./manage.py createsuperuser
+    ```
+    ユーザ名、メールアドレス、パスワードは適当に設定してください。
+4. 静的コンテンツの格納
+    ```bash
+    kubectl exec -it [POD名] -- ./manage.py collectstatic
+    ```
+    static/ディレクトリに静的コンテンツがコピーされます。このディレクトリはnginxコンテナにもマウントされているため  
+    Djangoの管理サイトを表示する際に静的コンテンツが表示されるようになります。
+5. Djangoアプリ接続確認
   http://localhost:8000 で確認（管理サイトは http://localhost:8000/admin ）
-4. Contrastサーバでオンボード確認
+6. Contrastサーバでオンボード確認
 
 ### 後片付け
 1. デプロイメントの削除
