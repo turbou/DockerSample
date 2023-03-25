@@ -168,5 +168,11 @@ src/contrast_security.yaml
     ```bash
     aws eks delete-cluster --name django-uwsgi-demo-cluster --region ap-northeast-1
     ```
+5. kubeconfigの削除
+    ```bash
+    kubectl config unset contexts.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
+    kubectl config unset clusters.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
+    kubectl config unset users.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
+    ```
 
 以上
