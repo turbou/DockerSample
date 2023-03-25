@@ -59,12 +59,12 @@ application:
 
 ## MacのDockerDesktopのk8sで起動、オンボードしてみる
 ### k8sのファイル生成について
-既にk8sフォルダにyamlファイルがありますが、komposeを使ったコマンドを記しておきます。
+既にk8sフォルダにyamlファイルがありますが、volumesのpathが実際の環境と異なるためkomposeコマンドを使って再作成してください。
 1. kompose
     ```bash
     # docker-compose.ymlのある場所で
     kompose convert --volumes hostPath -o k8s
-    # 余計なファイルが出来るので削除してください。余計なサービスが起動されます。
+    # 余計なファイルが出来るので削除してください。そのままだと余計なサービスが起動されます。
     rm -f k8s/nginx-tcp-service.yaml
     ```
 ### デプロイ
