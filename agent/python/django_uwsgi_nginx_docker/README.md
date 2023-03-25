@@ -51,6 +51,12 @@ application:
   http://localhost:8000 で確認（管理サイトは http://localhost:8000/admin ）
 5. Contrastサーバでオンボード確認
 
+### 後片付け
+1. コンテナ停止
+    ```bash
+    docker-compose down
+    ```
+
 ## MacのDockerDesktopのk8sで起動、オンボードしてみる
 ### k8sのファイル生成について
 既にk8sフォルダにyamlファイルがありますが、komposeを使ったコマンドを記しておきます。
