@@ -100,7 +100,7 @@ application:
 
 ## EKSで動かしてみる.
 ### DockerイメージをECRにpush
-1. 作業プロファイルを指定（任意）
+1. 作業プロファイルを指定（任意です。お使いになるプロファイルに合わせてください）
     ```bash
     export AWS_PROFILE=contrastsecurity
     ```
