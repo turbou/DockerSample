@@ -3,6 +3,7 @@ kind: Service
 metadata:
   annotations:
     kompose.cmd: kompose convert --volumes hostPath -o k8s
+    kompose.image-pull-policy: IfNotPresent
     kompose.version: 1.26.0 (40646f47)
   creationTimestamp: null
   labels:
