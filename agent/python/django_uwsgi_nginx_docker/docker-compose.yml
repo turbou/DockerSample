@@ -14,6 +14,7 @@ services:
     depends_on:
       - django
     labels:
+      kompose.image-pull-policy: "Always"
       kompose.service.type: loadbalancer
 
   django:
@@ -27,4 +28,6 @@ services:
      - TZ=Asia/Tokyo
     volumes:
       - ./static:/static
+    labels:
+      kompose.image-pull-policy: "Always"
 
