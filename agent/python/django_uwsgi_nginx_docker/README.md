@@ -139,9 +139,9 @@ application:
 ### デプロイのための準備
 作業するPCにeksctlがインストールされていること
 1. VPC、サブネットの作成  
-    作成中
+    *作成中*
 2. ロールの作成  
-    作成中
+    *作成中*
 3. クラスタの作成  
     ```bash
     aws eks create-cluster --region ap-northeast-1 \
