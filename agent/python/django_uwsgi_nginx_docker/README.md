@@ -99,11 +99,13 @@ application:
     ```
 
 ## EKSで動かしてみる.
-### DockerイメージをECRにpush
+**EKS、ECRなどを操作する権限を既に持っている前提となります。**  
+### 使用するプロファイルの設定
 1. 作業プロファイルを指定（任意です。お使いになるプロファイルに合わせてください）
     ```bash
     export AWS_PROFILE=contrastsecurity
     ```
+### DockerイメージをECRにpush
 1. リポジトリ作成
     ```bash
     # nginx
@@ -131,6 +133,8 @@ application:
     aws ecr list-images --repository-name django_uwsgi_nginx
     aws ecr list-images --repository-name django_uwsgi_django
     ```
+5. デプロイメントyamlの修正  
+    ```k8s/django-deployment.yaml```, ```k8s/nginx-deployment.yaml``` それぞれのimageの値もECRのURIに変更してください。
 
 ### デプロイのための準備
 作業するPCにeksctlがインストールされていること
