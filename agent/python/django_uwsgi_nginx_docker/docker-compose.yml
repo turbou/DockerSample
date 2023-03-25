@@ -2,27 +2,27 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:1.13
+    image: django_uwsgi_nginx:1.0.0
+    build: ./nginx
     container_name: django_uwsgi_nginx
     ports:
       - "8000:8000"
+    environment:
+     - TZ=Asia/Tokyo
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
       - ./static:/static
     depends_on:
       - django
 
   django:
-    image: django_uwsgi:1.0.0
+    image: django_uwsgi_django:1.0.0
     build: ./django
     container_name: django_uwsgi_django
     command: uwsgi --socket :8001 --module app.wsgi --py-autoreload 1 --logto /tmp/mylog.log --enable-threads --single-interpreter --master --lazy-apps
-    volumes:
-      - ./src:/code
-      - ./static:/static
     expose:
       - "8001"
     environment:
      - TZ=Asia/Tokyo
+    volumes:
+      - ./static:/static
 
