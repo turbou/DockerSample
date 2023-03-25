@@ -13,6 +13,8 @@ services:
       - ./static:/static
     depends_on:
       - django
+    labels:
+      kompose.service.type: loadbalancer
 
   django:
     image: django_uwsgi_django:1.0.0
