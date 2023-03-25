@@ -164,7 +164,7 @@ src/contrast_security.yaml
     aws eks list-nodegroups --cluster-name django-uwsgi-demo-cluster --region ap-northeast-1
     aws eks delete-nodegroup \
         --nodegroup-name django-uwsgi-nodegroup \
-        --cluster-name django-uwsgi-demo-cluster |
+        --cluster-name django-uwsgi-demo-cluster \
         --region ap-northeast-1
     ```
 4. クラスタの削除
