@@ -169,7 +169,9 @@ src/contrast_security.yaml
     ```
 4. クラスタの削除
     ```bash
-    aws eks delete-cluster --name django-uwsgi-demo-cluster --region ap-northeast-1
+    aws eks delete-cluster \
+        --name django-uwsgi-demo-cluster \
+        --region ap-northeast-1
     ```
 5. kubeconfigの削除
     ```bash
