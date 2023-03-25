@@ -167,7 +167,8 @@ src/contrast_security.yaml
         --cluster-name django-uwsgi-demo-cluster \
         --region ap-northeast-1
     ```
-4. クラスタの削除
+4. クラスタの削除  
+    **ノードグループの削除にしばらく時間がかかるので10分ぐらいしてからやってみてください。**
     ```bash
     aws eks delete-cluster \
         --name django-uwsgi-demo-cluster \
