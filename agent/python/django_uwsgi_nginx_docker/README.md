@@ -197,6 +197,8 @@ application:
     ```bash
     # 確認
     kubectl config view
+    # カレントコンテキストを元に戻す
+    kubectl config use-context docker-desktop
     # それぞれ削除
     kubectl config unset contexts.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
     kubectl config unset clusters.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
