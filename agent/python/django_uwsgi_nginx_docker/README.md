@@ -101,6 +101,64 @@ src/contrast_security.yaml
 ### デプロイのための準備
 作業するPCにeksctlがインストールされていること
 1. VPC、サブネットの作成
-    コンソールで
+    作成中
+2. ロールの作成
+    作成中
+3. クラスタの作成
+    ```bash
+    aws eks create-cluster --region ap-northeast-1 \
+        --name django-uwsgi-demo-cluster \
+        --kubernetes-version 1.25 \
+        --role-arn arn:aws:iam::771960604435:role/djangoUwsgiEKSClusterRole \
+        --resources-vpc-config \
+        subnetIds=subnet-03a0f83c73fb09cef,subnet-02e6085aee74f166b
+    ```
+4. ノードグループの作成
+    ```bash
+    aws eks create-nodegroup \
+        --cluster-name django-uwsgi-demo-cluster \
+        --nodegroup-name django-uwsgi-nodegroup \
+        --scaling-config minSize=1,maxSize=1,desiredSize=1 \
+        --disk-size 20 \
+        --subnets subnet-03a0f83c73fb09cef subnet-02e6085aee74f166b \
+        --instance-types t3.medium \
+        --ami-type AL2_x86_64 \
+        --remote-access ec2SshKey=Taka \
+        --node-role arn:aws:iam::771960604435:role/djangoUwsgiEKSNodeRole 
+    ```
+
+### デプロイ
+1. ローカルとEKSの接続
+    ```bash
+    aws eks update-kubeconfig --region ap-northeast-1 --name django-uwsgi-demo-cluster
+    ```
+2. ネープスペースの作成
+    ```bash
+    kubectl create namespace django-uwsgi
+    kubens django-uwsgi
+    ```
+3. デプロイ
+    ```bash
+    kubectl apply -f ./k8s -n django-uwsgi
+    ```
+
+### 後片付け
+1. デプロイメントの削除
+    ```bash
+    kubectl delete -f ./k8s -n django-uwsgi
+    ```
+2. ネームスペースの削除
+    ```bash
+    kubectl delete namespace django-uwsgi
+    ```
+3. ノードグループの削除
+    ```bash
+    aws eks list-nodegroups --cluster-name django-uwsgi-demo-cluster --region ap-northeast-1
+    aws eks delete-nodegroup --nodegroup-name django-uwsgi-nodegroup --cluster-name django-uwsgi-demo-cluster --region ap-northeast-1
+    ```
+4. クラスタの削除
+    ```bash
+    aws eks delete-cluster --name django-uwsgi-demo-cluster --region ap-northeast-1
+    ```
 
 以上
