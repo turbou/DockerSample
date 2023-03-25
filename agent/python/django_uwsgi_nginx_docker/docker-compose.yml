@@ -14,7 +14,7 @@ services:
     depends_on:
       - django
     labels:
-      kompose.image-pull-policy: "Always"
+      kompose.image-pull-policy: "IfNotPresent"
       kompose.service.type: loadbalancer
 
   django:
@@ -29,5 +29,5 @@ services:
     volumes:
       - ./static:/static
     labels:
-      kompose.image-pull-policy: "Always"
+      kompose.image-pull-policy: "IfNotPresent"
 
