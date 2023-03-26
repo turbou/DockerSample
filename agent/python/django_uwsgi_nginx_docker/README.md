@@ -195,6 +195,20 @@ application:
     # Associate RootTable
     aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
     aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
+    
+    # SecurityGroup
+    # Check VPC ID
+    aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
+
+    # Create SecurityGroup
+    aws ec2 create-security-group \
+        --group-name django-uwsgi-sg \
+        --description "Django uWSGI Demo" \
+        --vpc-id [VPC_ID] \
+        --tag-specifications \
+        ResourceType=security-group,Tags=[{"Key=Name,Value=django-uwsgi-sg"}] 
+    # Add Inbound Rule
+    aws ec2 authorize-security-group-ingress --group-id [SG_ID] --protocol tcp --port 8000 --cidr 0.0.0.0/0
     ```
 2. ロールの作成  
     ```bash
@@ -312,10 +326,17 @@ application:
     aws iam list-instance-profiles-for-role --role-name djangoUwsgiEKSNodeRole
     aws iam remove-role-from-instance-profile --instance-profile-name djangoUwsgiEKSNodeRole --role-name djangoUwsgiEKSNodeRole
     aws iam delete-role --role-name djangoUwsgiEKSNodeRole
+
+    # VPC関連
+    # vpc-idの確認
+    aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
+    # Network ACL
+    aws ec2 describe-network-acls --filters "Name=vpc-id,Values=[VPC_ID]" --query 'NetworkAcls[*].[NetworkAclId]' --output table
+    aws ec2 delete-network-acl --network-acl-id [NACL_ID]
+    # SecurityGroup
     
     # Subnet
     # VPC
-    aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
     aws ecw delete-vpc --vpc-id [VPC_ID]
     ```
 
