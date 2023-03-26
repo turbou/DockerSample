@@ -202,12 +202,12 @@ application:
 
     # Associate RootTable
     # Public
-    aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
-    aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
+    aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [PUBLIC_RTB_ID]
+    aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [PUBLIC_RTB_ID]
     # Private1
-    aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
+    aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [PRIVATE1_RTB_ID]
     # Private2
-    aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
+    aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [PRIVATE2_RTB_ID]
    
     # パブリック IPv4 アドレスを自動割り当て
     aws ec2 modify-subnet-attribute --subnet-id [SUBNET1_ID] --map-public-ip-on-launch
