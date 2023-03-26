@@ -139,7 +139,63 @@ application:
 ### デプロイのための準備
 作業するPCにeksctlがインストールされていること
 1. VPC、サブネットの作成  
-    *作成中*
+    ```bash
+    # VPC
+    aws ec2 create-vpc --cidr-block 10.0.0.0/16 --tag-specifications ResourceType=vpc,Tags=[{"Key=Name,Value=django-uwsgi-vpc"}]
+
+    # Check VPC ID
+    aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
+
+    # Create Subnet(Public1)
+    aws ec2 create-subnet \
+        --vpc-id [VPC_ID] \
+        --cidr-block 10.0.0.0/20 \
+        --availability-zone ap-northeast-1a \
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-public1"}]
+
+    # Create Subnet(Public2)
+    aws ec2 create-subnet \
+        --vpc-id [VPC_ID] \
+        --cidr-block 10.0.16.0/20 \
+        --availability-zone ap-northeast-1c \
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-public2"}]
+
+    # Create Subnet(Private1)
+    aws ec2 create-subnet \
+        --vpc-id [VPC_ID] \
+        --cidr-block 10.0.128.0/20 \
+        --availability-zone ap-northeast-1a \
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-private1"}]
+    
+    # Create Subnet(Private2)
+    aws ec2 create-subnet \
+        --vpc-id [VPC_ID] \
+        --cidr-block 10.0.144.0/20 \
+        --availability-zone ap-northeast-1c \
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-private2"}]
+    
+    # Create IGW
+    aws ec2 create-internet-gateway --tag-specifications ResourceType=internet-gateway,Tags=[{"Key=Name,Value=django-uwsgi-igw"}]
+    
+    # Check VPC ID
+    aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
+
+    # Attach IGW to VPC
+    aws ec2 attach-internet-gateway --vpc-id [VPC_ID] --internet-gateway-id [IGW_ID]
+
+    # Create Custom RootTable
+    aws ec2 create-route-table --vpc-id [VPC_ID] ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-public"}]
+
+    aws ec2 create-route --route-table-id [RTB_ID] --destination-cidr-block 0.0.0.0/0 --gateway-id [IGW_ID]
+
+    # Check Subnet ID
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+
+    # Associate RootTable
+    aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
+    aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
+    ```
 2. ロールの作成  
     *作成中*
 3. クラスタの作成  
