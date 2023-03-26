@@ -8,6 +8,7 @@ ContrastのPythonエージェントをDocker, k8s, eksで動かす手順につ�
 
 ## 前提条件
 - ローカルでの検証はMacのDockerDesktopで行っています。
+- aws cli v2, eksctlのインストールもお願いします。
 - ```brew install kubectx```で、kubectxをインストールして使っています。（任意）  
   k8sのネームスペースの切り替えが便利になるようです。
 - AWSの操作を行うユーザーはPowerAccessユーザーとなっています。権限が限定されているユーザーの場合  
@@ -281,6 +282,7 @@ application:
         --remote-access ec2SshKey=Taka \
         --node-role arn:aws:iam::XXXXXXXXXXXX:role/djangoUwsgiEKSNodeRole
     ```
+    この時点でEC2インスタンスも起動されます。
 
 ### デプロイ
 1. ローカルとEKSの接続
