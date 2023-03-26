@@ -196,6 +196,10 @@ application:
     aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
     aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
     
+    # パブリック IPv4 アドレスを自動割り当て
+    aws ec2 modify-subnet-attribute --subnet-id [SUBNET1_ID] --map-public-ip-on-launch
+    aws ec2 modify-subnet-attribute --subnet-id [SUBNET2_ID] --map-public-ip-on-launch
+
     # SecurityGroup
     # Check VPC ID
     aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
