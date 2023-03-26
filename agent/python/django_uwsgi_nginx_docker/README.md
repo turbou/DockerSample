@@ -330,9 +330,9 @@ application:
     # VPC関連
     # vpc-idの確認
     aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
-    # Network ACL
-    #aws ec2 describe-network-acls --filters "Name=vpc-id,Values=[VPC_ID]" --query 'NetworkAcls[*].[NetworkAclId]' --output table
-    #aws ec2 delete-network-acl --network-acl-id [NACL_ID]
+    # Network ACL(デフォルトで作成されたものはVPC削除時に同時に消されるのでスキップ）
+    # aws ec2 describe-network-acls --filters "Name=vpc-id,Values=[VPC_ID]" --query 'NetworkAcls[*].[NetworkAclId]' --output table
+    # aws ec2 delete-network-acl --network-acl-id [NACL_ID]
     # SecurityGroup
     #aws ec2 describe-security-groups --filters "Name=vpc-id,Values=[VPC_ID]" --query 'SecurityGroups[*].[GroupId]' --output table
     #aws ec2 delete-security-group --group-id [SG_ID]
@@ -347,7 +347,7 @@ application:
     aws ec2 delete-internet-gateway --internet-gateway-id [IGW_ID]
     # RouteTable
     aws ec2 describe-route-tables --filters "Name=vpc-id,Values=[VPC_ID]" --query 'RouteTables[*].[RouteTableId,(Tags[0].Value)]' --output table
-    # 存在するルートテーブルをすべて削除（エラーになるのはデフォルトなので無視して良いです）
+    # 存在するルートテーブルをすべて削除(エラーになるのはデフォルトなので無視して良いです。VPC削除時に同時に消されます）
     aws ec2 delete-route-table --route-table-id [RT_ID]
     # VPC
     aws ec2 delete-vpc --vpc-id [VPC_ID]
