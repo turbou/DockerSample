@@ -345,6 +345,10 @@ application:
         --filters "Name=attachment.vpc-id,Values=[VPC_ID]" --query 'InternetGateways[*].[InternetGatewayId,(Tags[0].Value)]' --output table
     aws ec2 detach-internet-gateway --internet-gateway-id [IGW_ID] --vpc-id [VPC_ID]
     aws ec2 delete-internet-gateway --internet-gateway-id [IGW_ID]
+    # RouteTable
+    aws ec2 describe-route-tables --filters "Name=vpc-id,Values=[VPC_ID]" --query 'RouteTables[*].[RouteTableId,(Tags[0].Value)]' --output table
+    # 存在するルートテーブルをすべて削除
+    aws ec2 delete-route-table --route-table-id [RT_ID]
     # VPC
     aws ec2 delete-vpc --vpc-id [VPC_ID]
     ```
