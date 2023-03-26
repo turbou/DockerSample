@@ -240,15 +240,15 @@ application:
 3. クラスタの作成  
     ```bash
     # Check Subnet ID
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[SubnetId,(Tags[0].Value)]' --output table
+
     # Create Cluster
     aws eks create-cluster --region ap-northeast-1 \
         --name django-uwsgi-demo-cluster \
         --kubernetes-version 1.25 \
         --role-arn arn:aws:iam::XXXXXXXXXXXX:role/djangoUwsgiEKSClusterRole \
         --resources-vpc-config \
-        subnetIds=[SUBNET1_ID],[SUBNET2_ID]
+        subnetIds=[PUBLIC1_SUBNET_ID],[PUBLIC2_SUBNET_ID]
     ```
 4. ノードグループの作成  
     ```bash
@@ -261,7 +261,7 @@ application:
         --nodegroup-name django-uwsgi-nodegroup \
         --scaling-config minSize=1,maxSize=1,desiredSize=1 \
         --disk-size 20 \
-        --subnets [SUBNET1_ID] [SUBNET2_ID] \
+        --subnets [PUBLIC1_SUBNET_ID] [PUBLIC2_SUBNET_ID] \
         --instance-types t3.medium \
         --ami-type AL2_x86_64 \
         --remote-access ec2SshKey=Taka \
