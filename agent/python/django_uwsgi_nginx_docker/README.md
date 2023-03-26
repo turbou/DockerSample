@@ -197,7 +197,19 @@ application:
     aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
     ```
 2. ロールの作成  
-    *作成中*
+    ```bash
+    # CreateRole(EKS Cluster)
+    aws iam create-role --path "/service-role/" --role-name djangoUwsgiEKSClusterRole --assume-role-policy-document file://awscli/role_eks-cluster.json
+    # Attach Policy
+    aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEKSClusterPolicy --role-name djangoUwsgiEKSClusterRole
+
+    # CreateRole(EKS NodeGroup)
+    aws iam create-role --path "/service-role/" --role-name djangoUwsgiEKSNodeRole --assume-role-policy-document file://awscli/role_eks-node.json
+    # Attach Policy
+    aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEKSWorkerNodePolicy --role-name djangoUwsgiEKSNodeRole
+    aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerRegistryReadOnly --role-name djangoUwsgiEKSNodeRole
+    aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEKS_CNI_Policy --role-name djangoUwsgiEKSNodeRole
+    ```
 3. クラスタの作成  
     ```bash
     aws eks create-cluster --region ap-northeast-1 \
