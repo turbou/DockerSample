@@ -343,6 +343,7 @@ application:
     # igw
     aws ec2 describe-internet-gateways \
         --filters "Name=attachment.vpc-id,Values=[VPC_ID]" --query 'InternetGateways[*].[InternetGatewayId,(Tags[0].Value)]' --output table
+    aws ec2 detach-internet-gateway --internet-gateway-id [IGW_ID] --vpc-id [VPC_ID]
     aws ec2 delete-internet-gateway --internet-gateway-id [IGW_ID]
     # VPC
     aws ec2 delete-vpc --vpc-id [VPC_ID]
