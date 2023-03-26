@@ -5,6 +5,7 @@ ContrastのPythonエージェントをDocker, k8s, eksで動かす手順につ�
 - contrast_security.yamlはDockerイメージに含まれるようにしています。
 - AWSのリソースの作成はすべてCLIで行えるようにしています。  
   出来上がったリソースの確認やステータスの確認はコンソールで行ってください。
+- k8s, eksの手順についてはPython以外のエージェントでも共通となります。
 
 ## 前提条件
 - ローカルでの検証はMacのDockerDesktopで行っています。
