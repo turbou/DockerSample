@@ -369,6 +369,7 @@ application:
     # aws ec2 delete-network-acl --network-acl-id [NACL_ID]
     # SecurityGroup
     aws ec2 describe-security-groups --filters "Name=vpc-id,Values=[VPC_ID]" --query 'SecurityGroups[*].[GroupId]' --output table
+    # エラーになるのはデフォルトなので無視して良いです。VPC削除時に同時に消されます。
     aws ec2 delete-security-group --group-id [SG_ID]
     # Subnet
     aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[VpcId,SubnetId,(Tags[0].Value)]' --output table
