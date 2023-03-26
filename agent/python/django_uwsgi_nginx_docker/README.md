@@ -148,32 +148,32 @@ application:
 
     # Create Subnet(Public1)
     aws ec2 create-subnet \
-        --vpc-id [VPC_ID] \
         --cidr-block 10.0.0.0/20 \
         --availability-zone ap-northeast-1a \
-        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-public1"}]
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-public1"}] \
+        --vpc-id [VPC_ID]
 
     # Create Subnet(Public2)
     aws ec2 create-subnet \
-        --vpc-id [VPC_ID] \
         --cidr-block 10.0.16.0/20 \
         --availability-zone ap-northeast-1c \
-        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-public2"}]
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-public2"}] \
+        --vpc-id [VPC_ID]
 
     # Create Subnet(Private1)
     aws ec2 create-subnet \
-        --vpc-id [VPC_ID] \
         --cidr-block 10.0.128.0/20 \
         --availability-zone ap-northeast-1a \
-        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-private1"}]
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-private1"}] \
+        --vpc-id [VPC_ID]
     
     # Create Subnet(Private2)
     aws ec2 create-subnet \
-        --vpc-id [VPC_ID] \
         --cidr-block 10.0.144.0/20 \
         --availability-zone ap-northeast-1c \
-        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-private2"}]
-    
+        --tag-specifications ResourceType=subnet,Tags=[{"Key=Name,Value=django-uwsgi-subnet-private2"}] \
+        --vpc-id [VPC_ID]
+
     # Create IGW
     aws ec2 create-internet-gateway --tag-specifications ResourceType=internet-gateway,Tags=[{"Key=Name,Value=django-uwsgi-igw"}]
     
