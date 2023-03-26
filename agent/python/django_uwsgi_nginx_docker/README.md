@@ -251,6 +251,7 @@ application:
         subnetIds=[PUBLIC1_SUBNET_ID],[PUBLIC2_SUBNET_ID]
     ```
 4. ノードグループの作成  
+    **クラスタの作成に5分ほどかかります。クラスタがアクティブになってからノードグループを作成してください。**  
     ```bash
     # Check Subnet ID
     aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[SubnetId,(Tags[0].Value)]' --output table
