@@ -287,6 +287,22 @@ application:
     ```bash
     kubectl apply -f ./k8s -n django-uwsgi
     ```
+4. 動作確認
+    ```bash
+    kubectl get pod
+    kubectl get svc
+    ```
+    nginxのEXTERNAL-IPからURLを取得して、ブラウザで疎通確認します。  
+    ```http://a9611862060c44ef488d09fad8643344-62537058.ap-northeast-1.elb.amazonaws.com:8000```
+5. Django管理サイトの後続作業  
+    Djangoの管理サイトで静的コンテンツを表示するための手続きとadminユーザーを作る処理です。  
+    ```bash
+    # createsuperuser
+    kubectl exec -it django-54b5555fd4-cnlcb -- python manage.py createsuperuser
+    # collectstatic
+    kubectl exec -it django-54b5555fd4-cnlcb -- python manage.py collectstatic
+    ```
+    ```http://a9611862060c44ef488d09fad8643344-62537058.ap-northeast-1.elb.amazonaws.com:8000/admin``` で接続できます。
 
 ### 後片付け
 1. デプロイメントの削除
