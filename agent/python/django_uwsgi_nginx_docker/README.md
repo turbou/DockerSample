@@ -253,8 +253,8 @@ application:
 4. ノードグループの作成  
     ```bash
     # Check Subnet ID
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[SubnetId,(Tags[0].Value)]' --output table
+
     # Create NodeGroup
     aws eks create-nodegroup \
         --cluster-name django-uwsgi-demo-cluster \
