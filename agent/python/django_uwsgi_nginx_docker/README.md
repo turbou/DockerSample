@@ -340,6 +340,10 @@ application:
     aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[SubnetId,(Tags[0].Value)]' --output table
     # 存在するサブネットをすべて削除
     aws ec2 delete-subnet --subnet-id [SUBNET_ID]
+    # igw
+    aws ec2 describe-internet-gateways \
+        --filters "Name=attachment.vpc-id,Values=[VPC_ID]" --query 'InternetGateways[*].[InternetGatewayId,(Tags[0].Value)]' --output table
+    aws ec2 delete-internet-gateway --internet-gateway-id [IGW_ID]
     # VPC
     aws ec2 delete-vpc --vpc-id [VPC_ID]
     ```
