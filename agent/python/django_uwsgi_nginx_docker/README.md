@@ -341,7 +341,7 @@ application:
     # 存在するサブネットをすべて削除
     aws ec2 delete-subnet --subnet-id [SUBNET_ID]
     # VPC
-    aws ecw delete-vpc --vpc-id [VPC_ID]
+    aws ec2 delete-vpc --vpc-id [VPC_ID]
     ```
 
 以上
