@@ -212,21 +212,29 @@ application:
     ```
 3. クラスタの作成  
     ```bash
+    # Check Subnet ID
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    # Create Cluster
     aws eks create-cluster --region ap-northeast-1 \
         --name django-uwsgi-demo-cluster \
         --kubernetes-version 1.25 \
         --role-arn arn:aws:iam::XXXXXXXXXXXX:role/djangoUwsgiEKSClusterRole \
         --resources-vpc-config \
-        subnetIds=subnet-03a0f83c73fb09cef,subnet-02e6085aee74f166b
+        subnetIds=[SUBNET1_ID],[SUBNET2_ID]
     ```
 4. ノードグループの作成  
     ```bash
+    # Check Subnet ID
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    # Create NodeGroup
     aws eks create-nodegroup \
         --cluster-name django-uwsgi-demo-cluster \
         --nodegroup-name django-uwsgi-nodegroup \
         --scaling-config minSize=1,maxSize=1,desiredSize=1 \
         --disk-size 20 \
-        --subnets subnet-03a0f83c73fb09cef subnet-02e6085aee74f166b \
+        --subnets [SUBNET1_ID] [SUBNET2_ID] \
         --instance-types t3.medium \
         --ami-type AL2_x86_64 \
         --remote-access ec2SshKey=Taka \
