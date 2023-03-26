@@ -1,5 +1,9 @@
 # Django, uWSGI, nginxをDocker, k8s, EKSで動かしてみる
 
+## 前提条件
+- ローカルでの検証はMacのDockerDesktopで行っています。
+- ```brew install kubectx```で、kubectxをインストールして使っています。（任意）
+
 ## 事前準備
 ### ダミーのcontrast_security.yamlを本物と入れ替え
 python版のcontrast_security.yamlをダウンロードしてください。
