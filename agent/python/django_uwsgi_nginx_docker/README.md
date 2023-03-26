@@ -291,5 +291,27 @@ application:
     kubectl config unset clusters.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
     kubectl config unset users.arn:aws:eks:ap-northeast-1:XXXXXXXXXXXX:cluster/django-uwsgi-demo-cluster
     ```
+6. AWSのその他のリソース
+    ```bash
+    # ECR
+    aws ecr delete-repository --repository-name django_uwsgi_nginx --force
+    aws ecr delete-repository --repository-name django_uwsgi_django --force
+    # IAM Role
+    # djangoUwsgiEKSClusterRole
+    aws iam list-attached-role-policies --role-name djangoUwsgiEKSClusterRole
+    aws iam detach-role-policy --role-name djangoUwsgiEKSClusterRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+    aws iam delete-role --role-name djangoUwsgiEKSClusterRole
+
+    # djangoUwsgiEKSNodeRole
+    aws iam list-attached-role-policies --role-name djangoUwsgiEKSNodeRole
+    aws iam detach-role-policy --role-name djangoUwsgiEKSNodeRole --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+    aws iam detach-role-policy --role-name djangoUwsgiEKSNodeRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+    aws iam detach-role-policy --role-name djangoUwsgiEKSNodeRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+    # インスタンスプロファイルの削除
+    aws iam list-instance-profiles-for-role --role-name djangoUwsgiEKSNodeRole
+    aws iam remove-role-from-instance-profile --instance-profile-name djangoUwsgiEKSNodeRole --role-name djangoUwsgiEKSNodeRole
+    aws iam delete-role --role-name djangoUwsgiEKSNodeRole
+    
+    ```
 
 以上
