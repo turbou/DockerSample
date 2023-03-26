@@ -1,8 +1,17 @@
 # Django, uWSGI, nginxをDocker, k8s, EKSで動かしてみる
 
+## 概要
+ContrastのPythonエージェントをDocker, k8s, eksで動かす手順について纏めています。  
+- contrast_security.yamlはDockerイメージに含まれるようにしています。
+- AWSのリソースの作成はすべてCLIで行えるようにしています。  
+  出来上がったリソースの確認やステータスの確認はコンソールで行ってください。
+
 ## 前提条件
 - ローカルでの検証はMacのDockerDesktopで行っています。
-- ```brew install kubectx```で、kubectxをインストールして使っています。（任意）
+- ```brew install kubectx```で、kubectxをインストールして使っています。（任意）  
+  k8sのネームスペースの切り替えが便利になるようです。
+- AWSの操作を行うユーザーはPowerAccessユーザーとなっています。権限が限定されているユーザーの場合  
+  適宜、権限を付与するなどしてAWSの操作を行ってください。
 
 ## 事前準備
 ### ダミーのcontrast_security.yamlを本物と入れ替え
