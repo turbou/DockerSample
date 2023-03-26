@@ -193,10 +193,7 @@ application:
     aws ec2 create-route-table --vpc-id [VPC_ID] --tag-specifications ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-private2"}]
 
     # Check Subnet ID
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-private1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
-    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-private2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[VpcId,SubnetId,(Tags[0].Value)]' --output table
     # Check RouteTable ID
     aws ec2 describe-route-tables --filters "Name=vpc-id,Values=[VPC_ID]" --query 'RouteTables[*].[RouteTableId,(Tags[0].Value)]' --output table
 
@@ -353,7 +350,7 @@ application:
     # aws ec2 describe-security-groups --filters "Name=vpc-id,Values=[VPC_ID]" --query 'SecurityGroups[*].[GroupId]' --output table
     # aws ec2 delete-security-group --group-id [SG_ID]
     # Subnet
-    aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[SubnetId,(Tags[0].Value)]' --output table
+    aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[VpcId,SubnetId,(Tags[0].Value)]' --output table
     # 存在するサブネットをすべて削除
     aws ec2 delete-subnet --subnet-id [SUBNET_ID]
     # igw
