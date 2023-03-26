@@ -368,8 +368,8 @@ application:
     # aws ec2 describe-network-acls --filters "Name=vpc-id,Values=[VPC_ID]" --query 'NetworkAcls[*].[NetworkAclId]' --output table
     # aws ec2 delete-network-acl --network-acl-id [NACL_ID]
     # SecurityGroup
-    # aws ec2 describe-security-groups --filters "Name=vpc-id,Values=[VPC_ID]" --query 'SecurityGroups[*].[GroupId]' --output table
-    # aws ec2 delete-security-group --group-id [SG_ID]
+    aws ec2 describe-security-groups --filters "Name=vpc-id,Values=[VPC_ID]" --query 'SecurityGroups[*].[GroupId]' --output table
+    aws ec2 delete-security-group --group-id [SG_ID]
     # Subnet
     aws ec2 describe-subnets --filters "Name=vpc-id,Values=[VPC_ID]" --query 'Subnets[*].[VpcId,SubnetId,(Tags[0].Value)]' --output table
     # 存在するサブネットをすべて削除
