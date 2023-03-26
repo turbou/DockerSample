@@ -227,12 +227,12 @@ application:
 2. ロールの作成  
     ```bash
     # CreateRole(EKS Cluster)
-    aws iam create-role --path "/service-role/" --role-name djangoUwsgiEKSClusterRole --assume-role-policy-document file://awscli/role_eks-cluster.json
+    aws iam create-role --role-name djangoUwsgiEKSClusterRole --assume-role-policy-document file://awscli/role_eks-cluster.json
     # Attach Policy
     aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy --role-name djangoUwsgiEKSClusterRole
 
     # CreateRole(EKS NodeGroup)
-    aws iam create-role --path "/service-role/" --role-name djangoUwsgiEKSNodeRole --assume-role-policy-document file://awscli/role_eks-node.json
+    aws iam create-role --role-name djangoUwsgiEKSNodeRole --assume-role-policy-document file://awscli/role_eks-node.json
     # Attach Policy
     aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy --role-name djangoUwsgiEKSNodeRole
     aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly --role-name djangoUwsgiEKSNodeRole
