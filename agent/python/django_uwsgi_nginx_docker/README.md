@@ -184,18 +184,29 @@ application:
     aws ec2 attach-internet-gateway --vpc-id [VPC_ID] --internet-gateway-id [IGW_ID]
 
     # Create Custom RootTable
+    # Public共通
     aws ec2 create-route-table --vpc-id [VPC_ID] --tag-specifications ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-public"}]
-
     aws ec2 create-route --route-table-id [RTB_ID] --destination-cidr-block 0.0.0.0/0 --gateway-id [IGW_ID]
+    # Private1
+    aws ec2 create-route-table --vpc-id [VPC_ID] --tag-specifications ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-private1"}]
+    # Private2
+    aws ec2 create-route-table --vpc-id [VPC_ID] --tag-specifications ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-private2"}]
 
     # Check Subnet ID
     aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
     aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-private1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-private2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
 
     # Associate RootTable
+    # Public
     aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
     aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
-    
+    # Private1
+    aws ec2 associate-route-table  --subnet-id [SUBNET1_ID] --route-table-id [RTB_ID]
+    # Private2
+    aws ec2 associate-route-table  --subnet-id [SUBNET2_ID] --route-table-id [RTB_ID]
+   
     # パブリック IPv4 アドレスを自動割り当て
     aws ec2 modify-subnet-attribute --subnet-id [SUBNET1_ID] --map-public-ip-on-launch
     aws ec2 modify-subnet-attribute --subnet-id [SUBNET2_ID] --map-public-ip-on-launch
