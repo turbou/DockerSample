@@ -204,9 +204,8 @@ application:
     aws ec2 create-security-group \
         --group-name django-uwsgi-sg \
         --description "Django uWSGI Demo" \
-        --vpc-id [VPC_ID] \
-        --tag-specifications \
-        ResourceType=security-group,Tags=[{"Key=Name,Value=django-uwsgi-sg"}] 
+        --tag-specifications ResourceType=security-group,Tags=[{"Key=Name,Value=django-uwsgi-sg"}] \
+        --vpc-id [VPC_ID]
     # Add Inbound Rule
     aws ec2 authorize-security-group-ingress --group-id [SG_ID] --protocol tcp --port 8000 --cidr 0.0.0.0/0
     ```
