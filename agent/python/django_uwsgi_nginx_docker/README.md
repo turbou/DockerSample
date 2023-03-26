@@ -197,6 +197,8 @@ application:
     aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-public2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
     aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-private1" --query 'Subnets[*].[VpcId,SubnetId]' --output table
     aws ec2 describe-subnets --filters "Name=tag:Name,Values=django-uwsgi-subnet-private2" --query 'Subnets[*].[VpcId,SubnetId]' --output table
+    # Check RouteTable ID
+    aws ec2 describe-route-tables --filters "Name=vpc-id,Values=[VPC_ID]" --query 'RouteTables[*].[RouteTableId,(Tags[0].Value)]' --output table
 
     # Associate RootTable
     # Public
