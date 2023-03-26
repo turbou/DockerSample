@@ -296,6 +296,7 @@ application:
     # ECR
     aws ecr delete-repository --repository-name django_uwsgi_nginx --force
     aws ecr delete-repository --repository-name django_uwsgi_django --force
+    
     # IAM Role
     # djangoUwsgiEKSClusterRole
     aws iam list-attached-role-policies --role-name djangoUwsgiEKSClusterRole
@@ -312,6 +313,10 @@ application:
     aws iam remove-role-from-instance-profile --instance-profile-name djangoUwsgiEKSNodeRole --role-name djangoUwsgiEKSNodeRole
     aws iam delete-role --role-name djangoUwsgiEKSNodeRole
     
+    # Subnet
+    # VPC
+    aws ec2 describe-vpcs --filters "Name=tag:Name,Values=django-uwsgi-vpc" --query 'Vpcs[*].[VpcId,CidrBlock]' --output table
+    aws ecw delete-vpc --vpc-id [VPC_ID]
     ```
 
 以上
