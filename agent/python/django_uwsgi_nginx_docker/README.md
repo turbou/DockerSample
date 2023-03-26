@@ -184,7 +184,7 @@ application:
     aws ec2 attach-internet-gateway --vpc-id [VPC_ID] --internet-gateway-id [IGW_ID]
 
     # Create Custom RootTable
-    aws ec2 create-route-table --vpc-id [VPC_ID] ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-public"}]
+    aws ec2 create-route-table --vpc-id [VPC_ID] --tag-specifications ResourceType=route-table,Tags=[{"Key=Name,Value=django-uwsgi-rtb-public"}]
 
     aws ec2 create-route --route-table-id [RTB_ID] --destination-cidr-block 0.0.0.0/0 --gateway-id [IGW_ID]
 
