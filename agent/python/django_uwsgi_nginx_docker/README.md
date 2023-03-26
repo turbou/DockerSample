@@ -207,8 +207,8 @@ application:
     aws ec2 associate-route-table  --subnet-id [PRIVATE2_SUBNET_ID] --route-table-id [PRIVATE2_RTB_ID]
    
     # パブリック IPv4 アドレスを自動割り当て
-    aws ec2 modify-subnet-attribute --subnet-id [SUBNET1_ID] --map-public-ip-on-launch
-    aws ec2 modify-subnet-attribute --subnet-id [SUBNET2_ID] --map-public-ip-on-launch
+    aws ec2 modify-subnet-attribute --subnet-id [PUBLIC1_SUBNET_ID] --map-public-ip-on-launch
+    aws ec2 modify-subnet-attribute --subnet-id [PUBLIC2_SUBNET_ID] --map-public-ip-on-launch
 
     # SecurityGroup
     # Check VPC ID
