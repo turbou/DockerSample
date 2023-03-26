@@ -92,12 +92,12 @@ application:
     ```
 3. 管理ユーザーの作成
     ```bash
-    kubectl exec -it [POD名] -- ./manage.py createsuperuser
+    kubectl exec -it [DjangoのPOD名] -- python manage.py createsuperuser
     ```
     ユーザ名、メールアドレス、パスワードは適当に設定してください。
 4. 静的コンテンツの格納
     ```bash
-    kubectl exec -it [POD名] -- ./manage.py collectstatic
+    kubectl exec -it [DjangoのPOD名] -- python manage.py collectstatic
     ```
     static/ディレクトリに静的コンテンツがコピーされます。このディレクトリはnginxコンテナにもマウントされているため  
     Djangoの管理サイトを表示する際に静的コンテンツが表示されるようになります。
@@ -307,9 +307,9 @@ application:
     Djangoの管理サイトで静的コンテンツを表示するための手続きとadminユーザーを作る処理です。  
     ```bash
     # createsuperuser
-    kubectl exec -it django-54b5555fd4-cnlcb -- python manage.py createsuperuser
+    kubectl exec -it [DjangoのPOD名] -- python manage.py createsuperuser
     # collectstatic
-    kubectl exec -it django-54b5555fd4-cnlcb -- python manage.py collectstatic
+    kubectl exec -it [DjangoのPOD名] -- python manage.py collectstatic
     ```
     ```http://a9611862060c44ef488d09fad8643344-62537058.ap-northeast-1.elb.amazonaws.com:8000/admin``` で接続できます。
 
