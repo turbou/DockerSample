@@ -7,6 +7,10 @@ services:
     environment:
       - TZ=Asia/Tokyo
       - MH_UI_WEB_PATH=mail
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/tmp
+    volumes:
+      - maildir:/tmp
 
   mysql:
     image: mysql:8.0.21
@@ -23,6 +27,8 @@ services:
       - MYSQL_PASSWORD=default1!
     ports:
       - '3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   teamserver:
     image: ghcr.io/contrast-security-inc/contrast:latest
@@ -58,6 +64,7 @@ services:
       # - CONTRAST_AUTHENTICATOR_SAML_KEYSTORE_PASSWORDMAP=some-alias=changeit
     volumes:
       - ./contrast_conf:/opt/contrast/conf
+      - contrast_data:/opt/contrast/data
     deploy: 
       resources:
         limits:
@@ -78,4 +85,9 @@ services:
       - TZ=Asia/Tokyo
     volumes:
       - ./nginx_conf:/etc/nginx/conf.d
+
+volumes:
+  contrast_data: {}
+  mysql_data: {}
+  maildir: {}
 
