@@ -5,11 +5,19 @@
 - 有効なContrastのライセンスファイルが必要です。
 
 ## 事前準備
+### ライセンスファイル
 docker-composeコマンドを実行するターミナルで環境変数 ```CONTRAST_LICENSE``` が設定されている必要があります。
 ```bash
 export CONTRAST_LICENSE=$(cat /Users/turbou/Downloads/contrast-12-31-2023.lic)
 ```
 *~/.bash_profileに上記をそのまま設定しておいてもよいです。*
+
+### 各種設定
+- TeamServer  
+contrast_conf下に設定ファイルがあるので適宜変更して使ってください。
+- nginx  
+nginx_conf下にdefault.confがあります。リバースプロキシの動きがおかしい場合はこの中を弄ってください。  
+locationsの下にmail.confもありますが、これはほぼ弄る必要はないです。
 
 ## コンテナ起動
 #### Dockerイメージプル
