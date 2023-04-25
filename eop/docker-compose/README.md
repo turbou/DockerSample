@@ -65,9 +65,15 @@ System Settings -> Mail
 
 Test Mail Connectionを押して、成功することを確認
 
-## コンテナ停止
+## コンテナ停止など
+### コンテナ停止
 ```bash
 docker-compose down
+```
+### ボリューム削除
+TeamServer, MySQL, Mailhogのボリュームが永続化されています。クリアする場合は以下のコマンドで。
+```bash
+docker volume prune
 ```
 
 以上
