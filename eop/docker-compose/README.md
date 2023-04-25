@@ -39,9 +39,23 @@ docker-compose logs -f --tail 100 mail
 docker exec -it contrast.teamserver bash
 ```
 
-## 起動後の設定
-### SMTPの設定
+## 各サービスへの接続
+### TeamServer
+http://localhost/Contrast
+### Mailhog
+http://localhost/mail
 
+## 起動後の設定
+### TeamServer
+#### Mail
+System Settings -> Mail
+- Mail Protocol: smtp
+- Mail Host: mail
+- Mail Port: 1025
+- Use SMTP Auth: チェックなし
+- Enable STARTTLS: チェックなし
+
+Test Mail Connectionを押して、成功することを確認
 
 ## コンテナ停止
 ```bash
