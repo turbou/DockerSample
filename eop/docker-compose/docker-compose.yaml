@@ -5,18 +5,20 @@ services:
 
   mail:
     image: mailhog/mailhog:v1.0.1
-    container_name: mail
+    container_name: contrast.mail
     environment:
+      - TZ=Asia/Tokyo
       - MH_UI_WEB_PATH=mail
 
   mysql:
     image: mysql:8.0.21
     #image: arm64v8/mysql:8.0.32
-    container_name: mysql
+    container_name: contrast.mysql
     command: --log-bin-trust-function-creators=ON
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE
     environment:
+      - TZ=Asia/Tokyo
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=contrast
       - MYSQL_USER=contrast
@@ -28,13 +30,14 @@ services:
   contrast:
     image: ghcr.io/contrast-security-inc/contrast:latest
     #image: ghcr.io/contrast-security-inc/contrast:3.9.11.3941630875@sha256:f5c38a1cd679fa71ea0af3ca2a960ea4a7261f4756e1c1cfe0240d7d3b9c25ad
-    container_name: teamserver
+    container_name: contrast.teamserver
     depends_on:
       - mail
       - mysql
     ports:
       - 8080:8080
     environment:
+      - TZ=Asia/Tokyo
     # LICENCE Setup:
       - CONTRAST_LICENSE=${CONTRAST_LICENSE}   #loaded via ENV
       # Use Hub account to pull license
@@ -68,12 +71,14 @@ services:
           memory: 4g
 
   nginx:
-    image: nginx:1.24.0
-    container_name: nginx
+    image: nginx:1.13
+    container_name: contrast.nginx
     depends_on:
       - contrast
     ports:
       - 80:80
+    environment:
+      - TZ=Asia/Tokyo
     volumes:
       - ./nginx_conf:/etc/nginx/conf.d
 
