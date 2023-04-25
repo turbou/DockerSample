@@ -71,7 +71,7 @@ services:
     image: nginx:1.13
     container_name: contrast.nginx
     depends_on:
-      - contrast
+      - teamserver
     ports:
       - 80:80
     environment:
