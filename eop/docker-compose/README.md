@@ -1,5 +1,17 @@
 # TeamServerをdocker composeで動かす
 
+## 概要
+簡単な手順でオンプレミス版TeamServerを起動できます。  
+以下のサービスが起動されます。  
+- mailhog  
+アクティベートメールなど確認できます。
+- mysql  
+データベース
+- teamserver  
+TeamServer本体です。
+- nginx  
+リバースプロキシに使っています。
+
 ## 前提条件
 - MacのDocker Desktopで動作確認済みです。
 - 有効なContrastのライセンスファイルが必要です。
