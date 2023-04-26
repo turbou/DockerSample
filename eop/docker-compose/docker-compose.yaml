@@ -25,7 +25,7 @@ services:
       - MYSQL_DATABASE=contrast
       - MYSQL_USER=contrast
       - MYSQL_PASSWORD=default1!
-    ports:
+    expose:
       - '3306'
     volumes:
       - mysql_data:/var/lib/mysql
@@ -37,8 +37,10 @@ services:
     depends_on:
       - mail
       - mysql
-    ports:
-      - 8080:8080
+    expose:
+      - '8080'
+    #ports:
+    #  - 8080:8080
     environment:
       - TZ=Asia/Tokyo
     # LICENCE Setup:
