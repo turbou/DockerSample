@@ -37,3 +37,13 @@ http://localhost:8080
 
 ## オンボード確認
 SQLインジェクションなどが検知されていることを確認
+
+## 後片付け
+#### コンテナ停止
+```
+docker-compose down
+```
+#### 掃除
+```
+docker system prune --volumes
+```
