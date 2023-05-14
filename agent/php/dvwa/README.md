@@ -2,6 +2,7 @@
 
 ## 事前準備
 ### contrast_security.yamlをDL
+docker-compose.ymlと同じ階層にDLして配置してください。
 
 ### DVWAの配置
 #### git clone
