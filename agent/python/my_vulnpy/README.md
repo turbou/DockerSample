@@ -1,5 +1,7 @@
 # Contrast-Security-OSS/vulnpy の補足
 
+vulnpyというPython系のフレームワークを網羅した脆弱アプリのプロジェクトがあるので、それを利用します。  
+
 ## 事前準備
 ### vlunpyをgit clone
 適当な場所に  
