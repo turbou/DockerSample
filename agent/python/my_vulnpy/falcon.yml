@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  vulnpy_falcon:
+    image: vulnpy_falcon
+    build:
+      context: .
+      dockerfile: Dockerfile_falcon
+    container_name: vulnpy_falcon
+    ports:
+      - "3010:3010"
+    environment:
+     - TZ=Asia/Tokyo
+     - CONTRAST__APPLICATION__NAME=Vulnpy_Falcon
+     - CONTRAST__SERVER__NAME=Vulnpy_Falcon_Server
+

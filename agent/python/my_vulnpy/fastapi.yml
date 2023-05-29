@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  vulnpy_fastapi:
+    image: vulnpy_fastapi
+    build:
+      context: .
+      dockerfile: Dockerfile_fastapi
+    container_name: vulnpy_fastapi
+    ports:
+      - "3011:3010"
+    environment:
+     - TZ=Asia/Tokyo
+     - CONTRAST__APPLICATION__NAME=Vulnpy_FastAPI
+     - CONTRAST__SERVER__NAME=Vulnpy_FastAPI_Server
+
