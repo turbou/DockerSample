@@ -2,7 +2,7 @@ version: '3'
 
 services:
   jenkins:
-    image: jenkins_with_plugins:2.176.1
+    image: jenkins_with_plugins:2.387.3
     build:
       context: ./jenkins
     container_name: petclinic_demo.jenkins

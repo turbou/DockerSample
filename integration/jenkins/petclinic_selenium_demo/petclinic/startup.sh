@@ -12,4 +12,4 @@ java -javaagent:/tmp/contrast/contrast.jar \
 -Dcontrast.agent.polling.app_activity_ms=3000 \
 -Dcontrast.agent.polling.server_activity_ms=3000 \
 -Dcontrast.api.timeout_ms=1000 \
--jar /tmp/petclinic/spring-petclinic-1.5.1.jar --server.port=8001
+-jar /tmp/petclinic/spring-petclinic-2.5.0-SNAPSHOT.jar --server.port=8001

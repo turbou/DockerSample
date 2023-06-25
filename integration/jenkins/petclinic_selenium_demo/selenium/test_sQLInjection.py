@@ -21,7 +21,7 @@ class TestSQLInjection():
   def test_sQLInjection(self):
     self.driver.get("http://jenkins:8001/")
     self.driver.set_window_size(1920, 1057)
-    self.driver.find_element(By.CSS_SELECTOR, "li:nth-child(3) span:nth-child(2)").click()
+    self.driver.find_element(By.CSS_SELECTOR, "li:nth-child(2) span:nth-child(2)").click()
     self.driver.find_element(By.NAME, "lastName").click()
     self.driver.find_element(By.NAME, "lastName").send_keys("Davis")
     self.driver.find_element(By.CSS_SELECTOR, ".btn:nth-child(1)").click()
