@@ -32,7 +32,7 @@ http://localhost:9000/jenkins/configure にアクセス
 **Contrast Connections** の項目を設定して、Test Contrast Connectionを実行して疎通確認。
 
 -  Connection Name
-  適当にDemoでOK
+  ここは`Demo`としてください。Jenkinsジョブから`Demo`という名前で参照されるようにしています。
 - Contrast Username
   TeamServerのログインID（メアド）
 - Contrast API Key, Contrast Service Key, Organization ID
