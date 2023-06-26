@@ -36,6 +36,7 @@ exit 0
         <com.aspectsecurity.contrast.contrastjenkins.ThresholdCondition>
           <thresholdCount>0</thresholdCount>
           <thresholdSeverity>Medium</thresholdSeverity>
+          <thresholdVulnType>hql-injection</thresholdVulnType>
           <applicationDefinition>
             <matchBy>APPLICATION_ORIGIN_NAME</matchBy>
             <applicationOriginName>PetClinic_8001_JenkinsDemo</applicationOriginName>

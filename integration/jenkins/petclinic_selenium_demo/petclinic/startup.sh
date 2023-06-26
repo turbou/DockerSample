@@ -7,6 +7,7 @@ java -javaagent:/tmp/contrast/contrast.jar \
 -Dcontrast.server.name=MacBookPro \
 -Dcontrast.agent.java.standalone_app_name=PetClinic_8001_JenkinsDemo \
 -Dcontrast.application.version=${APP_VERSION} \
+-Dcontrast.override.appversion=${APP_VERSION} \
 -Dcontrast.agent.contrast_working_dir=contrast-8001/ \
 -Dcontrast.agent.logger.level=INFO \
 -Dcontrast.agent.polling.app_activity_ms=3000 \
