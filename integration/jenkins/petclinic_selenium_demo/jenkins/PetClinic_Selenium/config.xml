@@ -23,7 +23,7 @@
 sleep 210
 pytest /tmp/selenium/test_sQLInjection.py
 sleep 30
-PID=`jps -l | awk &apos;/spring-petclinic-1.5.1.jar/ {print $1}&apos;`
+PID=`jps -l | awk &apos;/spring-petclinic-2.5.0-SNAPSHOT.jar/ {print $1}&apos;`
 kill -9 $PID
 
 exit 0
@@ -38,12 +38,12 @@ exit 0
           <thresholdSeverity>Medium</thresholdSeverity>
           <applicationDefinition>
             <matchBy>APPLICATION_ORIGIN_NAME</matchBy>
-            <applicationOriginName>PetClinic_8001</applicationOriginName>
+            <applicationOriginName>PetClinic_8001_JenkinsDemo</applicationOriginName>
             <agentType>JAVA</agentType>
             <failOnAppNotFound>true</failOnAppNotFound>
           </applicationDefinition>
-          <applicationId>db7690b3-a46e-4636-b9b6-0eb2d3898c5e</applicationId>
-          <applicationOriginName>PetClinic_8001</applicationOriginName>
+          <applicationId>749c0349-07a1-4f6d-ae62-72d8e7acb803</applicationId>
+          <applicationOriginName>PetClinic_8001_JenkinsDemo</applicationOriginName>
           <agentType>JAVA</agentType>
           <failOnAppNotFound>true</failOnAppNotFound>
           <applicationState>1</applicationState>
