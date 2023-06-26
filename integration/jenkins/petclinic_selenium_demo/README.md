@@ -132,8 +132,10 @@ exit 0
 ```
 
 ### 補足
-Jenkinsジョブのconfig.xmlを直接弄って、docker-compose buildからやり直してDockerイメージを作り直した場合は  
-`jenkins_docker/`ディレクトリを削除してから、docker-compose up -dを実行してください。
+- Jenkinsジョブのconfig.xmlを直接弄って、docker-compose buildからやり直してDockerイメージを作り直した場合は  
+  `jenkins_docker/`ディレクトリを削除してから、docker-compose up -dを実行してください。
+- Jenkinsジョブの脆弱性しきい値設定で脆弱性タイプをALLにすると、うまく脆弱性の情報を取得することができないため  
+  HQLインジェクションで設定しています。
 
 以上
 
