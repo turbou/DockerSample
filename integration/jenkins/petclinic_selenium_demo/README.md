@@ -21,7 +21,7 @@ http://localhost:9000/jenkins にアクセス
 ```bash
 docker exec -it petclinic_demo.jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
-次のプラグインインストール画面については、```Select plugins install```を選択して、そのまま何もせず終了してください。  
+次のプラグインインストール画面については、右上のバツでそのまま何もせず終了してください。  
 
 アクセスすると既にPetClinic_Seleniumというジョブがあります。
 
