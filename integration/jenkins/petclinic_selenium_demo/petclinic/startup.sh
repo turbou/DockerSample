@@ -5,7 +5,7 @@ fi
 java -javaagent:/tmp/contrast/contrast.jar \
 -Dcontrast.server.environment=development \
 -Dcontrast.server.name=MacBookPro \
--Dcontrast.agent.java.standalone_app_name=PetClinic_8001 \
+-Dcontrast.agent.java.standalone_app_name=PetClinic_8001_JenkinsDemo \
 -Dcontrast.application.version=${APP_VERSION} \
 -Dcontrast.agent.contrast_working_dir=contrast-8001/ \
 -Dcontrast.agent.logger.level=INFO \
