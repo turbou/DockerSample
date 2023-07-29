@@ -49,6 +49,8 @@ Google Cloud用デモ共通[事前準備](../README.md#事前準備)を参照し
   ```bash
   gcloud services enable artifactregistry.googleapis.com
   gcloud services enable run.googleapis.com
+  # 確認
+  gcloud services list --enabled
   ```
   APIの有効化でエラーがでる場合は、ロールの割り当てを適切に設定し直してください。
 
