@@ -80,6 +80,25 @@ Google Cloud用デモ共通[事前準備](../README.md#事前準備)を参照し
   gcloud artifacts docker images list asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo
   ```
 
+### クラスター
+- クラスタの作成
+  ```bash
+  # 確認
+  gcloud container clusters list --location=asia-northeast1
+  # 作成
+  gcloud container clusters create-auto juice-shop-cluster --location=asia-northeast1
+  ```
+- 認証プラグインをインストール
+  ```bash
+  gcloud components install gke-gcloud-auth-plugin
+  # バージョンを確認
+  gke-gcloud-auth-plugin --version
+  ```
+- クラスタの認証情報を取得
+  ```bash
+  gcloud container clusters get-credentials juice-shop-cluster --location=asia-northeast1
+  ```
+
 ### サービス
 - デプロイ
   ```bash
