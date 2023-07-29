@@ -2,7 +2,7 @@
 Contrastエージェント付きのDockerコンテナをCloud Runにデプロイして、Contrastサーバにオンボードするまでの手順です。
 
 ## 事前準備
-Google Cloud用デモ共通[事前準備](../#事前準備)を参照してください。
+Google Cloud用デモ共通[事前準備](../README.md#事前準備)を参照してください。
 
 ## 構成
 今回使用するgcloudの構成は以下のような感じです。
