@@ -8,7 +8,7 @@ Contrastエージェント付きのDockerコンテナをCloud Runにデプロイ
 
 ### 使用するアプリケーション（Dockerイメージ）の準備について
 **ContrastのNodeJSエージェントが含まれているDockerイメージ**を使ってデプロイします。  
-[Juice ShopのDockerサンプル](../../agent/nodejs/juice-shop) で、Juice ShopのDockerイメージをビルドしてください。  
+[Juice ShopのDockerサンプル](../../../agent/nodejs/juice-shop) で、Juice ShopのDockerイメージをビルドしてください。  
 ```docker images```で以下のDockerイメージが存在する前提で手順を進めます。  
 ```
 docker_juice-shop:1.0.0
