@@ -1,4 +1,4 @@
-# Cloud Run上のアプリをContrastサーバにオンボード
+# GKE上のアプリをContrastサーバにオンボード
 Contrastエージェント付きのDockerコンテナをCloud Runにデプロイして、Contrastサーバにオンボードするまでの手順です。
 
 ## 事前準備
