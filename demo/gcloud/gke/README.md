@@ -77,7 +77,7 @@ Google Cloud用デモ共通[事前準備](../README.md#事前準備)を参照し
   docker push asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0
   
   # push済みDockerイメージの一覧
-  gcloud artifacts docker images list asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo
+  gcloud artifacts docker images list --include-tags asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo
   ```
 
 ### クラスター
@@ -98,29 +98,21 @@ Google Cloud用デモ共通[事前準備](../README.md#事前準備)を参照し
   ```bash
   gcloud container clusters get-credentials juice-shop-cluster --location=asia-northeast1
   ```
-
-### サービス
 - デプロイ
   ```bash
-  # デプロイ
-  gcloud run deploy juice-shop --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0 --port=3000 --region=asia-northeast1 --allow-unauthenticated --memory=2048Mi --min-instances=0 --max-instances=1
+  kubectl create deployment juice-shop-server --image=asia-northeast1-docker.pkg.dev/tabocom-demo/my-repo/docker_juice-shop:1.0.0
   ```
-  （オプションの補足）
-  - --port=3000  
-    juice-shopを3000ポートで起動しているので、3000を指定しています。指定しないと8080になります。  
-  - --allow-unauthenticated  
-    juice-shopアプリを公開URLで起動するようにしています。
-  - --min-instances=0  
-    アクセスが無いときは停止状態になるらしく、お金がかからないみたいです。  
-  
-  数分ほどでデプロイが完了して、それからさらに2, 3分でJuice Shopを閲覧することができます。  
-  URLは上記CLIコマンドの応答でも確認できますし、コンソールのCloud Runでも確認することができます。
-
-- サービス一覧の確認
+- アプリケーションの公開
   ```bash
-  # サービス一覧の確認
-  gcloud run services list
+  kubectl expose deployment juice-shop-server --type LoadBalancer --port 80 --target-port 3000
   ```
+- アプリケーションに接続
+  ```bash
+  kubectl get service juice-shop-server
+  NAME                TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE
+  juice-shop-server   LoadBalancer   34.118.232.132   34.146.126.238   80:32545/TCP   60s
+  ```
+  この場合だと、http://34.146.126.238 でJuiceShopを開けます。
 
 ## 後片付け
 ### サービス
