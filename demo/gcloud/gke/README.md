@@ -104,24 +104,28 @@ Google Cloud用デモ共通[事前準備](../README.md#事前準備)を参照し
   ```
 - アプリケーションの公開
   ```bash
-  kubectl expose deployment juice-shop-server --type LoadBalancer --port 80 --target-port 3000
+  kubectl expose deployment juice-shop-service --type LoadBalancer --port 80 --target-port 3000
   ```
 - アプリケーションに接続
   ```bash
-  kubectl get service juice-shop-server
+  kubectl get service juice-shop-service
   NAME                TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)        AGE
-  juice-shop-server   LoadBalancer   34.118.232.132   34.146.126.238   80:32545/TCP   60s
+  juice-shop-service   LoadBalancer   34.118.232.132   34.146.126.238   80:32545/TCP   60s
   ```
   この場合だと、http://34.146.126.238 でJuiceShopを開けます。
 
 ## 後片付け
-### サービス
-- デプロイしたサービスの削除
+### クラスタ
+- サービスの削除
   ```bash
   # サービスの削除
-  gcloud run services delete juice-shop --region=asia-northeast1
-  # サービス一覧の確認
-  gcloud run services list
+  kubectl delete service juice-shop-service
+  ```
+- クラスタの削除
+  ```bash
+  gcloud container clusters delete juice-shop-cluster --location=asia-northeast1
+  # クラスタ一覧の確認
+  gcloud container clusters list --location=asia-northeast1
   ```
 
 以上
