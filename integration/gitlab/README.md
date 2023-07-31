@@ -1,7 +1,9 @@
-mkdir -p /srv/gitlab
-mkdir -p /srv/gitlab-runner
-
-998:998
+#### gitlabディレクトリの作成
+```bash
+mkdir -p ./srv/gitlab
+mkdir -p ./srv/gitlab-runner
+chown -R 998:998 ./srv
+```
 
 ##### gitlab-runnerの登録
 
