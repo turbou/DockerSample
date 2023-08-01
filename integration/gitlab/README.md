@@ -1,4 +1,7 @@
+まだ検証中です。
+
 #### gitlabディレクトリの作成
+今のところMacだとホストにボリュームをマウントすると起動エラーになります。
 ```bash
 mkdir -p ./srv/gitlab
 mkdir -p ./srv/gitlab-runner
