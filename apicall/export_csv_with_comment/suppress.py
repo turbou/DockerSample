@@ -9,7 +9,7 @@ def main():
     env_not_found = False
     for env_key in ['CONTRAST_BASEURL', 'CONTRAST_AUTHORIZATION', 'CONTRAST_API_KEY', 'CONTRAST_ORG_ID', 'CONTRAST_APP_ID', 'SUPPRESS_RULE_KEY']:
         if not env_key in os.environ:
-            print('環境変数 %s が設定されていません。' % env_key)
+            print('Environment variable %s is not set' % env_key)
             env_not_found |= True
     if env_not_found:
         print()
@@ -38,7 +38,7 @@ def main():
     data = r.json()
     #print(json.dumps(data, indent=4))
     if not data['success']:
-        print('Authorizationヘッダ, APIキー, 組織ID, TeamServerのURLが正しいか、ご確認ください。')
+        print('Please check AuthorizationHeader, APIKey, OrgID, TeamServerURL are relevant')
         return
     totalCnt = data['count']
     print(totalCnt)
@@ -51,7 +51,7 @@ def main():
         r = requests.get(url_attacks, headers=headers, json='{"quickFilter":"ALL","endDate":"%s"}' % ('1697381999287'))
         data = r.json()
         if not data['success']:
-            print('Authorizationヘッダ, APIキー, 組織ID, TeamServerのURLが正しいか、ご確認ください。')
+            print('Please check AuthorizationHeader, APIKey, OrgID, TeamServerURL are relevant')
             return
         for attack in data['attacks']:
             attack_uuids.append(attack['uuid']) 
