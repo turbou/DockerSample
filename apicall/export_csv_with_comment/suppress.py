@@ -7,7 +7,7 @@ from datetime import datetime as dt
 
 def main():
     env_not_found = False
-    for env_key in ['CONTRAST_BASEURL', 'CONTRAST_AUTHORIZATION', 'CONTRAST_API_KEY', 'CONTRAST_ORG_ID', 'CONTRAST_APP_ID', 'SUPPRESS_RULE_KEY']:
+    for env_key in ['CONTRAST_BASEURL', 'CONTRAST_AUTHORIZATION', 'CONTRAST_API_KEY', 'CONTRAST_ORG_ID', 'CONTRAST_APP_ID', 'CONTRAST_ENV', 'SUPPRESS_RULE_KEY']:
         if not env_key in os.environ:
             print('Environment variable %s is not set' % env_key)
             env_not_found |= True
@@ -18,6 +18,7 @@ def main():
         print('CONTRAST_API_KEY                   : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         print('CONTRAST_ORG_ID                    : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
         print('CONTRAST_APP_ID                    : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        print('CONTRAST_ENV                       : DEVELOPMENT|QA|PRODUCTION')
         print('SUPPRESS_RULE_KEY                  : XXXXXXXX')
         print()
         return
@@ -27,6 +28,7 @@ def main():
     AUTHORIZATION=os.environ['CONTRAST_AUTHORIZATION']
     ORG_ID=os.environ['CONTRAST_ORG_ID']
     APP_ID=os.environ['CONTRAST_APP_ID']
+    ENV=os.environ['CONTRAST_ENV']
     API_URL="%s/api/ng/%s" % (BASEURL, ORG_ID)
 
     START_DATE = '20231002000000'
@@ -41,7 +43,9 @@ def main():
     # この時点でアプリ、ルール、期間でフィルタリング
     all_attacks = []
     url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(all_attacks))
-    payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"%d","endDate":"%d"}' % ('sql-injection', APP_ID, start_unix_time, end_unix_time)
+    payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"%d","endDate":"%d","serverEnvironments":["%s"]}' % (
+        'sql-injection', APP_ID, start_unix_time, end_unix_time, ENV
+    )
     r = requests.post(url_attacks, headers=headers, data=payload)
     data = r.json()
     #print(json.dumps(data, indent=4))
@@ -60,7 +64,9 @@ def main():
     attackIncompleteFlg = totalCnt > len(all_attacks)
     while attackIncompleteFlg:
         url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(all_attacks))
-        payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"%d","endDate":"%d"}' % ('sql-injection', APP_ID, start_unix_time, end_unix_time)
+        payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"%d","endDate":"%d","serverEnvironments":["%s"]}' % (
+            'sql-injection', APP_ID, start_unix_time, end_unix_time, ENV
+        )
         r = requests.post(url_attacks, headers=headers, data=payload)
         data = r.json()
         #print(json.dumps(data, indent=4))
