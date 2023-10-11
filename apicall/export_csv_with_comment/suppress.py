@@ -29,12 +29,14 @@ def main():
     APP_ID=os.environ['CONTRAST_APP_ID']
     API_URL="%s/api/ng/%s" % (BASEURL, ORG_ID)
 
-    headers = {"Accept": "application/json", "API-Key": API_KEY, "Authorization": AUTHORIZATION}
+    headers = {"Accept": "application/json", "content-type": "application/json", "API-Key": API_KEY, "Authorization": AUTHORIZATION}
 
-    attack_uuids = []
-    url_applications = '%s/applications' % (API_URL)
-    url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=0&sort=-startTime' % (API_URL)
-    r = requests.get(url_attacks, headers=headers, json='{"quickFilter":"ALL","endDate":"%s"}' % ('1697381999287'))
+    # =============== 最初に攻撃一覧を取得 ===============
+    # この時点でアプリ、ルール、期間でフィルタリング
+    all_attacks = []
+    url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(all_attacks))
+    payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"1696172400000","endDate":"1696777199664"}' % ('sql-injection', APP_ID)
+    r = requests.post(url_attacks, headers=headers, data=payload)
     data = r.json()
     #print(json.dumps(data, indent=4))
     if not data['success']:
@@ -43,22 +45,67 @@ def main():
     totalCnt = data['count']
     print(totalCnt)
     for attack in data['attacks']:
-        attack_uuids.append(attack['uuid']) 
-    print(len(attack_uuids))
-    attackIncompleteFlg = True
+        app_ids = []
+        for app in attack['attacksApplication']:
+            app_ids.append(app['application']['app_id'])
+        all_attacks.append({'attack_uuid': attack['uuid'], 'app_ids': app_ids})
+
+    attackIncompleteFlg = False
+    attackIncompleteFlg = totalCnt > len(all_attacks)
     while attackIncompleteFlg:
-        url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(attack_uuids))
-        r = requests.get(url_attacks, headers=headers, json='{"quickFilter":"ALL","endDate":"%s"}' % ('1697381999287'))
+        url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(all_attacks))
+        payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"1696172400000","endDate":"1696777199664"}' % ('sql-injection', APP_ID)
+        r = requests.post(url_attacks, headers=headers, data=payload)
         data = r.json()
+        #print(json.dumps(data, indent=4))
         if not data['success']:
             print('Please check AuthorizationHeader, APIKey, OrgID, TeamServerURL are relevant')
             return
         for attack in data['attacks']:
-            attack_uuids.append(attack['uuid']) 
-        print(len(attack_uuids))
-        attackIncompleteFlg = totalCnt > len(attack_uuids)
+            app_ids = []
+            for app in attack['attacksApplication']:
+                app_ids.append(app['application']['app_id'])
+            all_attacks.append({'attack_uuid': attack['uuid'], 'app_ids': app_ids})
+        attackIncompleteFlg = totalCnt > len(all_attacks)
 
-    print('Total: ', len(attack_uuids))
+    print('Total(Attack): ', len(all_attacks))
+
+    # =============== 次に攻撃イベント一覧を取得 ===============
+    # 上で取得した攻撃UUIDをキーに取得しています。
+    all_attack_events = []
+    for suppress_attack_uuid in suppress_attack_uuids:
+        print(suppress_attack_uuid)
+        url_attackevents = '%s/rasp/events/new?expand=skip_links&limit=1000&offset=%d&sort=-timestamp' % (API_URL, len(all_attack_events))
+        payload = '{"attackUuid":"%s","quickFilter":"ALL","startDate":"1696172400000","endDate":"1696777199664"}' % (suppress_attack_uuid)
+        r = requests.post(url_attackevents, headers=headers, data=payload)
+        data = r.json()
+        totalCnt = data['count']
+        print(totalCnt)
+        for event in data['events']:
+            print(event['event_uuid'])
+            all_attack_events.append(event['event_uuid'])
+
+        attackIncompleteFlg = True
+        attackIncompleteFlg = totalCnt > len(all_attack_events)
+        while attackIncompleteFlg:
+            url_attackevents = '%s/rasp/events/new?expand=skip_links&limit=1000&offset=%d&sort=-timestamp' % (API_URL, len(all_attack_events))
+            payload = '{"attackUuid":"%s","quickFilter":"ALL","startDate":"1696172400000","endDate":"1696777199664"}' % (suppress_attack_uuid)
+            r = requests.post(url_attackevents, headers=headers, data=payload)
+            data = r.json()
+            for event in data['events']:
+                print(event['event_uuid'])
+                all_attack_events.append(event['event_uuid'])
+            attackIncompleteFlg = totalCnt > len(all_attack_events)
+    print('Total(AttackEvent): ', len(all_attack_events))
+
+    # =============== 最後に対象の攻撃イベントに対して消去を実行 ===============
+    for attack_event in all_attack_events:
+         print(attack_event)
+    #    url_attackevent_suppress = '%s/rasp/events/%s/suppress?expand=skip_links' % (API_URL, attack_event)
+    #    payload = '{"suppress_similar":false}'
+    #    r = requests.put(url_attackevent_suppress, headers=headers, data=payload)
+    #    data = r.json()
+    #    print(json.dumps(data, indent=4))
 
 if __name__ == '__main__':
     main()
