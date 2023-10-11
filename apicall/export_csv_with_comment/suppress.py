@@ -3,7 +3,7 @@ import json
 import html
 import requests
 import csv
-from datetime import datetime
+from datetime import datetime as dt
 
 def main():
     env_not_found = False
@@ -29,13 +29,19 @@ def main():
     APP_ID=os.environ['CONTRAST_APP_ID']
     API_URL="%s/api/ng/%s" % (BASEURL, ORG_ID)
 
+    START_DATE = '20231002000000'
+    END_DATE = '20231008235959'
+    start_unix_time = int(dt.strptime(START_DATE, '%Y%m%d%H%M%S').timestamp() * 1000)
+    end_unix_time = int(dt.strptime(END_DATE, '%Y%m%d%H%M%S').timestamp() * 1000)
+    print(start_unix_time, end_unix_time)
+
     headers = {"Accept": "application/json", "content-type": "application/json", "API-Key": API_KEY, "Authorization": AUTHORIZATION}
 
     # =============== 最初に攻撃一覧を取得 ===============
     # この時点でアプリ、ルール、期間でフィルタリング
     all_attacks = []
     url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(all_attacks))
-    payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"1696172400000","endDate":"1696777199664"}' % ('sql-injection', APP_ID)
+    payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"%d","endDate":"%d"}' % ('sql-injection', APP_ID, start_unix_time, end_unix_time)
     r = requests.post(url_attacks, headers=headers, data=payload)
     data = r.json()
     #print(json.dumps(data, indent=4))
@@ -54,7 +60,7 @@ def main():
     attackIncompleteFlg = totalCnt > len(all_attacks)
     while attackIncompleteFlg:
         url_attacks = '%s/attacks?expand=skip_links&limit=15&offset=%d&sort=-startTime' % (API_URL, len(all_attacks))
-        payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"1696172400000","endDate":"1696777199664"}' % ('sql-injection', APP_ID)
+        payload = '{"quickFilter":"ALL","protectionRules":["%s"],"applications":["%s"],"startDate":"%d","endDate":"%d"}' % ('sql-injection', APP_ID, start_unix_time, end_unix_time)
         r = requests.post(url_attacks, headers=headers, data=payload)
         data = r.json()
         #print(json.dumps(data, indent=4))
@@ -73,10 +79,11 @@ def main():
     # =============== 次に攻撃イベント一覧を取得 ===============
     # 上で取得した攻撃UUIDをキーに取得しています。
     all_attack_events = []
-    for suppress_attack_uuid in suppress_attack_uuids:
+    for attack in all_attacks:
+        suppress_attack_uuid = attack['attack_uuid']
         print(suppress_attack_uuid)
         url_attackevents = '%s/rasp/events/new?expand=skip_links&limit=1000&offset=%d&sort=-timestamp' % (API_URL, len(all_attack_events))
-        payload = '{"attackUuid":"%s","quickFilter":"ALL","startDate":"1696172400000","endDate":"1696777199664"}' % (suppress_attack_uuid)
+        payload = '{"attackUuid":"%s","quickFilter":"ALL","startDate":"%d","endDate":"%d"}' % (suppress_attack_uuid, start_unix_time, end_unix_time)
         r = requests.post(url_attackevents, headers=headers, data=payload)
         data = r.json()
         totalCnt = data['count']
@@ -89,7 +96,7 @@ def main():
         attackIncompleteFlg = totalCnt > len(all_attack_events)
         while attackIncompleteFlg:
             url_attackevents = '%s/rasp/events/new?expand=skip_links&limit=1000&offset=%d&sort=-timestamp' % (API_URL, len(all_attack_events))
-            payload = '{"attackUuid":"%s","quickFilter":"ALL","startDate":"1696172400000","endDate":"1696777199664"}' % (suppress_attack_uuid)
+            payload = '{"attackUuid":"%s","quickFilter":"ALL","startDate":"%d","endDate":"%d"}' % (suppress_attack_uuid, start_unix_time, end_unix_time)
             r = requests.post(url_attackevents, headers=headers, data=payload)
             data = r.json()
             for event in data['events']:
