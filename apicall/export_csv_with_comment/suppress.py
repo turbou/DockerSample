@@ -15,11 +15,11 @@ def main():
         add_help=True, # -h/–help オプションの追加
     )
     parser.add_argument('--showrule', help='Protectのルール一覧を表示だけ', action='store_true')
-    parser.add_argument('--app', help='アプリケーションID', required=True)
-    parser.add_argument('--rule', help='ルールID（例：sql-injection）', required=True)
-    parser.add_argument('--startdate', help='YYYYMMDD', required=True)
-    parser.add_argument('--enddate', help='YYYYMMDD', required=True)
-    parser.add_argument('--env', help='DEVELOPMENT|QA|PRODUCTION', required=True)
+    parser.add_argument('--app', help='アプリケーションID')
+    parser.add_argument('--rule', help='ルールID（例：sql-injection）')
+    parser.add_argument('--startdate', help='YYYYMMDD')
+    parser.add_argument('--enddate', help='YYYYMMDD')
+    parser.add_argument('--env', help='DEVELOPMENT|QA|PRODUCTION')
     args = parser.parse_args()
 
     env_not_found = False
@@ -48,6 +48,10 @@ def main():
         #print(json.dumps(data, indent=4))
         for rule in data['rules']:
             print('%-50s: %s' % (rule['uuid'], rule['name']))
+        return
+
+    if args.app is None or args.rule is None or args.env is None or args.startdate is None or args.enddate is None:
+        parser.print_help()
         return
 
     APP_ID=args.app
