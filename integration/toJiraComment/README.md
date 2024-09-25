@@ -1,23 +1,23 @@
-### 概要
+## Overview
 
-TeamServerから脆弱性一覧を取得して、取得した情報からJiraのチケットに表形式のコメントを追加するPython版サンプルスクリプトです。
+This is a Python sample script that retrieves a list of vulnerabilities from TeamServer and adds a table-formatted comment to a Jira ticket based on the retrieved information.
 
-### 前提
+## Prerequisites
 
-Python3.12.5でテストしています。Python3系なら動くと思います。  
-その他、必要なライブラリは以下のとおりです。
-```bash
-certifi==2024.8.30
-charset-normalizer==3.3.2
-idna==3.10
-requests==2.32.3
-urllib3==2.2.3
-```
+* Tested on Python 3.12.5. Should work with any Python 3.x version.
+* Required libraries:
+    ```bash
+    certifi==2024.8.30
+    charset-normalizer==3.3.2
+    idna==3.10
+    requests==2.32.3
+    urllib3==2.2.3
+    ```
 
-### 事前準備
+## Preparation
 
-環境変数をセットしてください。
-情報はTeamServerのユーザーメニュー - ユーザーの設定 - プロファイルから取得できます。
+Set the following environment variables. The information can be found in TeamServer under User Menu -> User Settings -> Profile.
+
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
 export CONTRAST_AUTHORIZATION=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==
@@ -25,23 +25,25 @@ export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 export CONTRAST_APP_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
-また、コメントを書き込むJiraの認証情報とチケットIDも設定してください。
+
+Also set the Jira authentication information and the ticket ID to which you want to add the comment.
+
 ```bash
 export CONTRAST_JIRA_USER=xxxx.yyyy@contrastsecurity.com
 export CONTRAST_JIRA_API_TOKEN=YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 export CONTRAST_JIRA_TICKET_ID=FAKEBUG-12730
 ```
 
-セッションメタデータで脆弱性をフィルタリングする場合は以下のように環境変数も設定してください。
+If you want to filter vulnerabilities by session metadata, set the following environment variables as well.
+
 ```bash
 export CONTRAST_METADATA_LABEL=branchName
 export CONTRAST_METADATA_VALUE=feature/dev-001
 ```
 
-### 実行方法
+## How to Run
 
 ```bash
 python ./add_comment.py
-```
+``` 
 
-以上
