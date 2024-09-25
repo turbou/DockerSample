@@ -12,7 +12,7 @@ LIMIT=25
 
 def main():
     env_not_found = False
-    for env_key in ['CONTRAST_BASEURL', 'CONTRAST_AUTHORIZATION', 'CONTRAST_API_KEY', 'CONTRAST_ORG_ID', 'CONTRAST_APP_ID']:
+    for env_key in ['CONTRAST_BASEURL', 'CONTRAST_AUTHORIZATION', 'CONTRAST_API_KEY', 'CONTRAST_ORG_ID', 'CONTRAST_APP_ID', 'CONTRAST_JIRA_USER', 'CONTRAST_JIRA_API_TOKEN', 'CONTRAST_JIRA_TICKET_ID']:
         if not env_key in os.environ:
             print('Environment variable is not set. %s' % env_key)
             env_not_found |= True
@@ -24,6 +24,9 @@ def main():
         print('CONTRAST_API_KEY                   : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         print('CONTRAST_ORG_ID                    : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
         print('CONTRAST_APP_ID                    : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
+        print('CONTRAST_JIRA_USER                 : xxxx.yyyy@contrastsecurity.com')
+        print('CONTRAST_JIRA_API_TOKEN            : YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
+        print('CONTRAST_JIRA_TICKET_ID            : FAKEBUG-12730')
         print('CONTRAST_METADATA_LABEL(optional)  : e.g. Branch Name')
         print('CONTRAST_METADATA_VALUE(optional)  : e.g. feature/oyoyo-001')
         return
@@ -61,7 +64,7 @@ def main():
         for f in data['filters']: 
             if f['agentLabel'] == metadata_label:
                 metadata_id=f['id']
-        print(metadata_id)
+        #print(metadata_id)
 
     all_traces = []
     url_traces = '%s/api/ng/organizations/%s/orgtraces/ui?expand=application&session_metadata&offset=%d&limit=%d&sort=-severity' % (baseurl, org_id, len(all_traces), LIMIT)
@@ -88,10 +91,13 @@ def main():
         traceIncompleteFlg = totalCnt > len(all_traces)
     print('Total(Trace): ', len(all_traces))
 
-    url = "https://contrast.atlassian.net/rest/api/3/issue/FAKEBUG-12730/comment"
+    jira_user=os.environ['CONTRAST_JIRA_USER']
+    jira_token=os.environ['CONTRAST_JIRA_API_TOKEN']
+    jira_ticket=os.environ['CONTRAST_JIRA_TICKET_ID']
+    url = "https://contrast.atlassian.net/rest/api/3/issue/%s/comment" % (jira_ticket)
     auth = HTTPBasicAuth(
-        "xxxx.yyyy@contrastsecurity.com",
-        "[YOUR_TOKEN]"
+        jira_user,
+        jira_token
     )
     headers = {
       "Accept": "application/json",
@@ -107,7 +113,7 @@ def main():
         			"attrs": {
         				"isNumberColumnEnabled": False,
         				"layout": "center",
-        				"width": 900,
+        				"width": 600,
         				"displayMode": "default"
         			},
         			"content": [
