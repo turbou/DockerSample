@@ -1,29 +1,26 @@
 ### 前提
 
-Python3.8.1でテストしています。Python3系なら動くと思います。
-
-requirements.txt 
-
-```
-requests==2.23.0
-```
+Python3.12.5でテストしています。Python3系なら動くと思います。
 
 ```bash
-pip install -r ./requirements.txt
-```
+(ocbc) MacBookAir13:ocbc_work turbou$ pip freeze
+certifi==2024.8.30
+charset-normalizer==3.3.2
+idna==3.10
+requests==2.32.3
+urllib3==2.2.3```
 
 ### 事前準備
 
 環境変数をセットしてください。
-CONTRAST_AUTHRORIZATIONは下記で作成します。
-$ echo -n 'username:service_key' | openssl base64
-
+情報はTeamServerのユーザーメニューから取得できます。
 
 ```bash
 export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
 export CONTRAST_AUTHORIZATION=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==
 export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+export CONTRAST_APP_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
 
 特定のアプリケーションを指定する場合は以下の環境変数もセットしてください。
