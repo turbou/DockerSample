@@ -8,6 +8,7 @@ import requests
 import csv
 from datetime import datetime
 
+# Number of vulnerabilities to fetch per request.
 LIMIT=25
 
 def main():
@@ -37,6 +38,8 @@ def main():
     org_id=os.environ['CONTRAST_ORG_ID']
     api_url="%s/api/ng/%s" % (baseurl, org_id)
     app_id=os.environ['CONTRAST_APP_ID']
+
+    # Metadata specification is optional.
     metadata_label=''
     if 'CONTRAST_METADATA_LABEL' in os.environ and len(os.environ['CONTRAST_METADATA_LABEL']) > 0:
         metadata_label=os.environ['CONTRAST_METADATA_LABEL']
@@ -48,8 +51,11 @@ def main():
         return
 
     headers = {"Accept": "application/json", "Content-Type": "application/json", "API-Key": api_key, "Authorization": authorization}
+
+    # Get the metadata filter ID from the given metadata label.
     metadata_id=None
     if len(metadata_label) > 0 and len(metadata_value) > 0:
+        # Perform the following operations only if metadata information is provided.
         url_metadatas = '%s/metadata/session/%s/filters?expand=skip_links' % (api_url, app_id)
         r = requests.get(url_metadatas, headers=headers)
         data = r.json()
@@ -66,9 +72,12 @@ def main():
                 metadata_id=f['id']
         #print(metadata_id)
 
+    # Fetch vulnerabilities for the target application. Filter by metadata if provided.
     all_traces = []
     url_traces = '%s/api/ng/organizations/%s/orgtraces/ui?expand=application&session_metadata&offset=%d&limit=%d&sort=-severity' % (baseurl, org_id, len(all_traces), LIMIT)
-    payload = '{"modules":["%s"],"metadataFilters":[{"fieldID":"%s","values":["%s"]}]}' % (app_id, metadata_id, metadata_value)
+    payload = '{"modules":["%s"]}' % (app_id)
+    if metadata_id:
+        payload = '{"modules":["%s"],"metadataFilters":[{"fieldID":"%s","values":["%s"]}]}' % (app_id, metadata_id, metadata_value)
     r = requests.post(url_traces, headers=headers, data=payload)
     data = r.json()
     #print(json.dumps(data, indent=4))
@@ -78,11 +87,14 @@ def main():
         print(v['vulnerability']['severity'], v['vulnerability']['ruleName'])
         all_traces.append({'severity': v['vulnerability']['severity'], 'ruleName': v['vulnerability']['ruleName']})
 
+    # This process iterates to ensure all vulnerabilities are retrieved, as there's a cap on the number fetched per request.
     traceIncompleteFlg = True
     traceIncompleteFlg = totalCnt > len(all_traces)
     while traceIncompleteFlg:
         url_traces = '%s/api/ng/organizations/%s/orgtraces/ui?expand=application&session_metadata&offset=%d&limit=%d&sort=-severity' % (baseurl, org_id, len(all_traces), LIMIT)
-        payload = '{"modules":["%s"],"metadataFilters":[{"fieldID":"%s","values":["%s"]}]}' % (app_id, metadata_id, metadata_value)
+        payload = '{"modules":["%s"]}' % (app_id)
+        if metadata_id:
+            payload = '{"modules":["%s"],"metadataFilters":[{"fieldID":"%s","values":["%s"]}]}' % (app_id, metadata_id, metadata_value)
         r = requests.post(url_traces, headers=headers, data=payload)
         data = r.json()
         for v in data['items']: 
@@ -91,6 +103,7 @@ def main():
         traceIncompleteFlg = totalCnt > len(all_traces)
     print('Total(Trace): ', len(all_traces))
 
+    # The following code is responsible for commenting the retrieved vulnerabilities on the Jira ticket.
     jira_user=os.environ['CONTRAST_JIRA_USER']
     jira_token=os.environ['CONTRAST_JIRA_API_TOKEN']
     jira_ticket=os.environ['CONTRAST_JIRA_TICKET_ID']
@@ -117,6 +130,7 @@ def main():
         				"displayMode": "default"
         			},
         			"content": [
+                        # Insert table block here.
         			]
         		}
         	]
@@ -133,6 +147,7 @@ def main():
     row_dict['content'] = cell_contents
     row_dict_list.append(row_dict)
 
+    # Table Cell
     for t in all_traces:
         row_dict = {}
         row_dict['type'] = 'tableRow'
