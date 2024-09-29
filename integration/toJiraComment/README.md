@@ -44,6 +44,6 @@ export CONTRAST_METADATA_VALUE=feature/dev-001
 ## How to Run
 
 ```bash
-python ./add_comment.py
+python ./add_comment_v2.py
 ``` 
 
