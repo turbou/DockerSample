@@ -195,7 +195,8 @@ def main():
     row_dict_list.append(row_dict)
 
     # Table Cell
-    pattern = re.compile(r' from | on | at | in |：| : ')
+    pattern = re.compile(r' from | on | at | in | : |：')
+    pattern2 = re.compile(r'^.+?( from | on | at | in | : |：)(.+)$')
     for t in all_traces:
         row_dict = {}
         row_dict['type'] = 'tableRow'
@@ -204,8 +205,9 @@ def main():
         cell_contents.append({'type': 'tableCell', 'attrs': {}, 'content': [{'type': 'paragraph', 'content': [{'type': 'text', 'text': t['ruleName']}]}]})
         title = t['title']
         if pattern.search(title):
-            title_array = re.split(r' from | on | at | in |：| : ', title)        
-            title = title_array[-1]
+            m = pattern2.match(title)
+            if m:
+                title = m.group(2)
         cell_contents.append({'type': 'tableCell', 'attrs': {}, 'content': [{'type': 'paragraph', 'content': [{'type': 'text', 'text': title}]}]})
         cell_contents.append({'type': 'tableCell', 'attrs': {}, 'content': [{'type': 'paragraph', 'content': [{'type': 'text', 'text': t['uuid'], 'marks': [{'type': 'link', 'attrs': {'href': t['link'], 'title': 'to TeamServer'}}]}]}]})
         row_dict['content'] = cell_contents
