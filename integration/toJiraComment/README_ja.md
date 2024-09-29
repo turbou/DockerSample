@@ -41,7 +41,7 @@ export CONTRAST_METADATA_VALUE=feature/dev-001
 ### 実行方法
 
 ```bash
-python ./add_comment.py
+python ./add_comment_v2.py
 ```
 
 以上
