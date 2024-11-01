@@ -53,6 +53,10 @@ def main():
         if m:
             app_ids.append(app['app_id'])
 
+    if len(app_ids) == 0:
+        print('No application found to match the regular expression.')
+        return
+
     app_ids_str = ','.join(['"{}"'.format(item) for item in app_ids])
 
     # Fetch vulnerabilities for the target application. Filter by metadata if provided.
