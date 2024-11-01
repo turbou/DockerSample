@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 
 # Number of vulnerabilities to fetch per request.
-LIMIT=1
+LIMIT=25
 
 def main():
     env_not_found = False
