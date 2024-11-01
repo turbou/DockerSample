@@ -61,7 +61,7 @@ def main():
     payload = '{"modules":[%s]}' % (app_ids_str)
     r = requests.post(url_traces, headers=headers, data=payload)
     data = r.json()
-    print(json.dumps(data, indent=4))
+    #print(json.dumps(data, indent=4))
     totalCnt = data['count']
     #print(totalCnt)
     for v in data['items']: 
