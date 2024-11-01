@@ -23,7 +23,7 @@ export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
 export CONTRAST_AUTHORIZATION=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==
 export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-export CONTRAST_APP_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+export CONTRAST_APP_NAME_REGEX=^ms-
 ```
 また、コメントを書き込むJiraの認証情報とチケットIDも設定してください。
 ```bash
@@ -32,16 +32,10 @@ export CONTRAST_JIRA_API_TOKEN=YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 export CONTRAST_JIRA_TICKET_ID=FAKEBUG-12730
 ```
 
-セッションメタデータで脆弱性をフィルタリングする場合は以下のように環境変数も設定してください。
-```bash
-export CONTRAST_METADATA_LABEL=branchName
-export CONTRAST_METADATA_VALUE=feature/dev-001
-```
-
 ### 実行方法
 
 ```bash
-python ./add_comment_v2.py
+python ./add_comment_v3.py
 ```
 
 以上
