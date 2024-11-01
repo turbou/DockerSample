@@ -23,7 +23,7 @@ export CONTRAST_BASEURL=https://eval.contrastsecurity.com/Contrast
 export CONTRAST_AUTHORIZATION=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==
 export CONTRAST_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export CONTRAST_ORG_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-export CONTRAST_APP_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+export CONTRAST_APP_NAME_REGEX=^ms-
 ```
 
 Also set the Jira authentication information and the ticket ID to which you want to add the comment.
@@ -44,6 +44,6 @@ export CONTRAST_METADATA_VALUE=feature/dev-001
 ## How to Run
 
 ```bash
-python ./add_comment_v2.py
+python ./add_comment_v3.py
 ``` 
 
