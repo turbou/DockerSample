@@ -216,6 +216,7 @@ rowDictList.add(rowDictForHeader)
 // Table Cell
 def pattern = ~/ from | on | at | in | : |：/
 def pattern2 = /^.+?( from | on | at | in | : |：)(.+)$/
+def outputJsonList = []
 allTraces.each { t ->
     def rowDict = [:]
     rowDict.type = 'tableRow'
@@ -251,9 +252,14 @@ allTraces.each { t ->
             ]
         ]
     ])
+    outputJsonList.add([Application: t.app_name, Risk: t.severity, "Issue Type": t.ruleName, "Affected Path": title, Details: t.uuid])
     rowDict.content = cellContents
     rowDictList.add(rowDict)
 }
+
+def outputJson = JsonOutput.toJson(outputJsonList)
+new File("output.json").write(JsonOutput.prettyPrint(outputJson))
+
 baseDict.body.content[0].content = rowDictList
 def payload = JsonOutput.toJson(baseDict)
 body = RequestBody.create(payload, mediaTypeJson)
@@ -268,8 +274,6 @@ for (Header header : headers) {
     requestBuilder.addHeader(header.getName(), header.getValue())
 }
 
-println "${Config.JIRA_USER}, ${Config.JIRA_API_TOKEN}"
-println Credentials.basic(Config.JIRA_USER, Config.JIRA_API_TOKEN)
 request = requestBuilder.build()
 response = httpClient.newCall(request).execute()
 resBody = response.body().string()
@@ -281,5 +285,4 @@ if (response.code() != 200) {
 }
 
 System.exit(0)
-
 
