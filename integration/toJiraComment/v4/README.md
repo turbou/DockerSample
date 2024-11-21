@@ -1,6 +1,25 @@
 ## Overview
 
-This is a Groovy sample script that retrieves a list of vulnerabilities from TeamServer and adds a table-formatted comment to a Jira ticket based on the retrieved information.
+This is a Groovy sample script that retrieves a list of vulnerabilities from TeamServer and adds a table-formatted comment to a Jira ticket based on the retrieved information.  
+Additionally, a JSON file in the following format will be output.  
+```json
+[
+    {   
+        "Application": "PetClinic_8001",
+        "Risk": "MEDIUM",
+        "Issue Type": "crypto-bad-mac",
+        "Affected Path": "GranteeManager",
+        "Details": "S9FW-FIXG-FIUB-WFCF"
+    },  
+    {   
+        "Application": "PetClinic_8001",
+        "Risk": "MEDIUM",
+        "Issue Type": "crypto-bad-mac",
+        "Affected Path": "PlainJavaSerializer.java",
+        "Details": "WEYX-LVBY-0BN2-C6GI"
+    }
+]
+```
 
 ## Prerequisites
 Script verified to work with:
