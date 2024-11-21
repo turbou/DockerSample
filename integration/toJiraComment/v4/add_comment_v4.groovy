@@ -30,18 +30,15 @@ import java.util.stream.Collectors
                   'Limitation: The script only aims to same language\'s unlicensed child applications, and it excludes already-merged applications.\n' +
                   'Preparation: Prepare four environment variables for your system. This script extracts the environment variables via the code below.\n\n' +
                   'Set variables properly, or change the code if necessary, at your own risk!\n' +
-                  '  os.environ["CONTRAST_BASEURL"]\n' +
-                  '  os.environ["CONTRAST_AUTHORIZATION"]\n' +
-                  '  os.environ["CONTRAST_API_KEY"]\n' +
-                  '  os.environ["CONTRAST_ORG_ID"]\n' +
-                  '  os.environ["CONTRAST_JIRA_URL"]\n' +
-                  '  os.environ["CONTRAST_JIRA_USER"]\n' +
-                  '  os.environ["CONTRAST_JIRA_API_TOKEN"]\n'
+                  '  System.getenv()CONTRAST_BASEURL\n' +
+                  '  System.getenv()CONTRAST_AUTHORIZATION\n' +
+                  '  System.getenv()CONTRAST_API_KEY\n' +
+                  '  System.getenv()CONTRAST_ORG_ID\n' +
+                  '  System.getenv()CONTRAST_JIRA_URL\n' +
+                  '  System.getenv()CONTRAST_JIRA_USER\n' +
+                  '  System.getenv()CONTRAST_JIRA_API_TOKEN\n'
 )
 @picocli.groovy.PicocliScript
-
-@Option(names = ["-t", "--test"], description = "If you set this option, You can check a list of merge target applications without performing the merge process.")
-@Field boolean test = false
 
 @Option(names = ["-a", "--app"], required = true, description = "Specify the application name. e.g. PetClinic")
 @Field String applicationName
@@ -105,11 +102,6 @@ if (targetAppId == null) {
 }
 
 println "Target application ID is ${targetAppId}."
-
-//if (test) {
-//    println "Exit for test execution."
-//    System.exit(0)
-//}
 
 def allTraces = []
 
