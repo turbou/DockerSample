@@ -26,9 +26,8 @@ import java.util.stream.Collectors
     mixinStandardHelpOptions = true,
     version = '0.1',
     usageHelpAutoWidth = true,
-    description = 'Contrast PS UAM(UnlicensedAppMerge) script merges whole unlicensed child applications onto <parent_id> that you set.\n' +
-                  'Limitation: The script only aims to same language\'s unlicensed child applications, and it excludes already-merged applications.\n' +
-                  'Preparation: Prepare four environment variables for your system. This script extracts the environment variables via the code below.\n\n' +
+    description = 'This is a Groovy sample script that retrieves a list of vulnerabilities from TeamServer and adds a table-formatted comment to a Jira ticket based on the retrieved information.\n' +
+                  'Additionally, a JSON file in the following format will be output.\n' +
                   'Set variables properly, or change the code if necessary, at your own risk!\n' +
                   '  System.getenv()CONTRAST_BASEURL\n' +
                   '  System.getenv()CONTRAST_AUTHORIZATION\n' +
